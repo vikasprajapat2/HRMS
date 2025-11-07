@@ -1,0 +1,108 @@
+﻿{% extends "base.html" %}
+{% block title %}Leave Report{% endblock %}
+{% block content %}
+<h2>Leave Report</h2>
+
+<div class="filters mb-4">
+    <form method="get" action="{{ url_for('leave.report') }}" class="form-inline">
+        <div class="form-group mr-2">
+            <label for="start_date" class="mr-2">Start Date:</label>
+            <input type="date" class="form-control" id="start_date" name="start_date" 
+                   value="{{ start_date if start_date }}">
+        </div>
+
+        <div class="form-group mr-2">
+            <label for="end_date" class="mr-2">End Date:</label>
+            <input type="date" class="form-control" id="end_date" name="end_date" 
+                   value="{{ end_date if end_date }}">
+        </div>
+
+        <div class="form-group mr-2">
+            <label for="status" class="mr-2">Status:</label>
+            <select name="status" id="status" class="form-control">
+                <option value="all" {% if selected_status == 'all' %}selected{% endif %}>All Status</option>
+                <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Pending</option>
+                <option value="approved" {% if selected_status == 'approved' %}selected{% endif %}>Approved</option>
+                <option value="rejected" {% if selected_status == 'rejected' %}selected{% endif %}>Rejected</option>
+            </select>
+        </div>
+
+        <div class="form-group mr-2">
+            <label for="employee_id" class="mr-2">Employee:</label>
+            <select name="employee_id" id="employee_id" class="form-control">
+                <option value="">All Employees</option>
+                {% for emp in employees %}
+                <option value="{{ emp.id }}" {% if selected_employee|string == emp.id|string %}selected{% endif %}>
+                    {{ emp.firstname }} {{ emp.lastname }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Generate Report</button>
+    </form>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Employee</th>
+            <th>Leave Type</th>
+            <th>Duration</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Status</th>
+            <th>Reason</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if leaves %}
+            {% for leave in leaves %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ leave.employee.firstname }} {{ leave.employee.lastname }}</td>
+                <td>{{ leave.leave_type }}</td>
+                <td>
+                    {% set days = (leave.end_date - leave.start_date).days + 1 %}
+                    {{ days }} day{% if days != 1 %}s{% endif %}
+                </td>
+                <td>{{ leave.start_date }}</td>
+                <td>{{ leave.end_date }}</td>
+                <td>
+                    <span class="badge {% if leave.status == 'approved' %}badge-success
+                                     {% elif leave.status == 'rejected' %}badge-danger
+                                     {% else %}badge-warning{% endif %}">
+                        {{ leave.status }}
+                    </span>
+                </td>
+                <td>{{ leave.reason }}</td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="8" class="text-center">No leave records found for the selected criteria.</td>
+            </tr>
+        {% endif %}
+    </tbody>
+</table>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const startDate = document.getElementById('start_date');
+    const endDate = document.getElementById('end_date');
+    
+    startDate.addEventListener('change', function() {
+        if (endDate.value && endDate.value < this.value) {
+            endDate.value = this.value;
+        }
+    });
+    
+    endDate.addEventListener('change', function() {
+        if (startDate.value && startDate.value > this.value) {
+            startDate.value = this.value;
+        }
+    });
+});
+</script>
+{% endblock %}

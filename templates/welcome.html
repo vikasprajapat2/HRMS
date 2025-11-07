@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome - Employee Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        .feature-icon {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero-section">
+        <div class="container text-center">
+            <h1 class="display-3 fw-bold mb-4">
+                <i class="fas fa-users-cog me-3"></i>
+                Employee Management System
+            </h1>
+            <p class="lead mb-5">
+                Streamline your HR operations with our comprehensive employee management solution
+            </p>
+            <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                <a href="{{ url_for('auth.login') }}" class="btn btn-light btn-lg px-5">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                </a>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-outline-light btn-lg px-5">
+                    <i class="fas fa-user-plus me-2"></i>Register
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-5">
+        <h2 class="text-center mb-5">Key Features</h2>
+        <div class="row g-4">
+            <div class="col-md-4 text-center">
+                <i class="fas fa-user-tie feature-icon"></i>
+                <h4>Employee Management</h4>
+                <p>Manage employee profiles, departments, and designations efficiently</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <i class="fas fa-calendar-check feature-icon"></i>
+                <h4>Attendance Tracking</h4>
+                <p>Track daily attendance with automated check-in/check-out system</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <i class="fas fa-calendar-times feature-icon"></i>
+                <h4>Leave Management</h4>
+                <p>Handle leave requests and approvals seamlessly</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <i class="fas fa-money-bill-wave feature-icon"></i>
+                <h4>Payroll Processing</h4>
+                <p>Automate salary calculations and generate payroll reports</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <i class="fas fa-shield-alt feature-icon"></i>
+                <h4>Role-Based Access</h4>
+                <p>Multi-role authentication for secure system access</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <i class="fas fa-chart-line feature-icon"></i>
+                <h4>Reports & Analytics</h4>
+                <p>Generate detailed reports for informed decision-making</p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white text-center py-4 mt-5">
+        <p class="mb-0">&copy; 2024 Employee Management System. All rights reserved.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

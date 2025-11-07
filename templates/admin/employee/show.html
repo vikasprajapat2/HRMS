@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Employee Details - Employee Management{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-user me-2"></i>Employee Details</h2>
+    <div>
+        <a href="{{ url_for('employee.edit', id=employee.id) }}" class="btn btn-warning">
+            <i class="fas fa-edit me-2"></i>Edit
+        </a>
+        <a href="{{ url_for('employee.index') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-user-circle fa-5x text-secondary"></i>
+                </div>
+                <h4>{{ employee.firstname }} {{ employee.lastname }}</h4>
+                <p class="text-muted">{{ employee.unique_id or 'No ID' }}</p>
+                <span class="badge bg-{{ 'success' if employee.status == 'active' else 'danger' }}">
+                    {{ employee.status|title }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Personal Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4"><strong>Email:</strong></div>
+                    <div class="col-md-8">{{ employee.email or 'N/A' }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4"><strong>Phone:</strong></div>
+                    <div class="col-md-8">{{ employee.phone or 'N/A' }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4"><strong>Date of Birth:</strong></div>
+                    <div class="col-md-8">{{ employee.dob.strftime('%Y-%m-%d') if employee.dob else 'N/A' }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4"><strong>Gender:</strong></div>
+                    <div class="col-md-8">{{ employee.gender|title if employee.gender else 'N/A' }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4"><strong>Religion:</strong></div>
+                    <div class="col-md-8">{{ employee.religion or 'N/A' }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4"><strong>Marital Status:</strong></div>
+                    <div class="col-md-8">{{ employee.marital|title if employee.marital else 'N/A' }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4"><strong>Address:</strong></div>
+                    <div class="col-md-8">{{ employee.address or 'N/A' }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">Employment Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4"><strong>Department:</strong></div>
+                    <div class="col-md-8">{{ employee.department.name if employee.department else 'N/A' }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4"><strong>Designation:</strong></div>
+                    <div class="col-md-8">{{ employee.designation.name if employee.designation else 'N/A' }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4"><strong>Schedule:</strong></div>
+                    <div class="col-md-8">{{ employee.schedule.name if employee.schedule else 'N/A' }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4"><strong>Joined Date:</strong></div>
+                    <div class="col-md-8">{{ employee.created_at.strftime('%Y-%m-%d') if employee.created_at else 'N/A' }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

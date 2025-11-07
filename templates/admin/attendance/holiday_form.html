@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if holiday else 'Add' }} Holiday{% endblock %}
+{% block content %}
+<h2>{{ 'Edit' if holiday else 'Add' }} Holiday</h2>
+
+<form method="post" class="col-md-6">
+    <div class="form-group mb-3">
+        <label for="name">Holiday Name *</label>
+        <input type="text" class="form-control" id="name" name="name" value="{{ holiday.name if holiday else '' }}" required>
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="date">Date *</label>
+        <input type="date" class="form-control" id="date" name="date" value="{{ holiday.date if holiday else '' }}" required>
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="type">Type *</label>
+        <select class="form-control" id="type" name="type" required>
+            <option value="government" {% if holiday and holiday.type == 'government' %}selected{% endif %}>Government Holiday</option>
+            <option value="company" {% if holiday and holiday.type == 'company' %}selected{% endif %}>Company Holiday</option>
+            <option value="other" {% if holiday and holiday.type == 'other' %}selected{% endif %}>Other</option>
+        </select>
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="is_paid">Paid Holiday?</label>
+        <select class="form-control" id="is_paid" name="is_paid">
+            <option value="true" {% if not holiday or holiday.is_paid %}selected{% endif %}>Yes</option>
+            <option value="false" {% if holiday and not holiday.is_paid %}selected{% endif %}>No</option>
+        </select>
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="description">Description</label>
+        <textarea class="form-control" id="description" name="description" rows="3">{{ holiday.description if holiday else '' }}</textarea>
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="{{ url_for('attendance.holidays') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+{% endblock %}

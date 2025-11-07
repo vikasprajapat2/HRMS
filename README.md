@@ -110,154 +110,117 @@ After setting up, you'll need to create your first user. You can either:
 2. Manually insert a user into the database
 
 ## Project Structure
+# Employee Management System - Python (Flask)
 
-```
-employee-management-python/
-│
-├── app.py                 # Main Flask application
-├── models.py              # SQLAlchemy database models
-├── requirements.txt       # Python dependencies
-├── README.md              # This file
-│
-├── routes/                # Application routes (blueprints)
-│   ├── __init__.py
-│   ├── auth.py           # Authentication routes
-│   ├── admin.py          # Dashboard routes
-│   ├── employee.py       # Employee management
-│   ├── department.py     # Department management
-│   ├── designation.py    # Designation management
-│   ├── attendance.py     # Attendance tracking
-│   ├── leave.py          # Leave management
-│   ├── payroll.py        # Payroll processing
-│   ├── schedule.py       # Schedule management
-│   └── user.py           # User management
-│
-├── templates/             # HTML templates (Jinja2)
-│   ├── base.html         # Base template
-│   ├── welcome.html      # Welcome page
-│   ├── auth/             # Authentication templates
-│   └── admin/            # Admin panel templates
-│
-└── static/                # Static files (CSS, JS, images)
-    ├── css/
-    ├── js/
-    └── uploads/
+This repository contains a Flask-based Employee Management System with attendance, leave, payroll, and schedule management.
+
+## Quick overview
+
+- Attendance: check-in/check-out, manual records, monthly reports
+- Auto-generation: attendance records can be auto-generated per date (weekends, government/company holidays, approved leaves)
+- Holiday management: add/edit/delete holidays which the auto-generator will honor
+- Leave management: request/approve leaves which are considered in attendance generation
+
+## Technologies
+
+- Python 3.8+
+- Flask, Flask-Login, Flask-Bcrypt
+- SQLAlchemy
+- Flask-Migrate (optional, recommended)
+- Jinja2 + Bootstrap for the UI
+
+## Setup (short)
+
+1. Clone or open the project folder.
+2. Create and activate a virtual environment:
+
+```powershell
+python -m venv venv
+venv\Scripts\activate
 ```
 
-## Features by Role
+3. Install dependencies:
 
-### Superadmin
-- Full system access
-- User management
-- Role management
-- All employee operations
-- All department and designation operations
-- Attendance management
-- Leave management
-- Payroll management
+```powershell
+pip install -r requirements.txt
+```
 
-### Admin
-- Employee management
-- Department and designation management
-- Attendance tracking
-- Leave management
-- User management (limited)
-- Payroll viewing
+4. Configure the database in `app.py` (MySQL or fallback to SQLite).
 
-### HR Manager
-- Employee management
-- Department and designation management
-- Leave approval/rejection
-- Employee profile viewing
+5. (Optional) Initialize migrations using Flask-Migrate:
 
-### Payroll Manager
-- Payroll calculation
-- Payroll report generation
-- Salary management
+```powershell
+# ensure FLASK_APP is set or run via python -m flask
+$env:FLASK_APP = 'app.py'
+flask db init    # only if migrations folder doesn't already exist
+flask db migrate -m "Initial"
+flask db upgrade
+```
 
-### Moderator
-- Attendance marking
-- Attendance report viewing
-- Schedule management
+If you don't use Flask-Migrate, running the app once will create tables with SQLAlchemy's `create_all()` behavior (if present). Note: migrations are recommended for production.
 
-## Usage
+6. Run the app:
 
-1. **Login**: Navigate to `/login` to access the system
-2. **Dashboard**: After login, you'll be redirected to a role-specific dashboard
-3. **Navigation**: Use the sidebar menu to access different modules
-4. **Employee Management**: Add, edit, or remove employees
-5. **Attendance**: Mark attendance daily for employees
-6. **Leave Requests**: Submit and approve leave requests
-7. **Payroll**: Calculate and generate payroll for employees
+```powershell
+python app.py
+```
 
-## API Endpoints
+Open http://127.0.0.1:5000 in your browser.
 
-### Authentication
-- `GET/POST /login` - User login
-- `GET/POST /register` - User registration
-- `GET /logout` - User logout
+## Key features and how to use them
 
-### Employees
-- `GET /employee/` - List all employees
-- `GET /employee/create` - Show create employee form
-- `POST /employee/create` - Create new employee
-- `GET /employee/<id>/edit` - Edit employee
-- `POST /employee/<id>/delete` - Delete employee
+- Attendance
+    - Attendance board: `/attendance/board` — check-in / check-out quickly.
+    - Manual add/edit: `/attendance/create` and edit links on index.
+    - Monthly report: `/attendance/monthly-report` — choose month, year, and employee.
 
-### Departments
-- `GET /department/` - List departments
-- `GET/POST /department/create` - Create department
-- `GET/POST /department/<id>/edit` - Edit department
-- `POST /department/<id>/delete` - Delete department
+- Holidays
+    - Manage holidays: `/attendance/holidays` — add government/company holidays.
+    - When a holiday is added/edited/deleted, the system regenerates attendance records for that date so the status (holiday/weekend/absent/leave) is correct.
 
-### Attendance
-- `GET /attendance/` - View attendance
-- `POST /attendance/check` - Mark attendance
-- `GET /attendance/report` - Attendance report
+- Auto-generate attendance
+    - The application auto-generates date-wise attendance for active employees when viewing a date or via the `Employee.generate_attendance(start_date, end_date)` method.
+    - Rules applied:
+        - If a holiday exists for the date → status = `holiday` (description = holiday name)
+        - If weekend (Sat/Sun) → status = `weekend`
+        - If approved leave covers the date → status = `leave` (description contains leave type)
+        - Otherwise default → status = `absent` until a check-in is recorded
 
-### Leave
-- `GET /leaves/` - List leave requests
-- `GET/POST /leaves/create` - Create leave request
-- `GET/POST /leaves/<id>/edit` - Edit leave
-- `POST /leaves/<id>/delete` - Delete leave
+## Database models (high-level)
 
-### Payroll
-- `GET /payroll/` - List payrolls
-- `GET/POST /payroll/create` - Create payroll
-- `POST /payroll/calculate` - Calculate payroll for all
-- `GET /payroll/report` - Payroll report
+- `Employee` — employee profile, schedule id, relationships to attendances and leaves
+- `Attendance` — date, time_in, time_out, status, description
+- `Holiday` — name, date, type (government/company), is_paid
+- `Leave` — type, start/end dates, status (pending/approved/rejected)
 
-## Database Tables
+## Useful routes (summary)
 
-- `roles` - User roles
-- `users` - System users
-- `departments` - Organization departments
-- `designations` - Job designations
-- `schedules` - Work schedules
-- `employees` - Employee information
-- `attendances` - Attendance records
-- `checks` - Check-in/check-out records
-- `leaves` - Leave requests
-- `salaries` - Employee salary information
-- `late_times` - Late arrival records
-- `over_times` - Overtime records
-- `payrolls` - Payroll records
+- Auth: `/login`, `/register`, `/logout`
+- Employees: `/employee/`, `/employee/create`
+- Attendance: `/attendance/`, `/attendance/board`, `/attendance/create`, `/attendance/monthly-report`, `/attendance/holidays`
+- Leaves: `/leaves/`, `/leaves/create`
 
-## Contributing
+## Notes and troubleshooting
 
-Feel free to submit issues and enhancement requests!
+- If you add holidays programmatically, regenerate attendance for affected dates by calling `employee.generate_attendance(date, date)` for each active employee.
+- Flask-Migrate is recommended. If you see missing `migrations/env.py` or alembic errors, initialize migrations with `flask db init` (only once) and then `flask db migrate` + `flask db upgrade`.
+- If you prefer not to use migrations, ensure SQLAlchemy is configured to create tables on startup (not recommended for production).
+
+## Contribution
+
+Contributions are welcome. Please open an issue or send a pull request with clear details.
 
 ## License
 
-This project is open-source and available under the MIT License.
+MIT
 
-## Support
+---
 
-For support and questions, please create an issue in the repository.
+If you'd like, I can also:
 
-## Acknowledgments
+- Add a short developer HOWTO with common commands
+- Add sample data fixtures (employees, schedules, holidays)
+- Add unit tests for the attendance generator
 
-- Original Laravel version by MOHONA678
-- Converted to Flask with Python by AI Assistant
-- Bootstrap 5 for responsive design
-- Flask community for excellent documentation
+Let me know which of the above you'd like next.
+- `GET/POST /payroll/create` - Create payroll

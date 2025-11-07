@@ -1,0 +1,43 @@
+﻿{% extends "base.html" %}
+{% block title %}Attendance Report{% endblock %}
+{% block content %}
+<h2>Attendance Report</h2>
+
+<form method="get" action="{{ url_for('attendance.report') }}" style="margin-bottom:12px;">
+	<label for="start_date">Start:</label>
+	<input type="date" id="start_date" name="start_date" value="{{ request.args.get('start_date','') }}">
+	<label for="end_date">End:</label>
+	<input type="date" id="end_date" name="end_date" value="{{ request.args.get('end_date','') }}">
+	<button class="btn btn-sm btn-secondary" type="submit">Run</button>
+</form>
+
+<table class="table" style="width:100%; border-collapse: collapse;">
+	<thead>
+		<tr>
+			<th style="border:1px solid #ddd;padding:8px;">#</th>
+			<th style="border:1px solid #ddd;padding:8px;">Date</th>
+			<th style="border:1px solid #ddd;padding:8px;">Employee</th>
+			<th style="border:1px solid #ddd;padding:8px;">Status</th>
+			<th style="border:1px solid #ddd;padding:8px;">Time In</th>
+			<th style="border:1px solid #ddd;padding:8px;">Time Out</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% if attendances %}
+			{% for a in attendances %}
+				<tr>
+					<td style="border:1px solid #ddd;padding:8px;">{{ loop.index }}</td>
+					<td style="border:1px solid #ddd;padding:8px;">{{ a.date }}</td>
+					<td style="border:1px solid #ddd;padding:8px;">{{ a.employee.firstname }} {{ a.employee.lastname }}</td>
+					<td style="border:1px solid #ddd;padding:8px;">{{ a.status or 'present' }}</td>
+					<td style="border:1px solid #ddd;padding:8px;">{{ a.time_in or '-' }}</td>
+					<td style="border:1px solid #ddd;padding:8px;">{{ a.time_out or '-' }}</td>
+				</tr>
+			{% endfor %}
+		{% else %}
+			<tr><td colspan="6" style="padding:8px;">No records found for the selected range.</td></tr>
+		{% endif %}
+	</tbody>
+</table>
+
+{% endblock %}

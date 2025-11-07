@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Attendance Board{% endblock %}
+{% block content %}
+<h2>Attendance Board - {{ date }}</h2>
+<p>Quick check-in/out for employees. Times shown are server local time.</p>
+<table class="table" style="width:100%; border-collapse: collapse;">
+  <thead>
+    <tr>
+      <th style="border:1px solid #ddd;padding:8px;">#</th>
+      <th style="border:1px solid #ddd;padding:8px;">Employee</th>
+      <th style="border:1px solid #ddd;padding:8px;">Status</th>
+      <th style="border:1px solid #ddd;padding:8px;">Time In</th>
+      <th style="border:1px solid #ddd;padding:8px;">Time Out</th>
+      <th style="border:1px solid #ddd;padding:8px;">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for emp in employees %}
+    {% set a = attendance_map.get(emp.id) %}
+    <tr>
+      <td style="border:1px solid #ddd;padding:8px;">{{ loop.index }}</td>
+      <td style="border:1px solid #ddd;padding:8px;">{{ emp.firstname }} {{ emp.lastname }}</td>
+      <td style="border:1px solid #ddd;padding:8px;">{% if a %}{{ a.status or 'present' }}{% else %}absent{% endif %}</td>
+      <td style="border:1px solid #ddd;padding:8px;">{% if a and a.time_in %}{{ a.time_in }}{% else %}-{% endif %}</td>
+      <td style="border:1px solid #ddd;padding:8px;">{% if a and a.time_out %}{{ a.time_out }}{% else %}-{% endif %}</td>
+      <td style="border:1px solid #ddd;padding:8px;">
+        <form method="post" action="{{ url_for('attendance.check') }}" style="display:inline-block;margin-right:4px;">
+          <input type="hidden" name="employee_id" value="{{ emp.id }}">
+          <input type="hidden" name="action" value="in">
+          <button class="btn btn-sm btn-success" type="submit">Check In</button>
+        </form>
+        <form method="post" action="{{ url_for('attendance.check') }}" style="display:inline-block;margin-right:4px;">
+          <input type="hidden" name="employee_id" value="{{ emp.id }}">
+          <input type="hidden" name="action" value="out">
+          <button class="btn btn-sm btn-danger" type="submit">Check Out</button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

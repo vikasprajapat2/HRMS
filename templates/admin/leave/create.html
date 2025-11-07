@@ -1,0 +1,72 @@
+﻿{% extends "base.html" %}
+{% block title %}Request Leave{% endblock %}
+{% block content %}
+<h2>Request Leave</h2>
+
+<form method="post" action="">
+    <div class="form-group">
+        <label for="employee_id">Employee</label>
+        <select name="employee_id" id="employee_id" class="form-control" required>
+            <option value="">-- Select Employee --</option>
+            {% for emp in employees %}
+            <option value="{{ emp.id }}" {% if leave and leave.employee_id == emp.id %}selected{% endif %}>
+                {{ emp.firstname }} {{ emp.lastname }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="leave_type">Leave Type</label>
+        <select name="leave_type" id="leave_type" class="form-control" required>
+            <option value="">-- Select Type --</option>
+            <option value="annual" {% if leave and leave.leave_type == 'annual' %}selected{% endif %}>Annual Leave</option>
+            <option value="sick" {% if leave and leave.leave_type == 'sick' %}selected{% endif %}>Sick Leave</option>
+            <option value="personal" {% if leave and leave.leave_type == 'personal' %}selected{% endif %}>Personal Leave</option>
+            <option value="unpaid" {% if leave and leave.leave_type == 'unpaid' %}selected{% endif %}>Unpaid Leave</option>
+            <option value="other" {% if leave and leave.leave_type == 'other' %}selected{% endif %}>Other</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="start_date">Start Date</label>
+        <input type="date" class="form-control" id="start_date" name="start_date" 
+               value="{% if leave %}{{ leave.start_date }}{% endif %}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="end_date">End Date</label>
+        <input type="date" class="form-control" id="end_date" name="end_date" 
+               value="{% if leave %}{{ leave.end_date }}{% endif %}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="reason">Reason</label>
+        <textarea class="form-control" id="reason" name="reason" rows="3" required>{% if leave %}{{ leave.reason }}{% endif %}</textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+    <a href="{{ url_for('leave.index') }}" class="btn btn-secondary">Cancel</a>
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const startDate = document.getElementById('start_date');
+    const endDate = document.getElementById('end_date');
+    
+    startDate.addEventListener('change', function() {
+        endDate.min = this.value;
+        if (endDate.value && endDate.value < this.value) {
+            endDate.value = this.value;
+        }
+    });
+    
+    endDate.addEventListener('change', function() {
+        startDate.max = this.value;
+        if (startDate.value && startDate.value > this.value) {
+            startDate.value = this.value;
+        }
+    });
+});
+</script>
+{% endblock %}
