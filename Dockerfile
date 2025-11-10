@@ -19,7 +19,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . /app
 
-# Expose port (Railway uses $PORT env var at runtime)
+# Expose port (use $PORT at runtime in hosting platforms)
 EXPOSE 5000
 
 # Default command — use Gunicorn to run the Flask app (app:app)
