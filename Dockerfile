@@ -9,7 +9,7 @@ WORKDIR /app
 # Install system dependencies (kept minimal)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
-    netcat \
+    netcat-openbsd \
  && rm -rf /var/lib/apt/lists/*
 
 # Copy and install Python dependencies
