@@ -12,8 +12,8 @@
             "driver": "MySQL",
             "name": "db",
             "group": "dbg",
-            "database": "hrms",
-            "username": "vikas"
+            "database": "hrms_db",
+            "username": "root"
         }
     ]
 }
