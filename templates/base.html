@@ -20,12 +20,13 @@
     {% if current_user.is_authenticated %}
     <!-- Sidebar -->
     <div class="d-flex" id="wrapper">
-        <div class="bg-dark text-white" id="sidebar-wrapper">
+    <div class="bg-dark text-white" id="sidebar-wrapper">
             <div class="sidebar-heading text-center py-4 fs-4 fw-bold border-bottom">
                 <i class="fas fa-users-cog me-2"></i>HRMS
             </div>
             <div class="list-group list-group-flush">
-                <a href="{{ url_for('admin.' + current_user.role.name + '_dashboard') }}" class="list-group-item list-group-item-action bg-dark text-white">
+                {%- set role_name = (current_user.role.name if current_user.role else 'admin') -%}
+                <a href="{{ url_for('admin.' + role_name + '_dashboard') }}" class="list-group-item list-group-item-action bg-dark text-white">
                     <i class="fas fa-tachometer-alt me-2"></i>Dashboard
                 </a>
                 {% if current_user.role.name in ['superadmin', 'admin', 'hr'] %}

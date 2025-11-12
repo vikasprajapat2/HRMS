@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from flask_login import login_user, logout_user, login_required
 from database import db
 from models import User
@@ -14,8 +14,10 @@ def login():
         password = request.form.get('password')
         
         user = User.query.filter_by(email=email).first()
-        
+        current_app.logger.debug(f'Login attempt for email={email}, found_user={bool(user)}')
+
         if user and bcrypt.check_password_hash(user.password, password):
+            current_app.logger.debug(f'User authenticated: id={user.id}, role_id={user.role_id}, role_exists={bool(user.role)}')
             login_user(user)
             flash('Login successful!', 'success')
             
