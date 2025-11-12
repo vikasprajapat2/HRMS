@@ -32,19 +32,16 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here-change-
 app.logger.addHandler(handler)  # Add log handler to app
 app.logger.setLevel(logging.DEBUG)  # Set log level
 
-# Database configuration: prefer MySQL if provided, fallback to SQLite
-mysql_user = os.getenv('MYSQL_USER')
-mysql_password = os.getenv('MYSQL_PASSWORD')
-mysql_host = os.getenv('MYSQL_HOST', '127.0.0.1')
+# Database configuration: MySQL only
+mysql_user = os.getenv('MYSQL_USER', 'root')
+mysql_password = os.getenv('MYSQL_PASSWORD', '1234')
+mysql_host = os.getenv('MYSQL_HOST', 'localhost')
 mysql_port = os.getenv('MYSQL_PORT', '3306')
-mysql_db = os.getenv('MYSQL_DATABASE')
+mysql_db = os.getenv('MYSQL_DATABASE', 'hrms_db')
 
-if mysql_user and mysql_password and mysql_db:
-    app.config['SQLALCHEMY_DATABASE_URI'] = (
-        f"mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_host}:{mysql_port}/{mysql_db}?charset=utf8mb4"
-    )
-else:
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///employee_management.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = (
+    f"mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_host}:{mysql_port}/{mysql_db}?charset=utf8mb4"
+)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 
@@ -110,7 +107,7 @@ def hr_required(f):
 # Using the app instance configured above. The factory `create_app()` is available
 # but the code below initializes and registers blueprints on `app` directly, so
 # avoid calling `create_app()` here to prevent import errors from an empty
-# `routes.__init__`.
+# `routes.__init__`.                    
 # app = create_app()
  
 @app.route('/')

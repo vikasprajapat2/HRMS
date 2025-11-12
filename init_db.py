@@ -45,7 +45,7 @@ def init_database():
                 name='Super Admin',
                 email='admin@example.com',
                 phone='1234567890',
-                password=bcrypt.generate_password_hash('admin123').decode('utf-8'),
+                password=bcrypt.generate_password_hash('1234').decode('utf-8'),
                 status='active'
             )
             db.session.add(admin_user)
@@ -100,7 +100,7 @@ def init_database():
         print("\nDatabase initialized successfully!")
         print("\nDefault Login Credentials:")
         print("Email: admin@example.com")
-        print("Password: admin123")
+        print("Password: 1234")
         print("\nYou can now run the application with: python app.py")
 
 if __name__ == '__main__':
