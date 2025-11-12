@@ -32,20 +32,16 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here-change-
 app.logger.addHandler(handler)  # Add log handler to app
 app.logger.setLevel(logging.DEBUG)  # Set log level
 
-# Database configuration: prefer MySQL if provided, fallback to SQLite for local development
+# Database configuration: MySQL only
 mysql_user = os.getenv('MYSQL_USER', 'root')
 mysql_password = os.getenv('MYSQL_PASSWORD', '1234')
 mysql_host = os.getenv('MYSQL_HOST', 'localhost')
 mysql_port = os.getenv('MYSQL_PORT', '3306')
 mysql_db = os.getenv('MYSQL_DATABASE', 'hrms_db')
 
-try:
-    app.config['SQLALCHEMY_DATABASE_URI'] = (
-        f"mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_host}:{mysql_port}/{mysql_db}?charset=utf8mb4"
-    )
-except:
-    # Fallback to SQLite if MySQL is not available
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///employee_management.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = (
+    f"mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_host}:{mysql_port}/{mysql_db}?charset=utf8mb4"
+)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 
