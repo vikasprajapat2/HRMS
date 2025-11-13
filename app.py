@@ -6,16 +6,25 @@ from datetime import datetime
 import os
 import logging
 from logging.handlers import RotatingFileHandler
+from logging import FileHandler
 from functools import wraps
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
-handler = RotatingFileHandler('flask.log', maxBytes=10000, backupCount=1)
-handler.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
+# Use a simple FileHandler on Windows to avoid permission issues with rollover
+try:
+    handler = FileHandler('flask.log')
+    handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+except Exception:
+    # Fallback to RotatingFileHandler if FileHandler creation fails
+    handler = RotatingFileHandler('flask.log', maxBytes=10000, backupCount=1)
+    handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
 
 # Load environment variables
 load_dotenv()
