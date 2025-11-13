@@ -2,3 +2,122 @@
 2025-11-12 14:40:45,948 - app - INFO - Verified database 'hrms_db' exists (or was created)
 2025-11-12 16:46:10,184 - app - INFO - Verified database 'hrms_db' exists (or was created)
 2025-11-12 16:46:11,554 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-12 17:00:26,849 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-12 17:00:27,813 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-12 17:00:47,742 - app - DEBUG - Login attempt for email=admin@example.com, found_user=False
+2025-11-12 17:01:16,024 - app - DEBUG - Login attempt for email=admin@example.com, found_user=False
+2025-11-12 17:03:17,882 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-12 17:03:19,181 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-12 17:03:36,951 - app - DEBUG - Login attempt for email=admin@example.com, found_user=False
+2025-11-12 17:03:58,868 - app - DEBUG - Login attempt for email=admin@example.com, found_user=False
+2025-11-12 17:04:13,753 - app - DEBUG - Login attempt for email=admin@example.com, found_user=False
+2025-11-12 17:04:59,221 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-12 17:24:22,097 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-12 17:24:36,160 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-12 17:24:44,287 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-12 17:25:10,573 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-12 17:25:11,805 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-12 17:25:39,507 - app - DEBUG - Login attempt for email=admin@example.com, found_user=True
+2025-11-12 17:25:39,728 - app - DEBUG - User authenticated: id=1, role_id=1, role_exists=True
+2025-11-13 09:26:51,695 - app - ERROR - Failed to ensure MySQL database 'hrms_db': 'cryptography' package is required for sha256_password or caching_sha2_password auth methods
+2025-11-13 09:26:51,703 - app - ERROR - Could not ensure MySQL database exists; continuing startup and deferring to runtime errors
+Traceback (most recent call last):
+  File "D:\employee-management-python\app.py", line 179, in <module>
+    ensure_mysql_database()
+  File "D:\employee-management-python\app.py", line 149, in ensure_mysql_database
+    conn = pymysql.connect(
+           ^^^^^^^^^^^^^^^^
+  File "D:\employee-management-python\venv\Lib\site-packages\pymysql\connections.py", line 358, in __init__
+    self.connect()
+  File "D:\employee-management-python\venv\Lib\site-packages\pymysql\connections.py", line 664, in connect
+    self._request_authentication()
+  File "D:\employee-management-python\venv\Lib\site-packages\pymysql\connections.py", line 976, in _request_authentication
+    auth_packet = _auth.caching_sha2_password_auth(self, auth_packet)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\employee-management-python\venv\Lib\site-packages\pymysql\_auth.py", line 266, in caching_sha2_password_auth
+    data = sha2_rsa_encrypt(conn.password, conn.salt, conn.server_public_key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\employee-management-python\venv\Lib\site-packages\pymysql\_auth.py", line 143, in sha2_rsa_encrypt
+    raise RuntimeError(
+RuntimeError: 'cryptography' package is required for sha256_password or caching_sha2_password auth methods
+2025-11-13 09:26:51,801 - app - ERROR - db.create_all() failed; application started but DB is not available
+Traceback (most recent call last):
+  File "D:\employee-management-python\app.py", line 184, in <module>
+    db.create_all()
+  File "D:\employee-management-python\venv\Lib\site-packages\flask_sqlalchemy\extension.py", line 900, in create_all
+    self._call_for_binds(bind_key, "create_all")
+  File "D:\employee-management-python\venv\Lib\site-packages\flask_sqlalchemy\extension.py", line 881, in _call_for_binds
+    getattr(metadata, op_name)(bind=engine)
+  File "D:\employee-management-python\venv\Lib\site-packages\sqlalchemy\sql\schema.py", line 5928, in create_all
+    bind._run_ddl_visitor(
+  File "D:\employee-management-python\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 3251, in _run_ddl_visitor
+    with self.begin() as conn:
+  File "D:\anaconda\Lib\contextlib.py", line 137, in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+  File "D:\employee-management-python\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 3241, in begin
+    with self.connect() as conn:
+         ^^^^^^^^^^^^^^
+  File "D:\employee-management-python\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 3277, in connect
+    return self._connection_cls(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\employee-management-python\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 143, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\employee-management-python\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 3301, in raw_connection
+    return self.pool.connect()
+           ^^^^^^^^^^^^^^^^^^^
+  File "D:\employee-management-python\venv\Lib\site-packages\sqlalchemy\pool\base.py", line 447, in connect
+    return _ConnectionFairy._checkout(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\employee-management-python\venv\Lib\site-packages\sqlalchemy\pool\base.py", line 1264, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\employee-management-python\venv\Lib\site-packages\sqlalchemy\pool\base.py", line 711, in checkout
+    rec = pool._do_get()
+          ^^^^^^^^^^^^^^
+  File "D:\employee-management-python\venv\Lib\site-packages\sqlalchemy\pool\impl.py", line 177, in _do_get
+    with util.safe_reraise():
+  File "D:\employee-management-python\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\employee-management-python\venv\Lib\site-packages\sqlalchemy\pool\impl.py", line 175, in _do_get
+    return self._create_connection()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\employee-management-python\venv\Lib\site-packages\sqlalchemy\pool\base.py", line 388, in _create_connection
+    return _ConnectionRecord(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\employee-management-python\venv\Lib\site-packages\sqlalchemy\pool\base.py", line 673, in __init__
+    self.__connect()
+  File "D:\employee-management-python\venv\Lib\site-packages\sqlalchemy\pool\base.py", line 899, in __connect
+    with util.safe_reraise():
+  File "D:\employee-management-python\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\employee-management-python\venv\Lib\site-packages\sqlalchemy\pool\base.py", line 895, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\employee-management-python\venv\Lib\site-packages\sqlalchemy\engine\create.py", line 661, in connect
+    return dialect.connect(*cargs, **cparams)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\employee-management-python\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 629, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\employee-management-python\venv\Lib\site-packages\pymysql\connections.py", line 358, in __init__
+    self.connect()
+  File "D:\employee-management-python\venv\Lib\site-packages\pymysql\connections.py", line 664, in connect
+    self._request_authentication()
+  File "D:\employee-management-python\venv\Lib\site-packages\pymysql\connections.py", line 976, in _request_authentication
+    auth_packet = _auth.caching_sha2_password_auth(self, auth_packet)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\employee-management-python\venv\Lib\site-packages\pymysql\_auth.py", line 266, in caching_sha2_password_auth
+    data = sha2_rsa_encrypt(conn.password, conn.salt, conn.server_public_key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\employee-management-python\venv\Lib\site-packages\pymysql\_auth.py", line 143, in sha2_rsa_encrypt
+    raise RuntimeError(
+RuntimeError: 'cryptography' package is required for sha256_password or caching_sha2_password auth methods
+2025-11-13 09:26:54,008 - app - ERROR - Failed to ensure MySQL database 'hrms_db': 'cryptography' package is required for sha256_password or caching_sha2_password auth methods
+2025-11-13 09:32:27,848 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-13 09:32:30,340 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-13 09:37:32,895 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-13 09:37:34,972 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-13 09:37:52,082 - app - DEBUG - Login attempt for email=admin@example.com, found_user=True
+2025-11-13 09:37:52,471 - app - DEBUG - User authenticated: id=1, role_id=1, role_exists=True
