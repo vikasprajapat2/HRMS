@@ -10,3 +10,4 @@ Werkzeug==3.0.1
 Flask-Migrate>=3.1.0
 psycopg2-binary>=2.9.0  # For PostgreSQL (optional for local)
 gunicorn==21.2.0  # Required for production deployment
+cryptography>=38.0.1  # required by PyMySQL for sha256/caching_sha2 auth
