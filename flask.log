@@ -121,3 +121,25 @@ RuntimeError: 'cryptography' package is required for sha256_password or caching_
 2025-11-13 09:37:34,972 - app - INFO - Verified database 'hrms_db' exists (or was created)
 2025-11-13 09:37:52,082 - app - DEBUG - Login attempt for email=admin@example.com, found_user=True
 2025-11-13 09:37:52,471 - app - DEBUG - User authenticated: id=1, role_id=1, role_exists=True
+2025-11-13 09:50:00,588 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-13 09:50:02,080 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-13 09:50:19,871 - app - DEBUG - Login attempt for email=admin@example.com, found_user=True
+2025-11-13 09:50:20,142 - app - DEBUG - User authenticated: id=1, role_id=1, role_exists=True
+2025-11-13 09:58:00,971 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-13 09:58:12,449 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-13 10:03:50,475 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-13 10:04:19,271 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-13 10:11:26,681 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-13 10:11:28,396 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-13 10:14:54,335 - app - DEBUG - Login attempt for email=admin@example.com, found_user=True
+2025-11-13 10:14:54,560 - app - DEBUG - User authenticated: id=1, role_id=1, role_exists=True
+2025-11-13 10:15:14,306 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-13 10:15:23,425 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-13 10:15:34,532 - app - DEBUG - Login attempt for email=admin@example.com, found_user=True
+2025-11-13 10:15:34,758 - app - DEBUG - User authenticated: id=1, role_id=1, role_exists=True
+2025-11-13 10:34:44,614 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-13 10:34:50,932 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-13 10:40:27,840 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-13 10:40:32,893 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-13 10:40:40,780 - app - INFO - Verified database 'hrms_db' exists (or was created)
+2025-11-13 10:52:10,716 - app - INFO - Verified database 'hrms_db' exists (or was created)
