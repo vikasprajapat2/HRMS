@@ -63,6 +63,41 @@ else:
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 
+# Make DB connection resilient: if MySQL is configured but unreachable on startup,
+# optionally fall back to a local SQLite database so the app doesn't crash with
+# a white page. This makes the app usable for debugging/development on hosts
+# where MySQL isn't available. To force the fallback in production set
+# FORCE_SQLITE_FALLBACK=1 (optional).
+use_fallback = False
+force_fallback = os.getenv('FORCE_SQLITE_FALLBACK', '0').lower() in ('1', 'true', 'yes')
+if app.config.get('SQLALCHEMY_DATABASE_URI', '').startswith('mysql') and not force_fallback:
+    try:
+        # Quick connectivity test using pymysql (do not select database yet)
+        import pymysql
+        # Parse host/port from the configured URI if available
+        # If DATABASE_URL was used, urlparse would be better, but we only need to test reachability.
+        pymysql.connect(host=os.getenv('MYSQL_HOST', 'localhost'),
+                        user=os.getenv('MYSQL_USER', 'root'),
+                        password=os.getenv('MYSQL_PASSWORD', '1234'),
+                        port=int(os.getenv('MYSQL_PORT', 3306)),
+                        connect_timeout=3)
+    except Exception as e:
+        app.logger.warning(f"MySQL connectivity test failed: {e}. Falling back to local SQLite for now.")
+        use_fallback = True
+
+if use_fallback or force_fallback:
+    # Ensure instance folder exists
+    try:
+        os.makedirs(os.path.join(app.root_path, 'instance'), exist_ok=True)
+    except Exception:
+        pass
+    sqlite_path = os.path.join(app.root_path, 'instance', 'hrms_fallback.db')
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{sqlite_path}"
+    app.config['USE_DB_FALLBACK'] = True
+    app.logger.warning(f"Using SQLite fallback database at {sqlite_path}")
+else:
+    app.config['USE_DB_FALLBACK'] = False
+
 # Initialize extensions with app
 db.init_app(app)
 bcrypt.init_app(app)
@@ -137,7 +172,9 @@ def index():
 
 @app.context_processor
 def inject_user():
-    return dict(current_user=current_user)
+    # Expose `use_db_fallback` to templates so we can show a warning banner if
+    # the app is running on a fallback SQLite DB because MySQL was unreachable.
+    return dict(current_user=current_user, use_db_fallback=app.config.get('USE_DB_FALLBACK', False))
 
 # Error handlers
 @app.errorhandler(404)

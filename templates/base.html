@@ -17,6 +17,11 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
+    {%- if use_db_fallback -%}
+    <div class="alert alert-warning text-center mb-0" role="alert">
+        <strong>Warning:</strong> The app is running with a local SQLite fallback because the configured MySQL database is not reachable. Data may not persist across deploys. Please set <code>DATABASE_URL</code> in your deployment environment.
+    </div>
+    {%- endif -%}
     {% if current_user.is_authenticated %}
     <!-- Sidebar -->
     <div class="d-flex" id="wrapper">
