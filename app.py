@@ -98,7 +98,8 @@ def load_user(user_id):
 def superadmin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or current_user.role.name != 'superadmin':
+        role_name = current_user.role.name if getattr(current_user, 'role', None) else None
+        if not current_user.is_authenticated or role_name != 'superadmin':
             flash('You do not have permission to access this page.', 'danger')
             return redirect(url_for('auth.login'))
         return f(*args, **kwargs)
@@ -107,7 +108,8 @@ def superadmin_required(f):
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or current_user.role.name not in ['admin', 'superadmin']:
+        role_name = current_user.role.name if getattr(current_user, 'role', None) else None
+        if not current_user.is_authenticated or role_name not in ['admin', 'superadmin']:
             flash('You do not have permission to access this page.', 'danger')
             return redirect(url_for('auth.login'))
         return f(*args, **kwargs)
@@ -116,7 +118,8 @@ def admin_required(f):
 def hr_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or current_user.role.name not in ['hr', 'admin', 'superadmin']:
+        role_name = current_user.role.name if getattr(current_user, 'role', None) else None
+        if not current_user.is_authenticated or role_name not in ['hr', 'admin', 'superadmin']:
             flash('You do not have permission to access this page.', 'danger')
             return redirect(url_for('auth.login'))
         return f(*args, **kwargs)  
