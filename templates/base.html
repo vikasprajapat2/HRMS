@@ -29,7 +29,7 @@
                 <a href="{{ url_for('admin.' + role_name + '_dashboard') }}" class="list-group-item list-group-item-action bg-dark text-white">
                     <i class="fas fa-tachometer-alt me-2"></i>Dashboard
                 </a>
-                {% if current_user.role.name in ['superadmin', 'admin', 'hr'] %}
+                {% if role_name in ['superadmin', 'admin', 'hr'] %}
                 <a href="{{ url_for('employee.index') }}" class="list-group-item list-group-item-action bg-dark text-white">
                     <i class="fas fa-user-tie me-2"></i>Employees
                 </a>
@@ -43,7 +43,7 @@
 
                 
                 
-                {% if current_user.role.name in ['superadmin', 'admin', 'moderator'] %}
+                {% if role_name in ['superadmin', 'admin', 'moderator'] %}
                 <a href="{{ url_for('attendance.index') }}" class="list-group-item list-group-item-action bg-dark text-white">
                     <i class="fas fa-calendar-check me-2"></i>Attendance
                 </a>
@@ -52,19 +52,19 @@
                 </a>
                 {% endif %}
                 
-                {% if current_user.role.name in ['superadmin', 'admin', 'hr'] %}
+                {% if role_name in ['superadmin', 'admin', 'hr'] %}
                 <a href="{{ url_for('leave.index') }}" class="list-group-item list-group-item-action bg-dark text-white">
                     <i class="fas fa-calendar-times me-2"></i>Leaves
                 </a>
                 {% endif %}
                 
-                {% if current_user.role.name in ['superadmin', 'admin', 'payroll'] %}
+                {% if role_name in ['superadmin', 'admin', 'payroll'] %}
                 <a href="{{ url_for('payroll.index') }}" class="list-group-item list-group-item-action bg-dark text-white">
                     <i class="fas fa-money-bill-wave me-2"></i>Payroll
                 </a>
                 {% endif %}
                 
-                {% if current_user.role.name in ['superadmin', 'admin'] %}
+                {% if role_name in ['superadmin', 'admin'] %}
                 <a href="{{ url_for('user.index') }}" class="list-group-item list-group-item-action bg-dark text-white">
                     <i class="fas fa-users me-2"></i>Users
                 </a>
@@ -85,7 +85,7 @@
                         <span class="me-3">
                             <i class="fas fa-user-circle me-1"></i>{{ current_user.name }}
                         </span>
-                        <span class="badge bg-info me-3">{{ current_user.role.name|title }}</span>
+                        <span class="badge bg-info me-3">{{ role_name|title }}</span>
                         <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger btn-sm">
                             <i class="fas fa-sign-out-alt me-1"></i>Logout
                         </a>
