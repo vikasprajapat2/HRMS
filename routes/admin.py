@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
 from database import db
 from models import Employee, Department, Designation, User, Attendance, Leave, Payroll
@@ -94,3 +94,29 @@ def moderator_dashboard():
                          total_employees=total_employees,
                          today_attendance=today_attendance,
                          role='moderator')
+
+
+@bp.route('/diag')
+@login_required
+def diagnostic():
+    """Diagnostic endpoint (login required).
+    Returns JSON about the current_user and attempts to render the dashboard template.
+    Use this after logging in to confirm whether template rendering or role access is causing the white page.
+    """
+    role_name = current_user.role.name if current_user.role else None
+    info = {
+        'user_id': current_user.id,
+        'user_name': current_user.name,
+        'role': role_name,
+    }
+    try:
+        # Try rendering the dashboard with minimal context to detect template errors
+        render_template('admin/dashboard.html', role=role_name, total_employees=0, total_departments=0)
+        info['render_ok'] = True
+    except Exception as e:
+        import traceback
+        info['render_ok'] = False
+        info['error'] = str(e)
+        info['trace'] = traceback.format_exc()
+
+    return jsonify(info)
