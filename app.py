@@ -181,6 +181,14 @@ def ensure_mysql_database():
 skip_db_init = os.getenv('SKIP_DB_INIT', '0').lower() in ('1', 'true', 'yes')
 
 with app.app_context():
+    # Warn if DATABASE_URL is not set (likely on deployment)
+    if not database_url and not os.getenv('FLASK_ENV') == 'development':
+        app.logger.warning(
+            '⚠️  DATABASE_URL environment variable is not set. '
+            'Falling back to MYSQL_HOST=localhost (will fail on Render/Railway). '
+            'Set DATABASE_URL to your actual database connection string.'
+        )
+    
     if skip_db_init:
         app.logger.info('SKIP_DB_INIT is set - skipping database creation on startup')
     else:
