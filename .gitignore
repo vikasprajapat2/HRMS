@@ -1,6 +1,55 @@
+# Virtual Environment
 venv/
+env/
+
+# Python Cache
 __pycache__/
-instance/
 *.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# IDE & Editor
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Environment
 .env
+.env.local
+
+# Flask
+instance/
+flask.log
+.webassets-cache
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+
+# Test/Setup files (can be recreated)
+test_*.py
+verify_*.py
+setup_mysql.py
+check_status.py
+run_local.py
+db.session.sql
+
+# Build & Deploy
+dist/
+build/
+*.egg-info/
+
