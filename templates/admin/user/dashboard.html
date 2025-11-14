@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card p-3">
+        <div class="text-center">
+          {% if employee and employee.image %}
+            <img src="/{{ url_for('static', filename='uploads/employees/' ~ employee.image) }}" class="rounded-circle" width="120" height="120">
+          {% else %}
+            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" style="width:120px;height:120px;font-size:36px">{{ (employee.firstname[0] if employee else user.name[0])|upper }}</div>
+          {% endif %}
+        </div>
+        <h4 class="text-center mt-3">{{ user.name }}</h4>
+        <p class="text-center text-muted">{{ user.email }}</p>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item"><strong>Phone:</strong> {{ user.phone or '-' }}</li>
+          <li class="list-group-item"><strong>Role:</strong> {{ user.role.name if user.role else '-' }}</li>
+          <li class="list-group-item"><strong>Status:</strong> {{ user.status }}</li>
+        </ul>
+      </div>
+
+      {% if employee %}
+      <div class="card mt-3 p-3">
+        <h5>Employee Info</h5>
+        <p><strong>ID:</strong> {{ employee.unique_id or ('EMP-' ~ employee.id) }}</p>
+        <p><strong>Department:</strong> {{ employee.department.name if employee.department else '-' }}</p>
+        <p><strong>Designation:</strong> {{ employee.designation.name if employee.designation else '-' }}</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="col-md-8">
+      <div class="card p-3 mb-3">
+        <h5>Recent Attendance</h5>
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>In</th>
+              <th>Out</th>
+              <th>Duration</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if attendances %}
+              {% for a in attendances %}
+                <tr>
+                  <td>{{ a.date.strftime('%Y-%m-%d') }}</td>
+                  <td>{{ a.time_in.strftime('%H:%M') if a.time_in else '-' }}</td>
+                  <td>{{ a.time_out.strftime('%H:%M') if a.time_out else '-' }}</td>
+                  <td>
+                    {% if a.time_in and a.time_out %}
+                      {% set duration = (a.time_out.hour*60 + a.time_out.minute) - (a.time_in.hour*60 + a.time_in.minute) %}
+                      {{ (duration // 60) }}h {{ (duration % 60) }}m
+                    {% else %}
+                      -
+                    {% endif %}
+                  </td>
+                  <td>{{ a.status }}</td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr><td colspan="5">No attendance records found.</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card p-3 mb-3">
+            <h5>Recent Leaves</h5>
+            <ul class="list-group list-group-flush">
+              {% if leaves %}
+                {% for l in leaves %}
+                <li class="list-group-item"><strong>{{ l.leave_type }}</strong> ({{ l.start_date }} - {{ l.end_date }}) - {{ l.status }}</li>
+                {% endfor %}
+              {% else %}
+                <li class="list-group-item">No leave records.</li>
+              {% endif %}
+            </ul>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card p-3 mb-3">
+            <h5>Recent Payrolls</h5>
+            <ul class="list-group list-group-flush">
+              {% if payrolls %}
+                {% for p in payrolls %}
+                <li class="list-group-item">{{ p.month }} {{ p.year }} - {{ p.net_salary }}</li>
+                {% endfor %}
+              {% else %}
+                <li class="list-group-item">No payroll records.</li>
+              {% endif %}
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask_login import login_required
+from flask_login import login_required, current_user
 from database import db
-from models import User, Role
+from models import User, Role, Employee, Attendance, Leave, Payroll
 from flask_bcrypt import Bcrypt
 
 bp = Blueprint('user', __name__, url_prefix='/user')
@@ -65,3 +65,26 @@ def delete(id):
     db.session.commit()
     flash('User deleted successfully!', 'success')
     return redirect(url_for('user.index'))
+
+
+@bp.route('/dashboard')
+@login_required
+def dashboard():
+    user = current_user
+    employee = None
+    attendances = []
+    leaves = []
+    payrolls = []
+
+    # Try to find a linked Employee record by email
+    try:
+        employee = Employee.query.filter_by(email=user.email).first()
+    except Exception:
+        employee = None
+
+    if employee:
+        attendances = Attendance.query.filter_by(employee_id=employee.id).order_by(Attendance.date.desc()).limit(7).all()
+        leaves = Leave.query.filter_by(employee_id=employee.id).order_by(Leave.created_at.desc()).limit(5).all()
+        payrolls = Payroll.query.filter_by(employee_id=employee.id).order_by(Payroll.year.desc(), Payroll.month.desc()).limit(6).all()
+
+    return render_template('admin/user/dashboard.html', user=user, employee=employee, attendances=attendances, leaves=leaves, payrolls=payrolls)
