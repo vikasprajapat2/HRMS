@@ -3,8 +3,33 @@ from flask_login import login_required, current_user
 from database import db
 from models import Employee, Department, Designation, Schedule
 from datetime import datetime
+import os
+from werkzeug.utils import secure_filename
 
 bp = Blueprint('employee', __name__, url_prefix='/employee')
+
+# Configuration for file uploads
+UPLOAD_FOLDER = 'static/uploads/employees'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+# Create upload folder if it doesn't exist
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def save_employee_image(file, employee_id):
+    """Save employee image and return filename"""
+    if file and file.filename and allowed_file(file.filename):
+        # Generate unique filename
+        ext = file.filename.rsplit('.', 1)[1].lower()
+        filename = f"emp_{employee_id}.{ext}"
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        
+        # Save file
+        file.save(filepath)
+        return filename
+    return None
 
 @bp.route('/')
 @login_required
@@ -33,6 +58,14 @@ def create():
         )
         db.session.add(employee)
         db.session.commit()
+        
+        # Handle image upload
+        if 'image' in request.files:
+            image_file = request.files['image']
+            image_filename = save_employee_image(image_file, employee.id)
+            if image_filename:
+                employee.image = image_filename
+                db.session.commit()
 
         # Create or update linked portal user using admin-provided password
         portal_password = request.form.get('portal_password')
@@ -95,6 +128,13 @@ def edit(id):
         employee.department_id = request.form.get('department_id')
         employee.designation_id = request.form.get('designation_id')
         employee.schedule_id = request.form.get('schedule_id')
+        
+        # Handle image upload
+        if 'image' in request.files:
+            image_file = request.files['image']
+            image_filename = save_employee_image(image_file, employee.id)
+            if image_filename:
+                employee.image = image_filename
         
         db.session.commit()
         flash('Employee updated successfully!', 'success')

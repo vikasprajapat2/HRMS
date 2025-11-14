@@ -17,6 +17,7 @@
                 <thead>
                     <tr>
                         <th>#</th>
+                        <th>Photo</th>
                         <th>ID</th>
                         <th>Name</th>
                         <th>Email</th>
@@ -32,6 +33,13 @@
                         {% for employee in employees %}
                         <tr>
                             <td>{{ loop.index }}</td>
+                            <td>
+                                {% if employee.image %}
+                                <img src="{{ url_for('static', filename='uploads/employees/' + employee.image) }}" alt="{{ employee.firstname }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                                {% else %}
+                                <div style="width: 40px; height: 40px; border-radius: 50%; background-color: #ccc; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">{{ employee.firstname[0] }}</div>
+                                {% endif %}
+                            </td>
                             <td>{{ employee.unique_id or 'N/A' }}</td>
                             <td>{{ employee.firstname }} {{ employee.lastname }}</td>
                             <td>{{ employee.email or 'N/A' }}</td>

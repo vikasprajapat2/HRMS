@@ -91,6 +91,7 @@ class Employee(db.Model):
     gender = db.Column(db.String(10))
     religion = db.Column(db.String(50))
     marital = db.Column(db.String(20))
+    image = db.Column(db.String(255))  # Store image filename
     status = db.Column(db.String(20), default='active')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
