@@ -1,70 +1,166 @@
 ﻿{% extends "base.html" %}
-{% block title %}Attendance Management{% endblock %}
+
+{% block title %}Attendance Management - Employee Management{% endblock %}
+
 {% block content %}
-<h2>Attendance Management - {{ date }}</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-calendar-check me-2"></i>Attendance Management</h2>
+    <div class="btn-group" role="group">
+        <a class="btn btn-primary" href="{{ url_for('attendance.board') }}">
+            <i class="fas fa-th me-2"></i>Attendance Board
+        </a>
+        <a class="btn btn-success" href="{{ url_for('attendance.create') }}">
+            <i class="fas fa-plus me-2"></i>Add Record
+        </a>
+        <a class="btn btn-info" href="{{ url_for('attendance.monthly_report') }}">
+            <i class="fas fa-chart-bar me-2"></i>Monthly Report
+        </a>
+    </div>
+</div>
 
-<div style="margin-bottom:12px;">
-  <a class="btn btn-primary" href="{{ url_for('attendance.board') }}">Attendance Board</a>
-  <a class="btn btn-success" href="{{ url_for('attendance.create') }}">Add Record</a>
-  <a class="btn btn-info" href="{{ url_for('attendance.monthly_report') }}">Monthly Report</a>
-  <a class="btn btn-secondary" href="{{ url_for('attendance.holidays') }}">Manage Holidays</a>
-</div><form method="get" action="{{ url_for('attendance.index') }}" style="margin-bottom:12px;">
-	<label for="date">Date:</label>
-	<input type="date" id="date" name="date" value="{{ date }}">
-	<button class="btn btn-sm btn-secondary" type="submit">Filter</button>
-</form>
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" action="{{ url_for('attendance.index') }}" class="row g-2">
+            <div class="col-md-6">
+                <label for="date" class="form-label">Select Date</label>
+                <input type="date" class="form-control" id="date" name="date" value="{{ date }}">
+            </div>
+            <div class="col-md-6 d-flex align-items-end">
+                <button class="btn btn-secondary w-100" type="submit">
+                    <i class="fas fa-filter me-2"></i>Filter
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
-<table class="table" style="width:100%; border-collapse: collapse;">
-	<thead>
-		<tr>
-			<th style="border:1px solid #ddd;padding:8px;">#</th>
-			<th style="border:1px solid #ddd;padding:8px;">Employee</th>
-			<th style="border:1px solid #ddd;padding:8px;">Status</th>
-			<th style="border:1px solid #ddd;padding:8px;">Time In</th>
-			<th style="border:1px solid #ddd;padding:8px;">Time Out</th>
-			<th style="border:1px solid #ddd;padding:8px;">Actions</th>
-		</tr>
-	</thead>
-	<tbody>
-		{% if attendances %}
-			{% for a in attendances %}
-			<tr>
-				<td style="border:1px solid #ddd;padding:8px;">{{ loop.index }}</td>
-				<td style="border:1px solid #ddd;padding:8px;">{{ a.employee.firstname }} {{ a.employee.lastname }}</td>
-				<td style="border:1px solid #ddd;padding:8px;">
-                    {% if a.status == 'present' %}
-                        <span class="badge bg-success text-white">Present</span>
-                    {% elif a.status == 'absent' %}
-                        <span class="badge bg-danger text-white">Absent</span>
-                    {% elif a.status == 'holiday' %}
-                        <span class="badge bg-info text-white" title="{{ a.description }}">Holiday</span>
-                    {% elif a.status == 'weekend' %}
-                        <span class="badge bg-secondary text-white">Weekend</span>
-                    {% elif a.status == 'leave' %}
-                        <span class="badge bg-warning text-white" title="{{ a.description }}">Leave</span>
-                    {% else %}
-                        <span class="badge bg-secondary text-white">{{ a.status }}</span>
-                    {% endif %}
-                    {% if a.description %}
-                        <small class="text-muted d-block">{{ a.description }}</small>
-                    {% endif %}
-                </td>
-				<td style="border:1px solid #ddd;padding:8px;">{{ a.time_in or '-' }}</td>
-				<td style="border:1px solid #ddd;padding:8px;">{{ a.time_out or '-' }}</td>
-				<td style="border:1px solid #ddd;padding:8px;">
-                    {% if a.status not in ['holiday', 'weekend'] %}
-                        <a class="btn btn-sm btn-info" href="{{ url_for('attendance.edit', attendance_id=a.id) }}">Edit</a>
-                        <form method="post" action="{{ url_for('attendance.delete', attendance_id=a.id) }}" style="display:inline-block;margin-left:6px;">
-                            <button class="btn btn-sm btn-danger" type="submit" onclick="return confirm('Delete this record?')">Delete</button>
-                        </form>
-                    {% endif %}
-				</td>
-			</tr>
-			{% endfor %}
-		{% else %}
-			<tr><td colspan="6" style="padding:8px;">No attendance records for this date.</td></tr>
-		{% endif %}
-	</tbody>
-</table>
+<div class="card">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Attendance Records - <strong>{{ date.strftime('%B %d, %Y') }}</strong></h5>
+    </div>
+    <div class="card-body">
+        {% if attendances %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Employee</th>
+                        <th>Status</th>
+                        <th>Check In</th>
+                        <th>Check Out</th>
+                        <th>Duration</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in attendances %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                {% if a.employee.image %}
+                                <img src="{{ url_for('static', filename='uploads/employees/' + a.employee.image) }}" 
+                                    alt="{{ a.employee.firstname }}" 
+                                    style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; margin-right: 8px;">
+                                {% else %}
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background-color: #007bff; color: white; 
+                                    display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; margin-right: 8px;">
+                                    {{ a.employee.firstname[0] }}
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <strong>{{ a.employee.firstname }} {{ a.employee.lastname }}</strong><br>
+                                    <small class="text-muted">{{ a.employee.unique_id or 'N/A' }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if a.status == 'present' %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check-circle me-1"></i>Present
+                                </span>
+                            {% elif a.status == 'absent' %}
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-times-circle me-1"></i>Absent
+                                </span>
+                            {% elif a.status == 'holiday' %}
+                                <span class="badge bg-info">
+                                    <i class="fas fa-star me-1"></i>Holiday
+                                </span>
+                                {% if a.description %}<br><small class="text-muted">{{ a.description }}</small>{% endif %}
+                            {% elif a.status == 'weekend' %}
+                                <span class="badge bg-secondary">
+                                    <i class="fas fa-home me-1"></i>Weekend
+                                </span>
+                            {% elif a.status == 'leave' %}
+                                <span class="badge bg-warning">
+                                    <i class="fas fa-calendar-times me-1"></i>Leave
+                                </span>
+                                {% if a.description %}<br><small class="text-muted">{{ a.description }}</small>{% endif %}
+                            {% elif a.status == 'half-day' %}
+                                <span class="badge bg-warning">
+                                    <i class="fas fa-sun me-1"></i>Half Day
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ a.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if a.time_in %}
+                                <strong>{{ a.time_in.strftime('%H:%M') }}</strong>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if a.time_out %}
+                                <strong>{{ a.time_out.strftime('%H:%M') }}</strong>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if a.time_in and a.time_out %}
+                                {% set in_dt = a.time_in %}
+                                {% set out_dt = a.time_out %}
+                                {% set duration = (out_dt.hour - in_dt.hour) * 60 + (out_dt.minute - in_dt.minute) %}
+                                {% if duration > 0 %}
+                                    <strong>{{ (duration // 60)|int }}h {{ (duration % 60)|int }}m</strong>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if a.status not in ['holiday', 'weekend'] %}
+                                <a href="{{ url_for('attendance.edit', attendance_id=a.id) }}" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <form method="POST" action="{{ url_for('attendance.delete', attendance_id=a.id) }}" style="display: inline;" onsubmit="return confirm('Delete this record?')">
+                                    <button class="btn btn-sm btn-danger" type="submit">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </form>
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info mb-0">
+            <i class="fas fa-info-circle me-2"></i>
+            No attendance records for <strong>{{ date.strftime('%B %d, %Y') }}</strong>. 
+            <a href="{{ url_for('attendance.create') }}">Add a record</a>.
+        </div>
+        {% endif %}
+    </div>
+</div>
 
 {% endblock %}

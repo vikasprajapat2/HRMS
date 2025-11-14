@@ -1,47 +1,83 @@
 ﻿{% extends "base.html" %}
-{% block title %}Create / Edit Attendance{% endblock %}
+
+{% block title %}Create Attendance - Employee Management{% endblock %}
+
 {% block content %}
-<h2>{% if attendance %}Edit{% else %}Create{% endif %} Attendance</h2>
+<div class="mb-4">
+    <h2><i class="fas fa-clipboard-list me-2"></i>{% if attendance %}Edit{% else %}Add{% endif %} Attendance Record</h2>
+</div>
 
-<form method="post" action="">
-	<div>
-		<label for="employee_id">Employee</label>
-		<select name="employee_id" id="employee_id" required>
-			<option value="">-- Select --</option>
-			{% for e in employees %}
-				<option value="{{ e.id }}" {% if attendance and attendance.employee_id==e.id %}selected{% endif %}>{{ e.firstname }} {{ e.lastname }}</option>
-			{% endfor %}
-		</select>
-	</div>
+<div class="card">
+    <div class="card-body">
+        <form method="POST" class="needs-validation">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="employee_id" class="form-label">Employee <span class="text-danger">*</span></label>
+                    <select class="form-select" name="employee_id" id="employee_id" required>
+                        <option value="">-- Select Employee --</option>
+                        {% for e in employees %}
+                        <option value="{{ e.id }}" {% if attendance and attendance.employee_id == e.id %}selected{% endif %}>
+                            {{ e.firstname }} {{ e.lastname }} ({{ e.unique_id or 'N/A' }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-	<div>
-		<label for="date">Date</label>
-		<input type="date" name="date" id="date" value="{% if attendance %}{{ attendance.date }}{% else %}{{ default_date }}{% endif %}" required>
-	</div>
+                <div class="col-md-6 mb-3">
+                    <label for="date" class="form-label">Date <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" name="date" id="date" 
+                        value="{% if attendance %}{{ attendance.date }}{% else %}{{ default_date }}{% endif %}" required>
+                </div>
+            </div>
 
-	<div>
-		<label for="time_in">Time In</label>
-		<input type="time" name="time_in" id="time_in" value="{% if attendance and attendance.time_in %}{{ attendance.time_in.strftime('%H:%M') }}{% endif %}">
-	</div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="time_in" class="form-label">Check In Time</label>
+                    <input type="time" class="form-control" name="time_in" id="time_in" 
+                        value="{% if attendance and attendance.time_in %}{{ attendance.time_in.strftime('%H:%M') }}{% endif %}">
+                </div>
 
-	<div>
-		<label for="time_out">Time Out</label>
-		<input type="time" name="time_out" id="time_out" value="{% if attendance and attendance.time_out %}{{ attendance.time_out.strftime('%H:%M') }}{% endif %}">
-	</div>
+                <div class="col-md-6 mb-3">
+                    <label for="time_out" class="form-label">Check Out Time</label>
+                    <input type="time" class="form-control" name="time_out" id="time_out" 
+                        value="{% if attendance and attendance.time_out %}{{ attendance.time_out.strftime('%H:%M') }}{% endif %}">
+                </div>
+            </div>
 
-	<div>
-		<label for="status">Status</label>
-		<select name="status" id="status">
-			<option value="present" {% if attendance and attendance.status=='present' %}selected{% endif %}>Present</option>
-			<option value="absent" {% if attendance and attendance.status=='absent' %}selected{% endif %}>Absent</option>
-			<option value="leave" {% if attendance and attendance.status=='leave' %}selected{% endif %}>Leave</option>
-		</select>
-	</div>
+            <div class="mb-3">
+                <label for="status" class="form-label">Attendance Status <span class="text-danger">*</span></label>
+                <select class="form-select" name="status" id="status" required>
+                    <option value="">-- Select Status --</option>
+                    <option value="present" {% if attendance and attendance.status == 'present' %}selected{% endif %}>
+                        <i class="fas fa-check-circle"></i> Present
+                    </option>
+                    <option value="absent" {% if attendance and attendance.status == 'absent' %}selected{% endif %}>
+                        <i class="fas fa-times-circle"></i> Absent
+                    </option>
+                    <option value="leave" {% if attendance and attendance.status == 'leave' %}selected{% endif %}>
+                        <i class="fas fa-calendar-times"></i> Leave
+                    </option>
+                    <option value="half-day" {% if attendance and attendance.status == 'half-day' %}selected{% endif %}>
+                        <i class="fas fa-sun"></i> Half Day
+                    </option>
+                </select>
+            </div>
 
-	<div style="margin-top:8px;">
-		<button class="btn btn-primary" type="submit">Save</button>
-		<a class="btn btn-secondary" href="{{ url_for('attendance.index') }}">Cancel</a>
-	</div>
-</form>
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>{% if attendance %}Update{% else %}Save{% endif %} Attendance
+                </button>
+                <a href="{{ url_for('attendance.index') }}" class="btn btn-secondary">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="alert alert-info mt-3">
+    <i class="fas fa-info-circle me-2"></i>
+    <strong>Note:</strong> Fill in check-in and check-out times if the employee was present. Leave times empty for absent/leave.
+</div>
 
 {% endblock %}
