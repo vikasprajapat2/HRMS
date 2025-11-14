@@ -6,6 +6,8 @@ from flask_bcrypt import Bcrypt
 import secrets
 import string
 import json
+from models import Employee, Attendance
+from datetime import datetime
 
 bp = Blueprint('hr', __name__, url_prefix='/hr')
 bcrypt = Bcrypt()
@@ -34,6 +36,32 @@ def index():
 
     hrs = User.query.filter_by(role_id=hr_role.id).all()
     return render_template('admin/hr/index.html', hrs=hrs)
+
+
+@bp.route('/attendance')
+@login_required
+def attendance_board():
+    # Allow HR, admin, superadmin
+    if current_user.role.name not in ['hr', 'admin', 'superadmin']:
+        flash('Access denied', 'danger')
+        return redirect(url_for('auth.login'))
+
+    # Optional date query param (ISO format)
+    date_arg = request.args.get('date')
+    try:
+        date_obj = datetime.fromisoformat(date_arg).date() if date_arg else datetime.now().date()
+    except Exception:
+        date_obj = datetime.now().date()
+
+    # Ensure attendance records exist for active employees
+    employees = Employee.query.order_by(Employee.firstname).all()
+    for employee in employees:
+        employee.generate_attendance(date_obj, date_obj)
+
+    attendances = Attendance.query.filter_by(date=date_obj).all()
+    attendance_map = {a.employee_id: a for a in attendances}
+
+    return render_template('admin/hr/attendance.html', employees=employees, attendance_map=attendance_map, date=date_obj)
 
 @bp.route('/create', methods=['GET', 'POST'])
 @login_required

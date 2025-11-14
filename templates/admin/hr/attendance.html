@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Attendance Board - {{ date.strftime('%Y-%m-%d') }}</h3>
+    <form class="d-flex" method="get" action="{{ url_for('hr.attendance_board') }}">
+      <input type="date" name="date" class="form-control me-2" value="{{ date.isoformat() }}">
+      <button class="btn btn-secondary">Go</button>
+    </form>
+  </div>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Photo</th>
+        <th>Employee</th>
+        <th>ID</th>
+        <th>Time In</th>
+        <th>Time Out</th>
+        <th>Duration</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for emp in employees %}
+      <tr>
+        <td>
+          {% if emp.image %}
+            <img src="/{{ url_for('static', filename='uploads/employees/' ~ emp.image) }}" alt="photo" width="40" height="40" class="rounded-circle">
+          {% else %}
+            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" style="width:40px;height:40px">{{ emp.firstname[0]|upper }}</div>
+          {% endif %}
+        </td>
+        <td>{{ emp.firstname }} {{ emp.lastname }}</td>
+        <td>{{ emp.unique_id or ('EMP-' ~ emp.id) }}</td>
+        {% set a = attendance_map.get(emp.id) %}
+        <td>{{ a.time_in.strftime('%H:%M') if a and a.time_in else '-' }}</td>
+        <td>{{ a.time_out.strftime('%H:%M') if a and a.time_out else '-' }}</td>
+        <td>
+          {% if a and a.time_in and a.time_out %}
+            {% set dt_in = (a.time_in) %}
+            {% set dt_out = (a.time_out) %}
+            {% set duration = ( (a.time_out.hour*60 + a.time_out.minute) - (a.time_in.hour*60 + a.time_in.minute) ) %}
+            {{ (duration // 60) }}h {{ (duration % 60) }}m
+          {% else %}
+            -
+          {% endif %}
+        </td>
+        <td>{{ a.status if a else 'absent' }}</td>
+        <td>
+          {% if a %}
+            <a href="{{ url_for('attendance.edit', attendance_id=a.id) }}" class="btn btn-sm btn-primary">Edit</a>
+          {% else %}
+            <a href="{{ url_for('attendance.create') }}?employee_id={{ emp.id }}&date={{ date.isoformat() }}" class="btn btn-sm btn-success">Add</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
