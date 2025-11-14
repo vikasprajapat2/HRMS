@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h3>HR Dashboard</h3>
+  <p>Summary metrics and quick actions will appear here.</p>
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card p-3">
+        <h5>Total HR users</h5>
+        <p>{{ total_hr or 0 }}</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3">
+        <h5>Total Employees</h5>
+        <p>{{ total_employees or 0 }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

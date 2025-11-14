@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>HR Users</h3>
+    <a href="{{ url_for('hr.create') }}" class="btn btn-primary">Create HR</a>
+  </div>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for h in hrs %}
+      <tr>
+        <td>{{ h.id }}</td>
+        <td>{{ h.name }}</td>
+        <td>{{ h.email }}</td>
+        <td>{{ h.phone }}</td>
+        <td>{{ h.status }}</td>
+        <td>
+          <form method="post" action="{{ url_for('hr.deactivate', user_id=h.id) }}" style="display:inline">
+            <button class="btn btn-sm btn-warning" type="submit">Deactivate</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6">No HR users found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
