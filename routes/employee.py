@@ -25,7 +25,6 @@ def create():
             address=request.form.get('address'),
             dob=datetime.strptime(request.form.get('dob'), '%Y-%m-%d').date() if request.form.get('dob') else None,
             gender=request.form.get('gender'),
-            religion=request.form.get('religion'),
             marital=request.form.get('marital'),
             department_id=request.form.get('department_id'),
             designation_id=request.form.get('designation_id'),
@@ -92,7 +91,6 @@ def edit(id):
         if request.form.get('dob'):
             employee.dob = datetime.strptime(request.form.get('dob'), '%Y-%m-%d').date()
         employee.gender = request.form.get('gender')
-        employee.religion = request.form.get('religion')
         employee.marital = request.form.get('marital')
         employee.department_id = request.form.get('department_id')
         employee.designation_id = request.form.get('designation_id')
