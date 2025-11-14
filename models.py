@@ -95,13 +95,13 @@ class Employee(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    attendances = db.relationship('Attendance', backref='employee', lazy=True)
-    checks = db.relationship('Check', backref='employee', lazy=True)
-    salary = db.relationship('Salary', backref='employee', uselist=False)
-    leaves = db.relationship('Leave', backref='employee', lazy=True)
-    late_times = db.relationship('LateTime', backref='employee', lazy=True)
-    over_times = db.relationship('OverTime', backref='employee', lazy=True)
-    payrolls = db.relationship('Payroll', backref='employee', lazy=True)
+    attendances = db.relationship('Attendance', backref='employee', lazy=True, cascade='all, delete-orphan')
+    checks = db.relationship('Check', backref='employee', lazy=True, cascade='all, delete-orphan')
+    salary = db.relationship('Salary', backref='employee', uselist=False, cascade='all, delete-orphan')
+    leaves = db.relationship('Leave', backref='employee', lazy=True, cascade='all, delete-orphan')
+    late_times = db.relationship('LateTime', backref='employee', lazy=True, cascade='all, delete-orphan')
+    over_times = db.relationship('OverTime', backref='employee', lazy=True, cascade='all, delete-orphan')
+    payrolls = db.relationship('Payroll', backref='employee', lazy=True, cascade='all, delete-orphan')
 
     def generate_attendance(self, start_date, end_date):
         """Generate attendance records for the employee between given dates."""
