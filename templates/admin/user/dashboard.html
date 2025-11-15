@@ -72,6 +72,40 @@
         </table>
       </div>
 
+      <!-- Apply Leave Card -->
+      <div class="card p-3 mb-3">
+        <h5>Apply For Leave</h5>
+        <form method="POST" action="{{ url_for('user.apply_leave') }}">
+          <div class="row g-2">
+            <div class="col-md-4">
+              <label class="form-label">Leave Type</label>
+              <select name="leave_type" class="form-select" required>
+                <option value="">-- Select --</option>
+                <option value="annual">Annual</option>
+                <option value="sick">Sick</option>
+                <option value="casual">Casual</option>
+                <option value="maternity">Maternity</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Start Date</label>
+              <input type="date" name="start_date" class="form-control" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">End Date</label>
+              <input type="date" name="end_date" class="form-control" required>
+            </div>
+            <div class="col-md-12 mt-2">
+              <label class="form-label">Reason</label>
+              <textarea name="reason" class="form-control" rows="2" placeholder="Optional reason"></textarea>
+            </div>
+            <div class="col-md-12 mt-2">
+              <button class="btn btn-primary">Submit Leave Request</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
       <div class="row">
         <div class="col-md-6">
           <div class="card p-3 mb-3">

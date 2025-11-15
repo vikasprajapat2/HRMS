@@ -5,6 +5,8 @@ from models import User, Role, Employee, Attendance, Leave, Payroll, AuditLog
 from flask_bcrypt import Bcrypt
 import json
 from functools import wraps
+from database import db
+from datetime import datetime
 
 bp = Blueprint('user', __name__, url_prefix='/user')
 bcrypt = Bcrypt()
@@ -156,3 +158,75 @@ def dashboard():
         payrolls = Payroll.query.filter_by(employee_id=employee.id).order_by(Payroll.year.desc(), Payroll.month.desc()).limit(6).all()
 
     return render_template('admin/user/dashboard.html', user=user, employee=employee, attendances=attendances, leaves=leaves, payrolls=payrolls)
+
+
+@bp.route('/leave/apply', methods=['GET', 'POST'])
+@login_required
+def apply_leave():
+    # Allow logged-in employees to apply for leave linked to their Employee record
+    user = current_user
+    try:
+        employee = Employee.query.filter_by(email=user.email).first()
+    except Exception:
+        employee = None
+
+    if not employee:
+        flash('Employee record not found for current user.', 'danger')
+        return redirect(url_for('user.dashboard'))
+
+    if request.method == 'POST':
+        try:
+            start_date = datetime.strptime(request.form.get('start_date'), '%Y-%m-%d').date()
+            end_date = datetime.strptime(request.form.get('end_date'), '%Y-%m-%d').date()
+        except Exception:
+            flash('Invalid date format.', 'danger')
+            return redirect(url_for('user.dashboard'))
+
+        if start_date > end_date:
+            flash('Start date cannot be after end date.', 'danger')
+            return redirect(url_for('user.dashboard'))
+
+        # Check for overlapping leaves
+        existing_leave = Leave.query.filter(
+            Leave.employee_id == employee.id,
+            Leave.status != 'rejected',
+            Leave.start_date <= end_date,
+            Leave.end_date >= start_date
+        ).first()
+
+        if existing_leave:
+            flash('You already have an approved/pending leave in this date range.', 'warning')
+            return redirect(url_for('user.dashboard'))
+
+        leave = Leave(
+            employee_id=employee.id,
+            leave_type=request.form.get('leave_type'),
+            start_date=start_date,
+            end_date=end_date,
+            reason=request.form.get('reason'),
+            status='pending'
+        )
+        db.session.add(leave)
+        db.session.commit()
+
+        # Audit log
+        try:
+            log = AuditLog(
+                actor_id=current_user.id,
+                action='create',
+                model='Leave',
+                record_id=leave.id,
+                old_data=None,
+                new_data=json.dumps({'employee_id': employee.id, 'start_date': str(start_date), 'end_date': str(end_date), 'leave_type': leave.leave_type}),
+                ip_address=request.remote_addr
+            )
+            db.session.add(log)
+            db.session.commit()
+        except Exception:
+            current_app.logger.exception('Failed to write audit log for leave application')
+
+        flash('Leave request submitted successfully!', 'success')
+        return redirect(url_for('user.dashboard'))
+
+    # GET -> redirect back to dashboard (form is embedded there)
+    return redirect(url_for('user.dashboard'))
