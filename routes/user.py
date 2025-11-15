@@ -7,6 +7,9 @@ import json
 from functools import wraps
 from database import db
 from datetime import datetime
+import os
+from werkzeug.utils import secure_filename
+from flask import current_app
 
 bp = Blueprint('user', __name__, url_prefix='/user')
 bcrypt = Bcrypt()
@@ -229,4 +232,102 @@ def apply_leave():
         return redirect(url_for('user.dashboard'))
 
     # GET -> redirect back to dashboard (form is embedded there)
+    return redirect(url_for('user.dashboard'))
+
+
+@bp.route('/profile')
+@login_required
+def profile():
+    user = current_user
+    try:
+        employee = Employee.query.filter_by(email=user.email).first()
+    except Exception:
+        employee = None
+    return render_template('admin/user/profile.html', user=user, employee=employee)
+
+
+@bp.route('/profile/edit', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    user = current_user
+    try:
+        employee = Employee.query.filter_by(email=user.email).first()
+    except Exception:
+        employee = None
+
+    if request.method == 'POST':
+        user.name = request.form.get('name') or user.name
+        user.phone = request.form.get('phone') or user.phone
+
+        # Update employee details if present
+        if employee:
+            employee.firstname = request.form.get('firstname') or employee.firstname
+            employee.lastname = request.form.get('lastname') or employee.lastname
+            employee.phone = request.form.get('phone') or employee.phone
+
+        # Handle image upload
+        file = request.files.get('image')
+        if file and file.filename:
+            filename = secure_filename(file.filename)
+            upload_folder = os.path.join(current_app.root_path, current_app.config.get('UPLOAD_FOLDER', 'static/uploads'), 'employees')
+            os.makedirs(upload_folder, exist_ok=True)
+            path = os.path.join(upload_folder, filename)
+            file.save(path)
+            # store only filename in db
+            if employee:
+                employee.image = filename
+
+        db.session.commit()
+        flash('Profile updated successfully!', 'success')
+        return redirect(url_for('user.profile'))
+
+    return render_template('admin/user/edit_profile.html', user=user, employee=employee)
+
+
+@bp.route('/profile/change-password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    user = current_user
+    if request.method == 'POST':
+        old = request.form.get('old_password')
+        new = request.form.get('new_password')
+        confirm = request.form.get('confirm_password')
+
+        if not bcrypt.check_password_hash(user.password, old):
+            flash('Current password is incorrect.', 'danger')
+            return redirect(url_for('user.change_password'))
+        if new != confirm:
+            flash('New passwords do not match.', 'danger')
+            return redirect(url_for('user.change_password'))
+
+        user.password = bcrypt.generate_password_hash(new).decode('utf-8')
+        db.session.commit()
+        flash('Password changed successfully.', 'success')
+        return redirect(url_for('user.profile'))
+
+    return render_template('admin/user/change_password.html')
+
+
+@bp.route('/leave/<int:id>/cancel', methods=['POST'])
+@login_required
+def cancel_leave(id):
+    # Allow employees to cancel their own pending leave requests
+    leave = Leave.query.get_or_404(id)
+    # find employee record for current user
+    try:
+        employee = Employee.query.filter_by(email=current_user.email).first()
+    except Exception:
+        employee = None
+
+    if not employee or leave.employee_id != employee.id:
+        flash('You are not authorized to cancel this leave.', 'danger')
+        return redirect(url_for('user.dashboard'))
+
+    if leave.status != 'pending':
+        flash('Only pending leaves can be cancelled.', 'warning')
+        return redirect(url_for('user.dashboard'))
+
+    db.session.delete(leave)
+    db.session.commit()
+    flash('Leave cancelled successfully.', 'success')
     return redirect(url_for('user.dashboard'))
