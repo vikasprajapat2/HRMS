@@ -9,25 +9,25 @@ from functools import wraps
 bp = Blueprint('user', __name__, url_prefix='/user')
 bcrypt = Bcrypt()
 
-def superadmin_required(f):
+def admin_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        if not current_user.is_authenticated or current_user.role.name != 'superadmin':
-            flash('Super Admin access required.', 'danger')
-            return redirect(url_for('admin.superadmin_dashboard'))
+        if not current_user.is_authenticated or current_user.role.name not in ['admin', 'superadmin']:
+            flash('Admin access required.', 'danger')
+            return redirect(url_for('admin.admin_dashboard'))
         return f(*args, **kwargs)
     return decorated
 
 @bp.route('/')
 @login_required
-@superadmin_required
+@admin_required
 def index():
     users = User.query.all()
     return render_template('admin/user/index.html', users=users)
 
 @bp.route('/create', methods=['GET', 'POST'])
 @login_required
-@superadmin_required
+@admin_required
 def create():
     if request.method == 'POST':
         hashed_password = bcrypt.generate_password_hash(request.form.get('password')).decode('utf-8')
@@ -67,7 +67,7 @@ def create():
 
 @bp.route('/<int:id>/edit', methods=['GET', 'POST'])
 @login_required
-@superadmin_required
+@admin_required
 def edit(id):
     user = User.query.get_or_404(id)
     
@@ -109,7 +109,7 @@ def edit(id):
 
 @bp.route('/<int:id>/delete', methods=['POST'])
 @login_required
-@superadmin_required
+@admin_required
 def delete(id):
     user = User.query.get_or_404(id)
     
