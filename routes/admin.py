@@ -101,6 +101,14 @@ def moderator_dashboard():
                          role='moderator')
 
 
+@bp.route('/employee')
+@login_required
+def employee_dashboard():
+    # Provide an admin-namespaced endpoint for 'employee' role links in templates.
+    # Redirect employees to their user dashboard. Admins/superadmins may also use this link.
+    return redirect(url_for('user.dashboard'))
+
+
 @bp.route('/superadmin/create-user-from-employee', methods=['GET', 'POST'])
 @login_required
 def create_user_from_employee():
