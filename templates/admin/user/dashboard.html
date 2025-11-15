@@ -6,7 +6,7 @@
       <div class="card p-3">
         <div class="text-center">
           {% if employee and employee.image %}
-            <img src="/{{ url_for('static', filename='uploads/employees/' ~ employee.image) }}" class="rounded-circle" width="120" height="120">
+            <img src="{{ url_for('static', filename='uploads/employees/' ~ employee.image) }}" class="rounded-circle" width="120" height="120" alt="{{ employee.firstname }}">
           {% else %}
             <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" style="width:120px;height:120px;font-size:36px">{{ (employee.firstname[0] if employee else user.name[0])|upper }}</div>
           {% endif %}
@@ -52,8 +52,12 @@
                   <td>{{ a.time_out.strftime('%H:%M') if a.time_out else '-' }}</td>
                   <td>
                     {% if a.time_in and a.time_out %}
-                      {% set duration = (a.time_out.hour*60 + a.time_out.minute) - (a.time_in.hour*60 + a.time_in.minute) %}
-                      {{ (duration // 60) }}h {{ (duration % 60) }}m
+                      {% set duration = (a.time_out.hour * 60 + a.time_out.minute) - (a.time_in.hour * 60 + a.time_in.minute) %}
+                      {% if duration >= 0 %}
+                        {{ (duration // 60) }}h {{ (duration % 60) }}m
+                      {% else %}
+                        -
+                      {% endif %}
                     {% else %}
                       -
                     {% endif %}
