@@ -120,7 +120,15 @@ def index():
 
 @app.context_processor
 def inject_user():
-    return dict(current_user=current_user)
+    # Provide current_user plus pending leaves count for notifications
+    pending_leaves = 0
+    try:
+        if current_user.is_authenticated and getattr(current_user, 'role', None) and current_user.role.name in ['superadmin', 'admin', 'hr']:
+            from models import Leave
+            pending_leaves = Leave.query.filter_by(status='pending').count()
+    except Exception:
+        pending_leaves = 0
+    return dict(current_user=current_user, pending_leaves=pending_leaves)
 
 # Error handlers
 @app.errorhandler(404)

@@ -176,3 +176,14 @@ def create_user_from_employee():
     ).all()
     
     return render_template('admin/superadmin/create_user_from_employee.html', employees=employees)
+
+
+@bp.route('/audit-logs')
+@login_required
+def audit_logs():
+    if current_user.role.name != 'superadmin':
+        flash('Access denied', 'danger')
+        return redirect(url_for('auth.login'))
+
+    logs = AuditLog.query.order_by(AuditLog.created_at.desc()).limit(200).all()
+    return render_template('admin/audit/logs.html', logs=logs)
