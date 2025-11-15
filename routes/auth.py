@@ -18,20 +18,32 @@ def login():
         user = User.query.filter_by(email=email).first()
         
         if user and bcrypt.check_password_hash(user.password, password):
-            login_user(user)
+            # deny login if account inactive
+            if getattr(user, 'status', 'active') != 'active':
+                flash('Account is inactive. Contact administrator.', 'danger')
+                return redirect(url_for('auth.login'))
+
+            remember = True if request.form.get('remember') else False
+            login_user(user, remember=remember)
             flash('Login successful!', 'success')
-            
+
             # Redirect based on role
-            if user.role.name == 'superadmin':
+            role_name = user.role.name if getattr(user, 'role', None) else None
+            if role_name == 'superadmin':
                 return redirect(url_for('admin.superadmin_dashboard'))
-            elif user.role.name == 'admin':
+            elif role_name == 'admin':
                 return redirect(url_for('admin.admin_dashboard'))
-            elif user.role.name == 'hr':
+            elif role_name == 'hr':
                 return redirect(url_for('admin.hr_dashboard'))
-            elif user.role.name == 'payroll':
+            elif role_name == 'payroll':
                 return redirect(url_for('admin.payroll_dashboard'))
-            else:
+            elif role_name == 'employee':
+                return redirect(url_for('user.dashboard'))
+            elif role_name == 'moderator':
                 return redirect(url_for('admin.moderator_dashboard'))
+            else:
+                # default to user dashboard for unknown/unspecified roles
+                return redirect(url_for('user.dashboard'))
         else:
             flash('Invalid email or password.', 'danger')
     
