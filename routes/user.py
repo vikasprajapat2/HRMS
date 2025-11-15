@@ -1,23 +1,22 @@
-@bp.route('/payroll/<int:id>/download')
-@login_required
-def download_payslip(id):
-    # Placeholder: Download payslip as PDF or CSV
-    payroll = Payroll.query.get_or_404(id)
-    try:
-        employee = Employee.query.filter_by(email=current_user.email).first()
-    except Exception:
-        employee = None
-    if not employee or payroll.employee_id != employee.id:
-        flash('You are not authorized to download this payslip.', 'danger')
-        return redirect(url_for('user.dashboard'))
-    # For now, just return a simple CSV string as attachment
-    from flask import Response
-    csv = f"Month,Year,Net Salary\n{payroll.month},{payroll.year},{payroll.net_salary}\n"
-    return Response(
-        csv,
-        mimetype="text/csv",
-        headers={"Content-Disposition":f"attachment;filename=payslip_{payroll.month}_{payroll.year}.csv"}
-    )
+
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
+from flask_login import login_required, current_user
+from database import db
+from models import User, Role, Employee, Attendance, Leave, Payroll, AuditLog
+from flask_bcrypt import Bcrypt
+import json
+from functools import wraps
+from database import db
+from datetime import datetime
+import os
+from werkzeug.utils import secure_filename
+from flask import current_app
+
+bp = Blueprint('user', __name__, url_prefix='/user')
+bcrypt = Bcrypt()
+
+# ...existing code...
+
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user
 from database import db
@@ -258,46 +257,46 @@ def apply_leave():
             Leave.end_date >= start_date
         ).first()
 
-        if existing_leave:
-            flash('You already have an approved/pending leave in this date range.', 'warning')
-            return redirect(url_for('user.dashboard'))
 
-        leave = Leave(
-            employee_id=employee.id,
-            leave_type=request.form.get('leave_type'),
-            start_date=start_date,
-            end_date=end_date,
-            reason=request.form.get('reason'),
-            status='pending'
-        )
-        db.session.add(leave)
-        db.session.commit()
 
-        # Audit log
-        try:
-            log = AuditLog(
-                actor_id=current_user.id,
-                action='create',
-                model='Leave',
-                record_id=leave.id,
-                old_data=None,
-                new_data=json.dumps({'employee_id': employee.id, 'start_date': str(start_date), 'end_date': str(end_date), 'leave_type': leave.leave_type}),
-                ip_address=request.remote_addr
-            )
-            db.session.add(log)
-            db.session.commit()
-        except Exception:
-            current_app.logger.exception('Failed to write audit log for leave application')
 
-        flash('Leave request submitted successfully!', 'success')
-        return redirect(url_for('user.dashboard'))
-
-    # GET -> redirect back to dashboard (form is embedded there)
-    return redirect(url_for('user.dashboard'))
-
+        from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
+        from flask_login import login_required, current_user
+        from database import db
+        from models import User, Role, Employee, Attendance, Leave, Payroll, AuditLog
+        from flask_bcrypt import Bcrypt
+        import json
+        from functools import wraps
+        from database import db
+        from datetime import datetime
+        import os
+        from werkzeug.utils import secure_filename
+        from flask import current_app
 
 @bp.route('/profile')
 @login_required
+
+        # Place this route after bp is defined
+        @bp.route('/payroll/<int:id>/download')
+        @login_required
+        def download_payslip(id):
+            # Placeholder: Download payslip as PDF or CSV
+            payroll = Payroll.query.get_or_404(id)
+            try:
+                employee = Employee.query.filter_by(email=current_user.email).first()
+            except Exception:
+                employee = None
+            if not employee or payroll.employee_id != employee.id:
+                flash('You are not authorized to download this payslip.', 'danger')
+                return redirect(url_for('user.dashboard'))
+            # For now, just return a simple CSV string as attachment
+            from flask import Response
+            csv = f"Month,Year,Net Salary\n{payroll.month},{payroll.year},{payroll.net_salary}\n"
+            return Response(
+                csv,
+                mimetype="text/csv",
+                headers={"Content-Disposition":f"attachment;filename=payslip_{payroll.month}_{payroll.year}.csv"}
+            )
 def profile():
     user = current_user
     try:

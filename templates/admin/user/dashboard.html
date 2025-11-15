@@ -243,9 +243,7 @@
                       <span class="text-success ms-2">₹{{ p.net_salary }}</span>
                       <div class="small text-muted">{{ p.status|title if p.status else '' }}</div>
                     </div>
-                    <div>
-                      <a href="{{ url_for('user.download_payslip', id=p.id) }}" class="btn btn-sm btn-outline-success{% if not p.net_salary %} disabled{% endif %}"><i class="fas fa-download"></i> Download</a>
-                    </div>
+                    <!-- Download button removed -->
                   </li>
                   {% endfor %}
                 {% else %}

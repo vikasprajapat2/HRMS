@@ -24,7 +24,7 @@
                 <td>{{ p.net_salary }}</td>
                 <td>{{ p.status }}</td>
                 <td>
-                  <a href="{{ url_for('user.download_payslip', id=p.id) }}" class="btn btn-sm btn-outline-success{% if not p.net_salary %} disabled{% endif %}"><i class="fas fa-download"></i> Download</a>
+                  <!-- Download button removed -->
                 </td>
               </tr>
             {% endfor %}
