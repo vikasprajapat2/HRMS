@@ -1,142 +1,262 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container mt-4">
-  <div class="row">
-    <div class="col-md-4">
-      <div class="card p-3">
-        <div class="text-center">
+<div class="container-fluid mt-4">
+  <div class="row mb-3">
+    <div class="col-12">
+      <h2><i class="fas fa-tachometer-alt me-2"></i>Dashboard</h2>
+      <p class="text-muted">Welcome back, {{ user.name }}!</p>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-md-6 col-xl-3">
+      <div class="card bg-primary text-white h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="text-uppercase mb-1">Present (This Month)</h6>
+              <h2 class="mb-0">{{ present_days_month }}</h2>
+            </div>
+            <i class="fas fa-user-check fa-3x opacity-50"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+      <div class="card bg-danger text-white h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="text-uppercase mb-1">Pending Leaves</h6>
+              <h2 class="mb-0">{{ pending_leaves }}</h2>
+            </div>
+            <i class="fas fa-calendar-times fa-3x opacity-50"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+      <div class="card bg-success text-white h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="text-uppercase mb-1">Approved Leaves (YTD)</h6>
+              <h2 class="mb-0">{{ approved_leaves_ytd }}</h2>
+            </div>
+            <i class="fas fa-calendar-check fa-3x opacity-50"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+      <div class="card bg-secondary text-white h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="text-uppercase mb-1">Payslips (This Year)</h6>
+              <h2 class="mb-0">{{ payrolls_this_year }}</h2>
+            </div>
+            <i class="fas fa-money-bill-wave fa-3x opacity-50"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Left column: profile & quick stats -->
+    <div class="col-lg-4">
+      <div class="card mb-3">
+        <div class="card-body text-center">
           {% if employee and employee.image %}
-            <img src="{{ url_for('static', filename='uploads/employees/' ~ employee.image) }}" class="rounded-circle" width="120" height="120" alt="{{ employee.firstname }}">
+            <img src="{{ url_for('static', filename='uploads/employees/' ~ employee.image) }}" class="rounded-circle mb-3" style="width:120px;height:120px;object-fit:cover;">
           {% else %}
-            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" style="width:120px;height:120px;font-size:36px">{{ (employee.firstname[0] if employee else user.name[0])|upper }}</div>
+            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mb-3" style="width:120px;height:120px;font-size:36px">{{ (employee.firstname[0] if employee else user.name[0])|upper }}</div>
           {% endif %}
+          <h5 class="mb-0">{{ user.name }}</h5>
+          <div class="text-muted mb-2">{{ user.email }}</div>
+          <div class="d-flex justify-content-center gap-2">
+            <a href="{{ url_for('user.profile') }}" class="btn btn-outline-primary btn-sm">Profile</a>
+            <a href="{{ url_for('user.edit_profile') }}" class="btn btn-outline-secondary btn-sm">Edit</a>
+          </div>
         </div>
-        <h4 class="text-center mt-3">{{ user.name }}</h4>
-        <p class="text-center text-muted">{{ user.email }}</p>
-        <ul class="list-group list-group-flush">
-          <li class="list-group-item"><strong>Phone:</strong> {{ user.phone or '-' }}</li>
-          <li class="list-group-item"><strong>Role:</strong> {{ user.role.name if user.role else '-' }}</li>
-          <li class="list-group-item"><strong>Status:</strong> {{ user.status }}</li>
-        </ul>
       </div>
 
-      {% if employee %}
-      <div class="card mt-3 p-3">
-        <h5>Employee Info</h5>
-        <p><strong>ID:</strong> {{ employee.unique_id or ('EMP-' ~ employee.id) }}</p>
-        <p><strong>Department:</strong> {{ employee.department.name if employee.department else '-' }}</p>
-        <p><strong>Designation:</strong> {{ employee.designation.name if employee.designation else '-' }}</p>
+      <div class="card mb-3">
+        <div class="card-body">
+          <h6 class="card-title mb-3">Leave Balances <span class="text-muted">(YTD)</span></h6>
+          <div class="row text-center">
+            <div class="col-4">
+              <div class="badge bg-primary mb-1" style="font-size:1.2rem;">Annual</div>
+              <div class="display-6 fw-bold">{{ leave_balance.annual }}</div>
+            </div>
+            <div class="col-4">
+              <div class="badge bg-success mb-1" style="font-size:1.2rem;">Sick</div>
+              <div class="display-6 fw-bold">{{ leave_balance.sick }}</div>
+            </div>
+            <div class="col-4">
+              <div class="badge bg-warning text-dark mb-1" style="font-size:1.2rem;">Casual</div>
+              <div class="display-6 fw-bold">{{ leave_balance.casual }}</div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {% endif %}
+      <div class="card mb-3">
+        <div class="card-body">
+          <h6 class="card-title mb-3">Quick Actions</h6>
+          <div class="d-grid gap-2">
+            <a href="#apply-leave" class="btn btn-primary"><i class="fas fa-calendar-plus me-2"></i>Apply Leave</a>
+            <a href="{{ url_for('user.attendance_list') }}" class="btn btn-outline-primary"><i class="fas fa-user-check me-2"></i>My Attendance</a>
+            <a href="{{ url_for('user.leaves_list') }}" class="btn btn-outline-warning"><i class="fas fa-calendar-alt me-2"></i>My Leaves</a>
+            <a href="{{ url_for('user.payrolls_list') }}" class="btn btn-outline-success"><i class="fas fa-money-bill-wave me-2"></i>Payslips</a>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <div class="col-md-8">
-      <div class="card p-3 mb-3">
-        <h5>Recent Attendance</h5>
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>In</th>
-              <th>Out</th>
-              <th>Duration</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% if attendances %}
-              {% for a in attendances %}
-                <tr>
-                  <td>{{ a.date.strftime('%Y-%m-%d') }}</td>
-                  <td>{{ a.time_in.strftime('%H:%M') if a.time_in else '-' }}</td>
-                  <td>{{ a.time_out.strftime('%H:%M') if a.time_out else '-' }}</td>
-                  <td>
-                    {% if a.time_in and a.time_out %}
-                      {% set duration = (a.time_out.hour * 60 + a.time_out.minute) - (a.time_in.hour * 60 + a.time_in.minute) %}
-                      {% if duration >= 0 %}
-                        {{ (duration // 60) }}h {{ (duration % 60) }}m
-                      {% else %}
-                        -
-                      {% endif %}
+    <!-- Right column: main content -->
+    <div class="col-lg-8">
+      <div class="row g-3">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-body">
+              <h6 class="card-title mb-3">Recent Attendance</h6>
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover table-sm mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Date</th>
+                      <th>In</th>
+                      <th>Out</th>
+                      <th>Duration</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% if attendances %}
+                      {% for a in attendances %}
+                      <tr>
+                        <td>{{ a.date.strftime('%d-%m-%Y') }}</td>
+                        <td>{{ a.time_in.strftime('%H:%M') if a.time_in else '-' }}</td>
+                        <td>{{ a.time_out.strftime('%H:%M') if a.time_out else '-' }}</td>
+                        <td>
+                          {% if a.time_in and a.time_out %}
+                            {% set duration = (a.time_out.hour * 60 + a.time_out.minute) - (a.time_in.hour * 60 + a.time_in.minute) %}
+                            {% if duration >= 0 %}{{ (duration // 60) }}h {{ (duration % 60) }}m{% else %}-{% endif %}
+                          {% else %}-{% endif %}
+                        </td>
+                        <td><span class="badge bg-{{ 'success' if a.status=='present' else 'danger' }}">{{ a.status|title }}</span></td>
+                      </tr>
+                      {% endfor %}
                     {% else %}
-                      -
+                      <tr><td colspan="5" class="text-center text-muted">No attendance records found.</td></tr>
                     {% endif %}
-                  </td>
-                  <td>{{ a.status }}</td>
-                </tr>
-              {% endfor %}
-            {% else %}
-              <tr><td colspan="5">No attendance records found.</td></tr>
-            {% endif %}
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Apply Leave Card -->
-      <div class="card p-3 mb-3">
-        <h5>Apply For Leave</h5>
-        <form method="POST" action="{{ url_for('user.apply_leave') }}">
-          <div class="row g-2">
-            <div class="col-md-4">
-              <label class="form-label">Leave Type</label>
-              <select name="leave_type" class="form-select" required>
-                <option value="">-- Select --</option>
-                <option value="annual">Annual</option>
-                <option value="sick">Sick</option>
-                <option value="casual">Casual</option>
-                <option value="maternity">Maternity</option>
-              </select>
+                  </tbody>
+                </table>
+              </div>
             </div>
-            <div class="col-md-3">
-              <label class="form-label">Start Date</label>
-              <input type="date" name="start_date" class="form-control" required>
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">End Date</label>
-              <input type="date" name="end_date" class="form-control" required>
-            </div>
-            <div class="col-md-12 mt-2">
-              <label class="form-label">Reason</label>
-              <textarea name="reason" class="form-control" rows="2" placeholder="Optional reason"></textarea>
-            </div>
-            <div class="col-md-12 mt-2">
-              <button class="btn btn-primary">Submit Leave Request</button>
-            </div>
-          </div>
-        </form>
-      </div>
-
-      <div class="row">
-        <div class="col-md-6">
-          <div class="card p-3 mb-3">
-            <h5>Recent Leaves</h5>
-            <ul class="list-group list-group-flush">
-              {% if leaves %}
-                {% for l in leaves %}
-                <li class="list-group-item"><strong>{{ l.leave_type }}</strong> ({{ l.start_date }} - {{ l.end_date }}) - {{ l.status }}</li>
-                {% endfor %}
-              {% else %}
-                <li class="list-group-item">No leave records.</li>
-              {% endif %}
-            </ul>
           </div>
         </div>
-        <div class="col-md-6">
-          <div class="card p-3 mb-3">
-            <h5>Recent Payrolls</h5>
-            <ul class="list-group list-group-flush">
-              {% if payrolls %}
-                {% for p in payrolls %}
-                <li class="list-group-item">{{ p.month }} {{ p.year }} - {{ p.net_salary }}</li>
-                {% endfor %}
-              {% else %}
-                <li class="list-group-item">No payroll records.</li>
-              {% endif %}
-            </ul>
+
+        <div class="col-12">
+          <div class="card" id="apply-leave">
+            <div class="card-body">
+              <h6 class="card-title mb-3">Apply For Leave</h6>
+              <form method="POST" action="{{ url_for('user.apply_leave') }}">
+                <div class="row g-2 align-items-end">
+                  <div class="col-md-3">
+                    <label class="form-label">Leave Type</label>
+                    <select name="leave_type" class="form-select" required>
+                      <option value="">-- Select --</option>
+                      <option value="annual">Annual</option>
+                      <option value="sick">Sick</option>
+                      <option value="casual">Casual</option>
+                      <option value="maternity">Maternity</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">Start Date</label>
+                    <input type="date" name="start_date" class="form-control" required>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">End Date</label>
+                    <input type="date" name="end_date" class="form-control" required>
+                  </div>
+                  <div class="col-md-3">
+                    <button class="btn btn-primary w-100"><i class="fas fa-paper-plane me-2"></i>Submit</button>
+                  </div>
+                  <div class="col-12 mt-2">
+                    <label class="form-label">Reason</label>
+                    <textarea name="reason" class="form-control" rows="2" placeholder="Optional reason"></textarea>
+                  </div>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
-      </div>
 
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h6 class="card-title mb-3">Recent Leaves</h6>
+              <ul class="list-group list-group-flush">
+                {% if leaves %}
+                  {% for l in leaves %}
+                  <li class="list-group-item d-flex justify-content-between align-items-start">
+                    <div>
+                      <strong>{{ l.leave_type|title }}</strong>
+                      <div class="small text-muted">{{ l.start_date.strftime('%d-%m-%Y') }} - {{ l.end_date.strftime('%d-%m-%Y') }}</div>
+                      {% if l.reason %}<div class="small text-muted">{{ l.reason }}</div>{% endif %}
+                    </div>
+                    <div class="text-end">
+                      <span class="badge bg-{{ 'warning' if l.status=='pending' else ('success' if l.status=='approved' else 'secondary') }}">{{ l.status|title }}</span>
+                      {% if l.status == 'pending' and employee and l.employee_id == employee.id %}
+                      <form method="POST" action="{{ url_for('user.cancel_leave', id=l.id) }}" class="mt-2" onsubmit="return confirm('Cancel this leave request?');">
+                        <button class="btn btn-sm btn-outline-danger"><i class="fas fa-times"></i> Cancel</button>
+                      </form>
+                      {% endif %}
+                    </div>
+                  </li>
+                  {% endfor %}
+                {% else %}
+                  <li class="list-group-item text-center text-muted">No leave records.</li>
+                {% endif %}
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h6 class="card-title mb-3">Recent Payslips</h6>
+              <ul class="list-group list-group-flush">
+                {% if payrolls %}
+                  {% for p in payrolls %}
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                      <strong>{{ p.month }} {{ p.year }}</strong>
+                      <span class="text-success ms-2">₹{{ p.net_salary }}</span>
+                      <div class="small text-muted">{{ p.status|title if p.status else '' }}</div>
+                    </div>
+                    <div>
+                      <a href="{{ url_for('user.download_payslip', id=p.id) }}" class="btn btn-sm btn-outline-success{% if not p.net_salary %} disabled{% endif %}"><i class="fas fa-download"></i> Download</a>
+                    </div>
+                  </li>
+                  {% endfor %}
+                {% else %}
+                  <li class="list-group-item text-center text-muted">No payroll records.</li>
+                {% endif %}
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
   </div>
 </div>

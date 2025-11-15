@@ -1,3 +1,23 @@
+@bp.route('/payroll/<int:id>/download')
+@login_required
+def download_payslip(id):
+    # Placeholder: Download payslip as PDF or CSV
+    payroll = Payroll.query.get_or_404(id)
+    try:
+        employee = Employee.query.filter_by(email=current_user.email).first()
+    except Exception:
+        employee = None
+    if not employee or payroll.employee_id != employee.id:
+        flash('You are not authorized to download this payslip.', 'danger')
+        return redirect(url_for('user.dashboard'))
+    # For now, just return a simple CSV string as attachment
+    from flask import Response
+    csv = f"Month,Year,Net Salary\n{payroll.month},{payroll.year},{payroll.net_salary}\n"
+    return Response(
+        csv,
+        mimetype="text/csv",
+        headers={"Content-Disposition":f"attachment;filename=payslip_{payroll.month}_{payroll.year}.csv"}
+    )
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user
 from database import db
@@ -160,7 +180,48 @@ def dashboard():
         leaves = Leave.query.filter_by(employee_id=employee.id).order_by(Leave.created_at.desc()).limit(5).all()
         payrolls = Payroll.query.filter_by(employee_id=employee.id).order_by(Payroll.year.desc(), Payroll.month.desc()).limit(6).all()
 
-    return render_template('admin/user/dashboard.html', user=user, employee=employee, attendances=attendances, leaves=leaves, payrolls=payrolls)
+        # Compute basic leave balances for display (year-to-date, approved leaves)
+        try:
+            current_year = datetime.now().year
+            # Company defaults
+            policy = {
+                'annual': 20,
+                'sick': 10,
+                'casual': 7
+            }
+            used = {'annual': 0, 'sick': 0, 'casual': 0}
+            approved_leaves = Leave.query.filter_by(employee_id=employee.id, status='approved').filter(Leave.start_date >= datetime(current_year, 1, 1).date()).all()
+            for al in approved_leaves:
+                # count inclusive days
+                days = (al.end_date - al.start_date).days + 1
+                key = (al.leave_type or '').lower()
+                if key in used:
+                    used[key] += days
+
+            leave_balance = {k: max(0, policy.get(k, 0) - used.get(k, 0)) for k in policy}
+        except Exception:
+            leave_balance = {'annual': 0, 'sick': 0, 'casual': 0}
+        # Additional summary metrics for dashboard cards (employee-scoped)
+        try:
+            today = datetime.now().date()
+            first_of_month = today.replace(day=1)
+            present_days_month = Attendance.query.filter(Attendance.employee_id == employee.id, Attendance.date >= first_of_month).count()
+            pending_leaves = Leave.query.filter_by(employee_id=employee.id, status='pending').count()
+            approved_leaves_ytd = Leave.query.filter(Leave.employee_id == employee.id, Leave.status == 'approved').filter(Leave.start_date >= datetime(current_year, 1, 1).date()).count()
+            payrolls_this_year = Payroll.query.filter_by(employee_id=employee.id, year=current_year).count()
+        except Exception:
+            present_days_month = 0
+            pending_leaves = 0
+            approved_leaves_ytd = 0
+            payrolls_this_year = 0
+    else:
+        leave_balance = {'annual': 0, 'sick': 0, 'casual': 0}
+        present_days_month = 0
+        pending_leaves = 0
+        approved_leaves_ytd = 0
+        payrolls_this_year = 0
+
+    return render_template('admin/user/dashboard.html', user=user, employee=employee, attendances=attendances, leaves=leaves, payrolls=payrolls, leave_balance=leave_balance, present_days_month=present_days_month, pending_leaves=pending_leaves, approved_leaves_ytd=approved_leaves_ytd, payrolls_this_year=payrolls_this_year)
 
 
 @bp.route('/leave/apply', methods=['GET', 'POST'])

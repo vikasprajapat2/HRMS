@@ -1,31 +1,39 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container mt-4">
-  <h4>My Leaves</h4>
-  <div class="card mt-3">
-    <div class="card-body">
       {% if leaves %}
-      <ul class="list-group">
-        {% for l in leaves %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          <div>
-            <strong>{{ l.leave_type }}</strong> ({{ l.start_date }} - {{ l.end_date }}) - {{ l.status }}
-            <div class="small text-muted">{{ l.reason or '' }}</div>
-          </div>
-          <div>
-            {% if l.status == 'pending' %}
-            <form method="POST" action="{{ url_for('user.cancel_leave', id=l.id) }}" onsubmit="return confirm('Cancel this leave?');">
-              <button class="btn btn-sm btn-outline-danger">Cancel</button>
-            </form>
-            {% endif %}
-          </div>
-        </li>
-        {% endfor %}
-      </ul>
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Start</th>
+              <th>End</th>
+              <th>Status</th>
+              <th>Reason</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for l in leaves %}
+            <tr>
+              <td>{{ l.leave_type|title }}</td>
+              <td>{{ l.start_date.strftime('%d-%m-%Y') }}</td>
+              <td>{{ l.end_date.strftime('%d-%m-%Y') }}</td>
+              <td><span class="badge bg-{{ 'warning' if l.status=='pending' else ('success' if l.status=='approved' else 'secondary') }}">{{ l.status|title }}</span></td>
+              <td>{{ l.reason or '' }}</td>
+              <td>
+                {% if l.status == 'pending' and employee and l.employee_id == employee.id %}
+                <form method="POST" action="{{ url_for('user.cancel_leave', id=l.id) }}" onsubmit="return confirm('Cancel this leave request?');">
+                  <button class="btn btn-sm btn-outline-danger"><i class="fas fa-times"></i> Cancel</button>
+                </form>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
       {% else %}
-      <div class="alert alert-info">No leave records found.</div>
+      <div class="alert alert-info text-center">No leave records found.</div>
       {% endif %}
-    </div>
-  </div>
-</div>
-{% endblock %}

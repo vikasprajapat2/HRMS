@@ -23,14 +23,36 @@
               <td>{{ a.time_out.strftime('%H:%M') if a.time_out else '-' }}</td>
               <td>{{ a.status }}</td>
             </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-      {% else %}
-      <div class="alert alert-info">No attendance records found.</div>
-      {% endif %}
-    </div>
-  </div>
-</div>
-{% endblock %}
+            {% if attendances %}
+            <div class="table-responsive">
+              <table class="table table-sm table-bordered table-hover">
+                <thead class="table-light">
+                  <tr>
+                    <th>Date</th>
+                    <th>In</th>
+                    <th>Out</th>
+                    <th>Duration</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for a in attendances %}
+                  <tr>
+                    <td>{{ a.date.strftime('%d-%m-%Y') }}</td>
+                    <td>{{ a.time_in.strftime('%H:%M') if a.time_in else '-' }}</td>
+                    <td>{{ a.time_out.strftime('%H:%M') if a.time_out else '-' }}</td>
+                    <td>
+                      {% if a.time_in and a.time_out %}
+                        {% set duration = (a.time_out.hour * 60 + a.time_out.minute) - (a.time_in.hour * 60 + a.time_in.minute) %}
+                        {% if duration >= 0 %}{{ (duration // 60) }}h {{ (duration % 60) }}m{% else %}-{% endif %}
+                      {% else %}-{% endif %}
+                    </td>
+                    <td><span class="badge bg-{{ 'success' if a.status=='present' else 'danger' }}">{{ a.status|title }}</span></td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info text-center">No attendance records found.</div>
+            {% endif %}

@@ -18,16 +18,15 @@
           </thead>
           <tbody>
             {% for p in payrolls %}
-            <tr>
-              <td>{{ p.month }}</td>
-              <td>{{ p.year }}</td>
-              <td>{{ p.net_salary }}</td>
-              <td>{{ p.status }}</td>
-              <td>
-                <!-- Placeholder: download payslip (not implemented) -->
-                <button class="btn btn-sm btn-outline-secondary" disabled>Download</button>
-              </td>
-            </tr>
+              <tr>
+                <td>{{ p.month }}</td>
+                <td>{{ p.year }}</td>
+                <td>{{ p.net_salary }}</td>
+                <td>{{ p.status }}</td>
+                <td>
+                  <a href="{{ url_for('user.download_payslip', id=p.id) }}" class="btn btn-sm btn-outline-success{% if not p.net_salary %} disabled{% endif %}"><i class="fas fa-download"></i> Download</a>
+                </td>
+              </tr>
             {% endfor %}
           </tbody>
         </table>
