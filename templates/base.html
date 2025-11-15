@@ -67,6 +67,22 @@
                 </a>
                 {% endif %}
 
+                {# Employee-specific links #}
+                {% if current_user.role.name == 'employee' %}
+                <a href="{{ url_for('user.attendance_list') }}" class="list-group-item list-group-item-action bg-dark text-white">
+                    <i class="fas fa-calendar-check me-2"></i>My Attendance
+                </a>
+                <a href="{{ url_for('user.leaves_list') }}" class="list-group-item list-group-item-action bg-dark text-white">
+                    <i class="fas fa-calendar-times me-2"></i>My Leaves
+                </a>
+                <a href="{{ url_for('user.payrolls_list') }}" class="list-group-item list-group-item-action bg-dark text-white">
+                    <i class="fas fa-file-invoice-dollar me-2"></i>Payslips
+                </a>
+                <a href="{{ url_for('user.profile') }}" class="list-group-item list-group-item-action bg-dark text-white">
+                    <i class="fas fa-user me-2"></i>Profile
+                </a>
+                {% endif %}
+
                 
                 
                 {% if current_user.role.name in ['superadmin', 'admin', 'moderator'] %}

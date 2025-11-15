@@ -246,6 +246,52 @@ def profile():
     return render_template('admin/user/profile.html', user=user, employee=employee)
 
 
+@bp.route('/attendance')
+@login_required
+def attendance_list():
+    # Full attendance history for the logged-in employee
+    try:
+        employee = Employee.query.filter_by(email=current_user.email).first()
+    except Exception:
+        employee = None
+
+    attendances = []
+    if employee:
+        attendances = Attendance.query.filter_by(employee_id=employee.id).order_by(Attendance.date.desc()).all()
+
+    return render_template('admin/user/attendance.html', attendances=attendances, employee=employee)
+
+
+@bp.route('/leaves')
+@login_required
+def leaves_list():
+    try:
+        employee = Employee.query.filter_by(email=current_user.email).first()
+    except Exception:
+        employee = None
+
+    leaves = []
+    if employee:
+        leaves = Leave.query.filter_by(employee_id=employee.id).order_by(Leave.start_date.desc()).all()
+
+    return render_template('admin/user/leaves.html', leaves=leaves, employee=employee)
+
+
+@bp.route('/payrolls')
+@login_required
+def payrolls_list():
+    try:
+        employee = Employee.query.filter_by(email=current_user.email).first()
+    except Exception:
+        employee = None
+
+    payrolls = []
+    if employee:
+        payrolls = Payroll.query.filter_by(employee_id=employee.id).order_by(Payroll.year.desc(), Payroll.month.desc()).all()
+
+    return render_template('admin/user/payrolls.html', payrolls=payrolls, employee=employee)
+
+
 @bp.route('/profile/edit', methods=['GET', 'POST'])
 @login_required
 def edit_profile():

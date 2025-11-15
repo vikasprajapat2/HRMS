@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h4>My Payslips</h4>
+  <div class="card mt-3">
+    <div class="card-body">
+      {% if payrolls %}
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Year</th>
+              <th>Net Salary</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in payrolls %}
+            <tr>
+              <td>{{ p.month }}</td>
+              <td>{{ p.year }}</td>
+              <td>{{ p.net_salary }}</td>
+              <td>{{ p.status }}</td>
+              <td>
+                <!-- Placeholder: download payslip (not implemented) -->
+                <button class="btn btn-sm btn-outline-secondary" disabled>Download</button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="alert alert-info">No payroll records found.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
