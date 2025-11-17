@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h4 class="mb-4"><i class="fas fa-hourglass-half me-2"></i>Leave Status</h4>
+
+  {% if leaves %}
+  <div class="row">
+    {% for leave in leaves %}
+    <div class="col-md-6 mb-4">
+      <div class="card {% if leave.status == 'approved' %}border-success{% elif leave.status == 'rejected' %}border-danger{% else %}border-warning{% endif %}">
+        <div class="card-header bg-{% if leave.status == 'approved' %}success{% elif leave.status == 'rejected' %}danger{% else %}warning{% endif %} text-white">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">{{ leave.leave_type|title }} Leave</h5>
+            <span class="badge bg-light text-dark">
+              {% if leave.status == 'approved' %}
+                <i class="fas fa-check-circle me-1"></i>Approved
+              {% elif leave.status == 'rejected' %}
+                <i class="fas fa-times-circle me-1"></i>Rejected
+              {% else %}
+                <i class="fas fa-hourglass-half me-1"></i>Pending
+              {% endif %}
+            </span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <p class="text-muted small mb-1">Start Date</p>
+              <h6 class="mb-0">{{ leave.start_date.strftime('%d %b %Y') }}</h6>
+            </div>
+            <div class="col-md-6">
+              <p class="text-muted small mb-1">End Date</p>
+              <h6 class="mb-0">{{ leave.end_date.strftime('%d %b %Y') }}</h6>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <p class="text-muted small mb-1">Duration</p>
+              {% set days = (leave.end_date - leave.start_date).days + 1 %}
+              <h6 class="mb-0">{{ days }} day{% if days != 1 %}s{% endif %}</h6>
+            </div>
+            <div class="col-md-6">
+              <p class="text-muted small mb-1">Applied On</p>
+              <h6 class="mb-0">{{ leave.created_at.strftime('%d %b %Y') if leave.created_at else '-' }}</h6>
+            </div>
+          </div>
+
+          {% if leave.reason %}
+          <div class="mb-3">
+            <p class="text-muted small mb-1">Reason</p>
+            <p class="mb-0">{{ leave.reason }}</p>
+          </div>
+          {% endif %}
+
+          <div class="d-flex gap-2">
+            {% if leave.status == 'pending' %}
+            <form method="POST" action="{{ url_for('user.cancel_leave', id=leave.id) }}" style="display:inline;">
+              <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Cancel this leave request?');">
+                <i class="fas fa-times me-1"></i>Cancel Request
+              </button>
+            </form>
+            {% else %}
+            <span class="text-muted small">
+              {% if leave.status == 'approved' %}
+              <i class="fas fa-check me-1"></i>Your leave has been approved.
+              {% else %}
+              <i class="fas fa-ban me-1"></i>Your leave request was rejected.
+              {% endif %}
+            </span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="alert alert-info text-center">
+    <p><i class="fas fa-info-circle me-2"></i>You haven't applied for any leaves yet.</p>
+    <a href="{{ url_for('employee.apply_leave') }}" class="btn btn-primary btn-sm">Apply for Leave</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

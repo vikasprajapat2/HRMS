@@ -69,10 +69,7 @@
                     <div class="col-md-4"><strong>Gender:</strong></div>
                     <div class="col-md-8">{{ employee.gender|title if employee.gender else 'N/A' }}</div>
                 </div>
-                <div class="row mb-3">
-                    <div class="col-md-4"><strong>Religion:</strong></div>
-                    <div class="col-md-8">{{ employee.religion or 'N/A' }}</div>
-                </div>
+                <!-- Religion field removed per request -->
                 <div class="row mb-3">
                     <div class="col-md-4"><strong>Marital Status:</strong></div>
                     <div class="col-md-8">{{ employee.marital|title if employee.marital else 'N/A' }}</div>
