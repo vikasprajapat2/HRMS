@@ -126,8 +126,9 @@ def employee_dashboard():
         )
 
     return render_template(
-        'employee/dashboard.html',
+        'admin/user/dashboard.html',
         employee=employee,
+        user=current_user,
         recent_attendance=recent_attendance,
         pending_leaves=pending_leaves,
         latest_payroll=latest_payroll
