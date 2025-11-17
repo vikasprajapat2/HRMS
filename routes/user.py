@@ -108,6 +108,78 @@ def create():
     roles = Role.query.all()
     return render_template('admin/user/create.html', roles=roles)
 
+@bp.route('/create-from-employee', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def create_from_employee():
+    """Create user account from selected employee (superadmin/admin only)."""
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin']:
+        flash('Access denied', 'danger')
+        return redirect(url_for('auth.login'))
+    
+    if request.method == 'POST':
+        employee_id = request.form.get('employee_id')
+        password = request.form.get('password')
+        role_id = request.form.get('role_id')
+        
+        if not employee_id or not password or not role_id:
+            flash('Please fill all required fields', 'danger')
+            employees = Employee.query.all()
+            roles = Role.query.all()
+            return render_template('admin/user/create_from_employee.html', employees=employees, roles=roles)
+        
+        if len(password) < 6:
+            flash('Password must be at least 6 characters', 'danger')
+            employees = Employee.query.all()
+            roles = Role.query.all()
+            return render_template('admin/user/create_from_employee.html', employees=employees, roles=roles)
+        
+        employee = Employee.query.get_or_404(employee_id)
+        
+        # Check if user already exists
+        email_for_user = employee.email or f"{employee.unique_id}@employee.local"
+        existing_user = User.query.filter_by(email=email_for_user).first()
+        
+        if existing_user:
+            flash(f'User account already exists for this employee ({existing_user.email})', 'warning')
+            return redirect(url_for('user.index'))
+        
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        
+        user = User(
+            name=f"{employee.firstname} {employee.lastname}",
+            email=email_for_user,
+            phone=employee.phone,
+            password=hashed_password,
+            role_id=role_id,
+            status='active'
+        )
+        db.session.add(user)
+        db.session.commit()
+        
+        # Audit log
+        try:
+            log = AuditLog(
+                actor_id=current_user.id,
+                action='create',
+                model='User',
+                record_id=user.id,
+                old_data=None,
+                new_data=json.dumps({'name': user.name, 'email': user.email, 'role_id': role_id, 'employee_id': employee_id}),
+                ip_address=request.remote_addr
+            )
+            db.session.add(log)
+            db.session.commit()
+        except Exception as e:
+            current_app.logger.error(f'Failed to write audit log: {e}')
+        
+        flash(f'User account created for {employee.firstname} {employee.lastname}!', 'success')
+        return redirect(url_for('user.index'))
+    
+    employees = Employee.query.all()
+    roles = Role.query.all()
+    return render_template('admin/user/create_from_employee.html', employees=employees, roles=roles)
+
 @bp.route('/<int:id>/edit', methods=['GET', 'POST'])
 @login_required
 @admin_required
