@@ -160,19 +160,42 @@ def apply_leave():
     employee = _get_logged_in_employee()
     if request.method == 'POST' and employee:
         from models import Leave
+        try:
+            start_date = datetime.strptime(request.form.get('start_date'), '%Y-%m-%d').date()
+            end_date = datetime.strptime(request.form.get('end_date'), '%Y-%m-%d').date()
+        except Exception:
+            flash('Invalid date format.', 'danger')
+            return redirect(url_for('employee.apply_leave'))
+
+        if start_date > end_date:
+            flash('Start date cannot be after end date.', 'danger')
+            return redirect(url_for('employee.apply_leave'))
+
+        # Check for overlapping leaves
+        existing_leave = Leave.query.filter(
+            Leave.employee_id == employee.id,
+            Leave.status != 'rejected',
+            Leave.start_date <= end_date,
+            Leave.end_date >= start_date
+        ).first()
+
+        if existing_leave:
+            flash('You already have a leave request in this date range.', 'danger')
+            return redirect(url_for('employee.apply_leave'))
+
         leave = Leave(
             employee_id=employee.id,
             leave_type=request.form.get('leave_type'),
-            start_date=datetime.strptime(request.form.get('start_date'), '%Y-%m-%d').date(),
-            end_date=datetime.strptime(request.form.get('end_date'), '%Y-%m-%d').date(),
+            start_date=start_date,
+            end_date=end_date,
             reason=request.form.get('reason'),
             status='pending'
         )
         db.session.add(leave)
         db.session.commit()
-        flash('Leave request submitted.', 'success')
-        return redirect(url_for('employee.apply_leave'))
-    return render_template('employee/apply_leave.html')
+        flash('Leave request submitted successfully.', 'success')
+        return redirect(url_for('user.dashboard'))
+    return render_template('employee/apply_leave.html', employee=employee)
 
 @bp.route('/my-payroll', methods=['GET'])
 @login_required

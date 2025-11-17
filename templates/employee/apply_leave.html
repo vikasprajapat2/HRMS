@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h4 class="mb-4"><i class="fas fa-calendar-plus me-2"></i>Apply For Leave</h4>
+  <div class="card">
+    <div class="card-body">
+      <form method="POST" action="">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="leave_type" class="form-label">Leave Type</label>
+            <select name="leave_type" id="leave_type" class="form-select" required>
+              <option value="">-- Select --</option>
+              <option value="annual">Annual Leave</option>
+              <option value="sick">Sick Leave</option>
+              <option value="casual">Casual Leave</option>
+              <option value="maternity">Maternity Leave</option>
+              <option value="personal">Personal Leave</option>
+              <option value="unpaid">Unpaid Leave</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label for="reason" class="form-label">Reason</label>
+            <input type="text" name="reason" id="reason" class="form-control" placeholder="Enter reason">
+          </div>
+
+          <div class="col-md-6">
+            <label for="start_date" class="form-label">Start Date</label>
+            <input type="date" name="start_date" id="start_date" class="form-control" required>
+          </div>
+
+          <div class="col-md-6">
+            <label for="end_date" class="form-label">End Date</label>
+            <input type="date" name="end_date" id="end_date" class="form-control" required>
+          </div>
+
+          <div class="col-12">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane me-2"></i>Submit Request</button>
+            <a href="{{ url_for('user.dashboard') }}" class="btn btn-secondary">Cancel</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

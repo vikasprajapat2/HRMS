@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card p-3 text-center">
+        {% if employee and employee.image %}
+          <img src="{{ url_for('static', filename='uploads/employees/' ~ employee.image) }}" class="rounded-circle" width="140" height="140" alt="{{ employee.firstname }}">
+        {% else %}
+          <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" style="width:140px;height:140px;font-size:42px">{{ (employee.firstname[0] if employee else current_user.name[0])|upper }}</div>
+        {% endif %}
+        <h4 class="mt-3">{{ current_user.name }}</h4>
+        <p class="text-muted">{{ current_user.email }}</p>
+        <a href="{{ url_for('employee.change_password') }}" class="btn btn-outline-secondary btn-sm">Change Password</a>
+      </div>
+      {% if employee %}
+      <div class="card mt-3 p-3">
+        <h6>Employee Info</h6>
+        <p><strong>ID:</strong> {{ employee.unique_id or ('EMP-' ~ employee.id) }}</p>
+        <p><strong>Department:</strong> {{ employee.department.name if employee.department else '-' }}</p>
+        <p><strong>Designation:</strong> {{ employee.designation.name if employee.designation else '-' }}</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="col-md-8">
+      <div class="card p-3">
+        <h5>Profile Details</h5>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item"><strong>Name:</strong> {{ current_user.name }}</li>
+          <li class="list-group-item"><strong>Email:</strong> {{ current_user.email }}</li>
+          <li class="list-group-item"><strong>Phone:</strong> {{ current_user.phone or '-' }}</li>
+          <li class="list-group-item"><strong>Role:</strong> {{ current_user.role.name if current_user.role else '-' }}</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
