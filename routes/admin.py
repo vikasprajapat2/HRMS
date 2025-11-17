@@ -170,6 +170,17 @@ def delete_user(id):
         return redirect(url_for('auth.login'))
     
     user = User.query.get_or_404(id)
+    
+    # Prevent superadmin from deleting themselves
+    if current_user.id == user.id:
+        flash('You cannot delete your own account!', 'danger')
+        return redirect(url_for('user.index'))
+    
+    # Prevent deletion of superadmin accounts
+    if user.role.name == 'superadmin':
+        flash('Cannot delete superadmin accounts!', 'danger')
+        return redirect(url_for('user.index'))
+    
     db.session.delete(user)
     db.session.commit()
     flash(f'User {user.name} deleted successfully!', 'success')
