@@ -30,6 +30,75 @@ def _get_logged_in_employee():
                 return emp
     return None
 
+@bp.route('/<int:id>/create-user', methods=['GET', 'POST'])
+@login_required
+def create_user_for_employee(id):
+    """Create or update a user account for a specific employee (superadmin/admin only)."""
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin']:
+        flash('Access denied', 'danger')
+        return redirect(url_for('auth.login'))
+    
+    employee = Employee.query.get_or_404(id)
+    
+    # Check if user already exists
+    existing_user = None
+    if employee.email:
+        existing_user = User.query.filter_by(email=employee.email).first()
+    if not existing_user and employee.unique_id:
+        synthetic_email = f"{employee.unique_id}@employee.local"
+        existing_user = User.query.filter_by(email=synthetic_email).first()
+    
+    if request.method == 'POST':
+        password = request.form.get('password')
+        role_id = request.form.get('role_id')
+        
+        if not password or len(password) < 6:
+            flash('Password must be at least 6 characters', 'danger')
+            return render_template('admin/employee/create_user.html', 
+                                 employee=employee, 
+                                 existing_user=existing_user, 
+                                 roles=Role.query.all())
+        
+        # Ensure employee role exists
+        employee_role = Role.query.filter_by(name='employee').first()
+        if not employee_role:
+            employee_role = Role(name='employee', description='Employee self-service')
+            db.session.add(employee_role)
+            db.session.commit()
+        
+        email_for_user = employee.email or f"{employee.unique_id}@employee.local"
+        
+        if existing_user:
+            # Update existing user
+            existing_user.password = bcrypt.generate_password_hash(password).decode('utf-8')
+            existing_user.role_id = role_id
+            existing_user.name = f"{employee.firstname} {employee.lastname}"
+            existing_user.phone = employee.phone
+            existing_user.status = 'active'
+            db.session.commit()
+            flash('User account updated successfully!', 'success')
+        else:
+            # Create new user
+            new_user = User(
+                role_id=role_id,
+                name=f"{employee.firstname} {employee.lastname}",
+                email=email_for_user,
+                phone=employee.phone,
+                password=bcrypt.generate_password_hash(password).decode('utf-8'),
+                status='active'
+            )
+            db.session.add(new_user)
+            db.session.commit()
+            flash('User account created successfully!', 'success')
+        
+        return redirect(url_for('employee.show', id=employee.id))
+    
+    roles = Role.query.all()
+    return render_template('admin/employee/create_user.html', 
+                         employee=employee, 
+                         existing_user=existing_user, 
+                         roles=roles)
+
 @bp.route('/change-password', methods=['GET', 'POST'])
 @login_required
 def change_password():
