@@ -60,7 +60,7 @@
                         <td>
                             <div class="d-flex align-items-center">
                                 {% if a.employee.image %}
-                                <img src="{{ url_for('static', filename='uploads/employees/' + a.employee.image) }}" 
+                                <img src="{{ url_for('static', filename='uploads/employees/' ~ a.employee.image) }}" 
                                     alt="{{ a.employee.firstname }}" 
                                     style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; margin-right: 8px;">
                                 {% else %}

@@ -21,7 +21,7 @@
             <div class="card-body text-center">
                 <div class="mb-3">
                     {% if employee.image %}
-                    <img src="{{ url_for('static', filename='uploads/employees/' + employee.image) }}" alt="{{ employee.firstname }}" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 3px solid #007bff;">
+                    <img src="{{ url_for('static', filename='uploads/employees/' ~ employee.image) }}" alt="{{ employee.firstname }}" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 3px solid #007bff;">
                     {% else %}
                     <div style="width: 150px; height: 150px; margin: 0 auto; border-radius: 50%; background-color: #007bff; display: flex; align-items: center; justify-content: center; color: white; font-size: 60px; font-weight: bold;">{{ employee.firstname[0] }}</div>
                     {% endif %}
