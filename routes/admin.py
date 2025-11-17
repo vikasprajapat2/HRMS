@@ -144,3 +144,33 @@ def create_user_from_employee():
         return redirect(url_for('auth.login'))
 
     return redirect(url_for('employee.create'))
+
+
+@bp.route('/employee/<int:id>/delete', methods=['POST'])
+@login_required
+def delete_employee(id):
+    """Delete an employee (superadmin only)."""
+    if current_user.role.name != 'superadmin':
+        flash('Access denied', 'danger')
+        return redirect(url_for('auth.login'))
+    
+    employee = Employee.query.get_or_404(id)
+    db.session.delete(employee)
+    db.session.commit()
+    flash(f'Employee {employee.firstname} {employee.lastname} deleted successfully!', 'success')
+    return redirect(url_for('employee.index'))
+
+
+@bp.route('/user/<int:id>/delete', methods=['POST'])
+@login_required
+def delete_user(id):
+    """Delete a user (superadmin only)."""
+    if current_user.role.name != 'superadmin':
+        flash('Access denied', 'danger')
+        return redirect(url_for('auth.login'))
+    
+    user = User.query.get_or_404(id)
+    db.session.delete(user)
+    db.session.commit()
+    flash(f'User {user.name} deleted successfully!', 'success')
+    return redirect(url_for('user.index'))
