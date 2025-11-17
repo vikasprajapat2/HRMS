@@ -126,7 +126,7 @@ def change_password():
         current_user.password = bcrypt.generate_password_hash(new_pwd).decode('utf-8')
         db.session.commit()
         flash('Password updated successfully.', 'success')
-        return redirect(url_for('admin.employee_dashboard'))
+        return redirect(url_for('user.dashboard'))
 
     return render_template('employee/change_password.html')
 

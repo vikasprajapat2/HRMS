@@ -31,7 +31,7 @@ def login():
             elif user.role.name == 'moderator':
                 return redirect(url_for('admin.moderator_dashboard'))
             else:
-                return redirect(url_for('admin.employee_dashboard'))
+                return redirect(url_for('user.dashboard'))
 
         # 2) Employee login: username is Employee ID (unique_id), password is ADMIN-SET user password
         employee = Employee.query.filter_by(unique_id=username).first()
@@ -49,7 +49,7 @@ def login():
                 # Allow login even if role differs; redirect to employee dashboard
                 login_user(linked_user)
                 flash('Login successful!', 'success')
-                return redirect(url_for('admin.employee_dashboard'))
+                return redirect(url_for('user.dashboard'))
 
             flash('Invalid Employee ID or password, or account not set up. Contact admin.', 'danger')
             return render_template('auth/login.html')

@@ -25,9 +25,9 @@
         'hr': 'admin.hr_dashboard',
         'payroll': 'admin.payroll_dashboard',
         'moderator': 'admin.moderator_dashboard',
-        'employee': 'admin.employee_dashboard'
+        'employee': 'user.dashboard'
     } %}
-    {% set dashboard_endpoint = dashboard_map.get(role_name, 'admin.employee_dashboard') %}
+    {% set dashboard_endpoint = dashboard_map.get(role_name, 'user.dashboard') %}
     <!-- Sidebar -->
     <div class="d-flex" id="wrapper">
         <div class="bg-dark text-white" id="sidebar-wrapper">
@@ -51,9 +51,6 @@
                 {% endif %}
 
                 {% if role_name == 'employee' %}
-                <a href="{{ url_for('admin.employee_dashboard') }}" class="list-group-item list-group-item-action bg-dark text-white">
-                    <i class="fas fa-user me-2"></i>My Dashboard
-                </a>
                 <a href="{{ url_for('employee.profile') }}" class="list-group-item list-group-item-action bg-dark text-white">
                     <i class="fas fa-id-card me-2"></i>My Profile
                 </a>
