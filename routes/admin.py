@@ -105,33 +105,77 @@ def employee_dashboard():
     # Attempt to map the logged-in user to an Employee via email
     employee = Employee.query.filter_by(email=current_user.email).first()
 
-    recent_attendance = []
+    attendances = []
+    leaves = []
+    payrolls = []
+    leave_balance = {'annual': 0, 'sick': 0, 'casual': 0}
+    present_days_month = 0
     pending_leaves = 0
-    latest_payroll = None
+    approved_leaves_ytd = 0
+    payrolls_this_year = 0
 
     if employee:
-        recent_attendance = (
+        attendances = (
             Attendance.query
             .filter_by(employee_id=employee.id)
             .order_by(Attendance.date.desc())
             .limit(5)
             .all()
         )
-        pending_leaves = Leave.query.filter_by(employee_id=employee.id, status='pending').count()
-        latest_payroll = (
+        leaves = (
+            Leave.query
+            .filter_by(employee_id=employee.id)
+            .order_by(Leave.start_date.desc())
+            .limit(5)
+            .all()
+        )
+        payrolls = (
             Payroll.query
             .filter_by(employee_id=employee.id)
             .order_by(Payroll.year.desc(), Payroll.month.desc())
-            .first()
+            .limit(5)
+            .all()
         )
+
+        try:
+            current_year = datetime.now().year
+            policy = {'annual': 20, 'sick': 10, 'casual': 7}
+            used = {'annual': 0, 'sick': 0, 'casual': 0}
+            approved_leaves = Leave.query.filter_by(employee_id=employee.id, status='approved').filter(Leave.start_date >= datetime(current_year, 1, 1).date()).all()
+            for al in approved_leaves:
+                days = (al.end_date - al.start_date).days + 1
+                key = (al.leave_type or '').lower()
+                if key in used:
+                    used[key] += days
+            leave_balance = {k: max(0, policy.get(k, 0) - used.get(k, 0)) for k in policy}
+        except Exception:
+            leave_balance = {'annual': 0, 'sick': 0, 'casual': 0}
+
+        try:
+            today = datetime.now().date()
+            first_of_month = today.replace(day=1)
+            present_days_month = Attendance.query.filter(Attendance.employee_id == employee.id, Attendance.date >= first_of_month).count()
+            pending_leaves = Leave.query.filter_by(employee_id=employee.id, status='pending').count()
+            approved_leaves_ytd = Leave.query.filter(Leave.employee_id == employee.id, Leave.status == 'approved').filter(Leave.start_date >= datetime(current_year, 1, 1).date()).count()
+            payrolls_this_year = Payroll.query.filter_by(employee_id=employee.id, year=current_year).count()
+        except Exception:
+            present_days_month = 0
+            pending_leaves = 0
+            approved_leaves_ytd = 0
+            payrolls_this_year = 0
 
     return render_template(
         'admin/user/dashboard.html',
-        employee=employee,
         user=current_user,
-        recent_attendance=recent_attendance,
+        employee=employee,
+        attendances=attendances,
+        leaves=leaves,
+        payrolls=payrolls,
+        leave_balance=leave_balance,
+        present_days_month=present_days_month,
         pending_leaves=pending_leaves,
-        latest_payroll=latest_payroll
+        approved_leaves_ytd=approved_leaves_ytd,
+        payrolls_this_year=payrolls_this_year
     )
 
 
