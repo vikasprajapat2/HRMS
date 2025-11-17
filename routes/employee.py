@@ -209,6 +209,43 @@ def my_leaves():
         leaves = Leave.query.filter_by(employee_id=employee.id).order_by(Leave.created_at.desc()).all()
     return render_template('employee/my_leaves.html', leaves=leaves, employee=employee)
 
+@bp.route('/leave-records', methods=['GET'])
+@login_required
+def leave_records():
+    if current_user.role.name != 'employee':
+        flash('Only employees can view this page.', 'danger')
+        return redirect(url_for('auth.login'))
+    employee = _get_logged_in_employee()
+    
+    status_filter = request.args.get('status', 'all')
+    leaves = []
+    stats = {
+        'total': 0,
+        'pending': 0,
+        'approved': 0,
+        'rejected': 0,
+        'total_days_approved': 0
+    }
+    
+    if employee:
+        query = Leave.query.filter_by(employee_id=employee.id)
+        if status_filter != 'all':
+            query = query.filter_by(status=status_filter)
+        leaves = query.order_by(Leave.created_at.desc()).all()
+        
+        # Calculate statistics
+        all_leaves = Leave.query.filter_by(employee_id=employee.id).all()
+        stats['total'] = len(all_leaves)
+        stats['pending'] = len([l for l in all_leaves if l.status == 'pending'])
+        stats['approved'] = len([l for l in all_leaves if l.status == 'approved'])
+        stats['rejected'] = len([l for l in all_leaves if l.status == 'rejected'])
+        for l in all_leaves:
+            if l.status == 'approved':
+                days = (l.end_date - l.start_date).days + 1
+                stats['total_days_approved'] += days
+    
+    return render_template('employee/leave_records.html', leaves=leaves, employee=employee, stats=stats, status_filter=status_filter)
+
 @bp.route('/my-payroll', methods=['GET'])
 @login_required
 def my_payroll():
