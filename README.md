@@ -2,6 +2,14 @@
 
 This is a Python Flask conversion of the Laravel Employee Management System with HTML, CSS, and Bootstrap 5.
 
+## Recent Changes (2025-11-17)
+
+- Removed the **Employee Portal Password** field from the Add Employee form (`templates/admin/employee/create.html`).
+- Portal accounts are no longer auto-created from the Add Employee UI; to create a portal user please use the Users/Admin panel or the `create_user_for_employee` flow if available.
+- If an account is created without an email, the system will use the format `<EmployeeID>@employee.local` as the default account email in existing code paths.
+
+If you want the previous behavior (creating portal accounts from the Add Employee form) restored, or want an explicit "Create portal account" checkbox added to the form, open an issue or request the change here.
+
 ## Features
 
 - **User Authentication**: Multi-role authentication system (Superadmin, Admin, HR, Payroll Manager, Moderator)
