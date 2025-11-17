@@ -246,6 +246,21 @@ def leave_records():
     
     return render_template('employee/leave_records.html', leaves=leaves, employee=employee, stats=stats, status_filter=status_filter)
 
+@bp.route('/leave-status', methods=['GET'])
+@login_required
+def leave_status():
+    if current_user.role.name != 'employee':
+        flash('Only employees can view this page.', 'danger')
+        return redirect(url_for('auth.login'))
+    employee = _get_logged_in_employee()
+    
+    leaves = []
+    if employee:
+        # Get all leaves ordered by most recent first
+        leaves = Leave.query.filter_by(employee_id=employee.id).order_by(Leave.start_date.desc()).all()
+    
+    return render_template('employee/leave_status.html', leaves=leaves, employee=employee)
+
 @bp.route('/my-payroll', methods=['GET'])
 @login_required
 def my_payroll():
