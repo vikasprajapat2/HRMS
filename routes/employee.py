@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from database import db
-from models import Employee, Department, Designation, Schedule, User, Role
+from models import Employee, Department, Designation, Schedule, User, Role, Leave
 from datetime import datetime
 from flask_bcrypt import Bcrypt
 
@@ -197,6 +197,18 @@ def apply_leave():
         return redirect(url_for('user.dashboard'))
     return render_template('employee/apply_leave.html', employee=employee)
 
+@bp.route('/my-leaves', methods=['GET'])
+@login_required
+def my_leaves():
+    if current_user.role.name != 'employee':
+        flash('Only employees can view this page.', 'danger')
+        return redirect(url_for('auth.login'))
+    employee = _get_logged_in_employee()
+    leaves = []
+    if employee:
+        leaves = Leave.query.filter_by(employee_id=employee.id).order_by(Leave.created_at.desc()).all()
+    return render_template('employee/my_leaves.html', leaves=leaves, employee=employee)
+
 @bp.route('/my-payroll', methods=['GET'])
 @login_required
 def my_payroll():
@@ -277,8 +289,10 @@ def create():
 @bp.route('/<int:id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit(id):
+    if current_user.role.name not in ['admin', 'superadmin']:
+        flash('Access denied.', 'danger')
+        return redirect(url_for('auth.login'))
     employee = Employee.query.get_or_404(id)
-    
     if request.method == 'POST':
         employee.firstname = request.form.get('firstname')
         employee.lastname = request.form.get('lastname')
@@ -294,11 +308,9 @@ def edit(id):
         employee.department_id = request.form.get('department_id')
         employee.designation_id = request.form.get('designation_id')
         employee.schedule_id = request.form.get('schedule_id')
-        
         db.session.commit()
         flash('Employee updated successfully!', 'success')
         return redirect(url_for('employee.index'))
-    
     departments = Department.query.all()
     designations = Designation.query.all()
     schedules = Schedule.query.all()

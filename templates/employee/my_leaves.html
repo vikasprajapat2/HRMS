@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4><i class="fas fa-calendar-alt me-2"></i>My Leave Requests</h4>
+        <a href="{{ url_for('employee.apply_leave') }}" class="btn btn-primary"><i class="fas fa-plus me-2"></i>New Request</a>
+      </div>
+
+      {% if leaves %}
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover table-sm">
+          <thead class="table-light">
+            <tr>
+              <th>Leave Type</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Days</th>
+              <th>Reason</th>
+              <th>Status</th>
+              <th>Submitted On</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for leave in leaves %}
+            <tr>
+              <td><strong>{{ leave.leave_type|title }}</strong></td>
+              <td>{{ leave.start_date.strftime('%d-%m-%Y') }}</td>
+              <td>{{ leave.end_date.strftime('%d-%m-%Y') }}</td>
+              <td>
+                {% set days = (leave.end_date - leave.start_date).days + 1 %}
+                {{ days }} day{% if days != 1 %}s{% endif %}
+              </td>
+              <td>{{ leave.reason or '-' }}</td>
+              <td>
+                <span class="badge bg-{{ 'success' if leave.status == 'approved' else ('danger' if leave.status == 'rejected' else 'warning') }}">
+                  {{ leave.status|title }}
+                </span>
+              </td>
+              <td>{{ leave.created_at.strftime('%d-%m-%Y') if leave.created_at else '-' }}</td>
+              <td>
+                {% if leave.status == 'pending' %}
+                <form method="POST" action="{{ url_for('user.cancel_leave', id=leave.id) }}" style="display:inline;">
+                  <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Cancel this leave request?');">
+                    <i class="fas fa-times"></i> Cancel
+                  </button>
+                </form>
+                {% else %}
+                <span class="text-muted">-</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="alert alert-info text-center">
+        <p>No leave requests found.</p>
+        <a href="{{ url_for('employee.apply_leave') }}" class="btn btn-primary btn-sm">Apply for Leave</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
