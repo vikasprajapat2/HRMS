@@ -9,27 +9,15 @@
 
 <div class="card">
     <div class="card-body">
-        <form method="POST" enctype="multipart/form-data">
+        <form method="POST">
             <div class="row">
-                <div class="col-md-8">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="firstname" class="form-label">First Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="firstname" name="firstname" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="lastname" class="form-label">Last Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="lastname" name="lastname" required>
-                        </div>
-                    </div>
+                <div class="col-md-6 mb-3">
+                    <label for="firstname" class="form-label">First Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="firstname" name="firstname" required>
                 </div>
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <label for="image" class="form-label">Employee Photo</label>
-                        <input type="file" class="form-control" id="image" name="image" accept="image/*">
-                        <small class="text-muted">Supported: PNG, JPG, JPEG, GIF (Max 2MB)</small>
-                        <div id="imagePreview" class="mt-2"></div>
-                    </div>
+                <div class="col-md-6 mb-3">
+                    <label for="lastname" class="form-label">Last Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="lastname" name="lastname" required>
                 </div>
             </div>
 
@@ -44,7 +32,16 @@
                 </div>
             </div>
 
-            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="portal_password" class="form-label">Employee Portal Password <span class="text-danger">*</span></label>
+                    <input type="password" class="form-control" id="portal_password" name="portal_password" required>
+                    <div class="form-text">Employee will use Employee ID + this password to log in.</div>
+                </div>
+                <div class="col-md-6 mb-3 d-flex align-items-end">
+                    <div class="text-muted">If Email is empty, account will use {{ "<EmployeeID>@employee.local" }}.</div>
+                </div>
+            </div>
 
             <div class="row">
                 <div class="col-md-6 mb-3">
@@ -58,7 +55,7 @@
             </div>
 
             <div class="row">
-                <div class="col-md-6 mb-3">
+                <div class="col-md-4 mb-3">
                     <label for="gender" class="form-label">Gender</label>
                     <select class="form-select" id="gender" name="gender">
                         <option value="">Select Gender</option>
@@ -67,7 +64,11 @@
                         <option value="other">Other</option>
                     </select>
                 </div>
-                <div class="col-md-6 mb-3">
+                <div class="col-md-4 mb-3">
+                    <label for="religion" class="form-label">Religion</label>
+                    <input type="text" class="form-control" id="religion" name="religion">
+                </div>
+                <div class="col-md-4 mb-3">
                     <label for="marital" class="form-label">Marital Status</label>
                     <select class="form-select" id="marital" name="marital">
                         <option value="">Select Status</option>
@@ -125,20 +126,4 @@
         </form>
     </div>
 </div>
-
-<script>
-document.getElementById('image').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    const preview = document.getElementById('imagePreview');
-    preview.innerHTML = '';
-    
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            preview.innerHTML = `<img src="${e.target.result}" alt="Preview" style="max-width: 150px; border-radius: 5px; border: 1px solid #ddd; padding: 5px;">`;
-        };
-        reader.readAsDataURL(file);
-    }
-});
-</script>
 {% endblock %}

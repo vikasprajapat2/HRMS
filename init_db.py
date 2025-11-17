@@ -24,6 +24,7 @@ def init_database():
             {'name': 'hr', 'description': 'HR Manager with HR management access'},
             {'name': 'payroll', 'description': 'Payroll Manager with payroll access'},
             {'name': 'moderator', 'description': 'Moderator with attendance management access'},
+            {'name': 'employee', 'description': 'Employee self-service'},
         ]
         
         for role_data in roles_data:

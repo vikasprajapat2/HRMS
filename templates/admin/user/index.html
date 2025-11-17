@@ -24,6 +24,7 @@
               <th>ID</th>
               <th>Name</th>
               <th>Email</th>
+              <th>Employee ID</th>
               <th>Phone</th>
               <th>Role</th>
               <th>Status</th>
@@ -36,6 +37,13 @@
               <td>{{ user.id }}</td>
               <td>{{ user.name }}</td>
               <td>{{ user.email }}</td>
+              <td>
+                {% if user_employee_map.get(user.id) %}
+                  <span class="badge bg-secondary">{{ user_employee_map[user.id].unique_id }}</span>
+                {% else %}
+                  <span class="text-muted">-</span>
+                {% endif %}
+              </td>
               <td>{{ user.phone or '-' }}</td>
               <td>
                 <span class="badge bg-info">{{ user.role.name }}</span>

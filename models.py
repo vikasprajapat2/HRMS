@@ -2,6 +2,21 @@ from flask_login import UserMixin
 from datetime import datetime, timedelta
 from database import db
 
+class WorkingDayConfig(db.Model):
+    """Stores which weekdays (0-6, where 0=Monday, 6=Sunday) are working days.
+    
+    By default, 0-4 (Mon-Fri) are working days and 5-6 (Sat-Sun) are non-working.
+    HR/Admin can toggle individual days to customize the working week.
+    """
+    __tablename__ = 'working_day_configs'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    weekday = db.Column(db.Integer, nullable=False, unique=True)  # 0-6: Mon-Sun
+    day_name = db.Column(db.String(20), nullable=False)  # Monday, Tuesday, ...
+    is_working_day = db.Column(db.Boolean, default=True)  # True = working day, False = weekend/non-working
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
 class Holiday(db.Model):
     __tablename__ = 'holidays'
     
@@ -118,13 +133,20 @@ class Employee(db.Model):
             if holiday:
                 status = 'holiday'
                 description = holiday.name
-            # Check if it's a weekend (5=Saturday, 6=Sunday)
-            elif current_date.weekday() in [5, 6]:
-                status = 'weekend'
-                description = 'Weekend'
+            # Check if it's a working day or weekend using WorkingDayConfig
             else:
-                status = 'absent'  # Default to absent, will be updated when employee checks in
-                description = None
+                weekday = current_date.weekday()  # 0=Monday, 6=Sunday
+                config = WorkingDayConfig.query.filter_by(weekday=weekday).first()
+                
+                # Default: Mon-Fri (0-4) are working, Sat-Sun (5-6) are weekends
+                is_working = config.is_working_day if config else weekday < 5
+                
+                if not is_working:
+                    status = 'weekend'
+                    description = 'Weekend'
+                else:
+                    status = 'absent'  # Default to absent, will be updated when employee checks in
+                    description = None
 
             # Check if employee is on approved leave
             leave = Leave.query.filter_by(

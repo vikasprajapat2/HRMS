@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask_login import login_required
+from flask_login import login_required, current_user
 from database import db
-from models import Attendance, Employee, Check, Holiday, Leave
+from models import Attendance, Employee, Check, Holiday, Leave, WorkingDayConfig
 from datetime import datetime, time, timedelta
 from calendar import monthrange
 from collections import defaultdict
@@ -36,8 +36,13 @@ def index():
 def board():
     """Attendance board for today: shows all employees and their attendance records for today.
 
+    Only users in roles `superadmin`, `admin`, `moderator`, or `hr` may access the board.
     Actions (check-in / check-out) post to the existing `/attendance/check` endpoint.
     """
+    # restrict access to managers and HR
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin', 'moderator', 'hr']:
+        flash('Access denied', 'danger')
+        return redirect(url_for('auth.login'))
     current_date = datetime.now().date()
     employees = Employee.query.order_by(Employee.firstname).all()
     attendances = Attendance.query.filter_by(date=current_date).all()
@@ -54,6 +59,11 @@ def check():
     current_time = datetime.now().time()
     current_date = datetime.now().date()
     
+    # Only allow privileged roles to mark attendance
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin', 'moderator', 'hr']:
+        flash('Access denied', 'danger')
+        return redirect(url_for('auth.login'))
+
     attendance = Attendance.query.filter_by(employee_id=employee_id, date=current_date).first()
     
     if action == 'in':
@@ -82,7 +92,14 @@ def check():
 @bp.route('/create', methods=['GET', 'POST'])
 @login_required
 def create():
-    """Create a manual attendance record."""
+    """Create a manual attendance record.
+
+    Only `superadmin`, `admin`, `moderator`, and `hr` may create manual records.
+    """
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin', 'moderator', 'hr']:
+        flash('Access denied', 'danger')
+        return redirect(url_for('auth.login'))
+
     if request.method == 'POST':
         employee_id = request.form.get('employee_id')
         date_str = request.form.get('date')
@@ -120,6 +137,11 @@ def create():
 @bp.route('/edit/<int:attendance_id>', methods=['GET', 'POST'])
 @login_required
 def edit(attendance_id):
+    # Only privileged roles can edit attendance
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin', 'moderator', 'hr']:
+        flash('Access denied', 'danger')
+        return redirect(url_for('auth.login'))
+
     attendance = Attendance.query.get_or_404(attendance_id)
     if request.method == 'POST':
         date_str = request.form.get('date')
@@ -155,6 +177,11 @@ def edit(attendance_id):
 @bp.route('/delete/<int:attendance_id>', methods=['POST'])
 @login_required
 def delete(attendance_id):
+    # Only privileged roles can delete attendance
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin', 'moderator', 'hr']:
+        flash('Access denied', 'danger')
+        return redirect(url_for('auth.login'))
+
     attendance = Attendance.query.get_or_404(attendance_id)
     date = attendance.date
     db.session.delete(attendance)
@@ -167,6 +194,11 @@ def delete(attendance_id):
 @login_required
 def monthly_report():
     """Generate monthly attendance report with statistics."""
+    # Only privileged roles can view reports
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin', 'moderator', 'hr']:
+        flash('Access denied', 'danger')
+        return redirect(url_for('auth.login'))
+
     # Get month and year from query params, default to current month
     year = int(request.args.get('year', datetime.now().year))
     month = int(request.args.get('month', datetime.now().month))
@@ -239,6 +271,11 @@ def monthly_report():
 @bp.route('/report')
 @login_required
 def report():
+    # Only privileged roles can view general reports
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin', 'moderator', 'hr']:
+        flash('Access denied', 'danger')
+        return redirect(url_for('auth.login'))
+
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
     
@@ -252,12 +289,22 @@ def report():
 @bp.route('/holidays')
 @login_required
 def holidays():
+    # Only allow superadmin, admin or hr to view/manage holidays
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin', 'hr']:
+        flash('Access denied', 'danger')
+        return redirect(url_for('auth.login'))
+
     holidays = Holiday.query.order_by(Holiday.date).all()
     return render_template('admin/attendance/holidays.html', holidays=holidays)
 
 @bp.route('/holidays/create', methods=['GET', 'POST'])
 @login_required
 def create_holiday():
+    # Only superadmin, admin or hr can create holidays
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin', 'hr']:
+        flash('Access denied', 'danger')
+        return redirect(url_for('auth.login'))
+
     if request.method == 'POST':
         name = request.form.get('name')
         date_str = request.form.get('date')
@@ -294,6 +341,11 @@ def create_holiday():
 @bp.route('/holidays/<int:holiday_id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_holiday(holiday_id):
+    # Only superadmin, admin or hr can edit holidays
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin', 'hr']:
+        flash('Access denied', 'danger')
+        return redirect(url_for('auth.login'))
+
     holiday = Holiday.query.get_or_404(holiday_id)
     
     if request.method == 'POST':
@@ -324,6 +376,11 @@ def edit_holiday(holiday_id):
 @bp.route('/holidays/<int:holiday_id>/delete', methods=['POST'])
 @login_required
 def delete_holiday(holiday_id):
+    # Only superadmin, admin or hr can delete holidays
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin', 'hr']:
+        flash('Access denied', 'danger')
+        return redirect(url_for('auth.login'))
+
     holiday = Holiday.query.get_or_404(holiday_id)
     date = holiday.date
     
@@ -337,3 +394,69 @@ def delete_holiday(holiday_id):
 
     flash('Holiday deleted successfully', 'success')
     return redirect(url_for('attendance.holidays'))
+
+
+@bp.route('/working-days')
+@login_required
+def manage_working_days():
+    """View and manage working days configuration (which days are working vs. non-working).
+    
+    Only superadmin, admin, and hr can access.
+    """
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin', 'hr']:
+        flash('Access denied', 'danger')
+        return redirect(url_for('auth.login'))
+    
+    # Get or create working day configs for all 7 days
+    day_names = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    configs = []
+    for i in range(7):
+        config = WorkingDayConfig.query.filter_by(weekday=i).first()
+        if not config:
+            # Create default: Mon-Fri (0-4) working, Sat-Sun (5-6) non-working
+            config = WorkingDayConfig(
+                weekday=i,
+                day_name=day_names[i],
+                is_working_day=i < 5
+            )
+            db.session.add(config)
+        configs.append(config)
+    db.session.commit()
+    
+    return render_template('admin/attendance/working_days.html', configs=configs)
+
+
+@bp.route('/working-days/<int:weekday>/toggle', methods=['POST'])
+@login_required
+def toggle_working_day(weekday):
+    """Toggle a specific weekday between working/non-working.
+    
+    Only superadmin, admin, and hr can toggle.
+    """
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin', 'hr']:
+        flash('Access denied', 'danger')
+        return redirect(url_for('auth.login'))
+    
+    if weekday < 0 or weekday > 6:
+        flash('Invalid weekday', 'danger')
+        return redirect(url_for('attendance.manage_working_days'))
+    
+    config = WorkingDayConfig.query.filter_by(weekday=weekday).first()
+    if not config:
+        day_names = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        config = WorkingDayConfig(
+            weekday=weekday,
+            day_name=day_names[weekday],
+            is_working_day=weekday < 5
+        )
+        db.session.add(config)
+    
+    # Toggle the status
+    config.is_working_day = not config.is_working_day
+    db.session.commit()
+    
+    status = 'working day' if config.is_working_day else 'non-working day (weekend)'
+    flash(f'{config.day_name} is now marked as {status}', 'success')
+    
+    return redirect(url_for('attendance.manage_working_days'))
+

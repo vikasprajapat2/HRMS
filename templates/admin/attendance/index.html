@@ -15,6 +15,11 @@
         <a class="btn btn-info" href="{{ url_for('attendance.monthly_report') }}">
             <i class="fas fa-chart-bar me-2"></i>Monthly Report
         </a>
+        {% if current_user.is_authenticated and current_user.role and current_user.role.name in ['superadmin', 'admin', 'hr'] %}
+        <a class="btn btn-warning" href="{{ url_for('attendance.manage_working_days') }}">
+            <i class="fas fa-calendar-alt me-2"></i>Working Days
+        </a>
+        {% endif %}
     </div>
 </div>
 

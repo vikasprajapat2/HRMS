@@ -30,7 +30,7 @@
                         <small class="text-muted">Supported: PNG, JPG, JPEG, GIF (Max 2MB)</small>
                         <div id="imagePreview" class="mt-2">
                             {% if employee.image %}
-                            <img src="{{ url_for('static', filename='uploads/employees/' + employee.image) }}" alt="Employee Photo" style="max-width: 150px; border-radius: 5px; border: 1px solid #ddd; padding: 5px;">
+                            <img src="{{ url_for('static', filename='uploads/employees/' ~ employee.image) }}" alt="Employee Photo" style="max-width: 150px; border-radius: 5px; border: 1px solid #ddd; padding: 5px;">
                             {% endif %}
                         </div>
                     </div>

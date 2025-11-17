@@ -46,8 +46,27 @@ def admin_required(f):
 @login_required
 @admin_required
 def index():
+    # Restrict to superadmin and admin only
+    if not current_user.is_authenticated or current_user.role.name not in ['admin', 'superadmin']:
+        flash('Access denied', 'danger')
+        return redirect(url_for('auth.login'))
+    
+    # Get all users
     users = User.query.all()
-    return render_template('admin/user/index.html', users=users)
+    
+    # For each user with employee role, try to find linked employee
+    user_employee_map = {}
+    for user in users:
+        if user.role.name == 'employee':
+            # Try to find employee by email or synthetic email
+            emp = Employee.query.filter_by(email=user.email).first()
+            if not emp and '@' in user.email:
+                uid = user.email.split('@')[0]
+                emp = Employee.query.filter_by(unique_id=uid).first()
+            if emp:
+                user_employee_map[user.id] = emp
+    
+    return render_template('admin/user/index.html', users=users, user_employee_map=user_employee_map)
 
 @bp.route('/create', methods=['GET', 'POST'])
 @login_required
@@ -277,26 +296,6 @@ def apply_leave():
 @login_required
 
         # Place this route after bp is defined
-        @bp.route('/payroll/<int:id>/download')
-        @login_required
-        def download_payslip(id):
-            # Placeholder: Download payslip as PDF or CSV
-            payroll = Payroll.query.get_or_404(id)
-            try:
-                employee = Employee.query.filter_by(email=current_user.email).first()
-            except Exception:
-                employee = None
-            if not employee or payroll.employee_id != employee.id:
-                flash('You are not authorized to download this payslip.', 'danger')
-                return redirect(url_for('user.dashboard'))
-            # For now, just return a simple CSV string as attachment
-            from flask import Response
-            csv = f"Month,Year,Net Salary\n{payroll.month},{payroll.year},{payroll.net_salary}\n"
-            return Response(
-                csv,
-                mimetype="text/csv",
-                headers={"Content-Disposition":f"attachment;filename=payslip_{payroll.month}_{payroll.year}.csv"}
-            )
 def profile():
     user = current_user
     try:

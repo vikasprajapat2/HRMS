@@ -1,16 +1,11 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from database import db
-from models import Employee, Department, Designation, User, Attendance, Leave, Payroll, Role, AuditLog
+from models import Employee, Department, Designation, User, Attendance, Leave, Payroll
 from sqlalchemy import func
 from datetime import datetime
-import secrets
-import string
-import json
-from flask_bcrypt import Bcrypt
 
 bp = Blueprint('admin', __name__)
-bcrypt = Bcrypt()
 
 @bp.route('/super')
 @login_required
@@ -100,90 +95,52 @@ def moderator_dashboard():
                          today_attendance=today_attendance,
                          role='moderator')
 
-
 @bp.route('/employee')
 @login_required
 def employee_dashboard():
-    # Provide an admin-namespaced endpoint for 'employee' role links in templates.
-    # Redirect employees to their user dashboard. Admins/superadmins may also use this link.
-    return redirect(url_for('user.dashboard'))
+    if current_user.role.name != 'employee':
+        flash('Access denied', 'danger')
+        return redirect(url_for('auth.login'))
+
+    # Attempt to map the logged-in user to an Employee via email
+    employee = Employee.query.filter_by(email=current_user.email).first()
+
+    recent_attendance = []
+    pending_leaves = 0
+    latest_payroll = None
+
+    if employee:
+        recent_attendance = (
+            Attendance.query
+            .filter_by(employee_id=employee.id)
+            .order_by(Attendance.date.desc())
+            .limit(5)
+            .all()
+        )
+        pending_leaves = Leave.query.filter_by(employee_id=employee.id, status='pending').count()
+        latest_payroll = (
+            Payroll.query
+            .filter_by(employee_id=employee.id)
+            .order_by(Payroll.year.desc(), Payroll.month.desc())
+            .first()
+        )
+
+    return render_template(
+        'employee/dashboard.html',
+        employee=employee,
+        recent_attendance=recent_attendance,
+        pending_leaves=pending_leaves,
+        latest_payroll=latest_payroll
+    )
 
 
-@bp.route('/superadmin/create-user-from-employee', methods=['GET', 'POST'])
+@bp.route('/create-user-from-employee')
 @login_required
 def create_user_from_employee():
-    if current_user.role.name != 'superadmin':
-        flash('Super Admin access required', 'danger')
-        return redirect(url_for('admin.superadmin_dashboard'))
-    
-    if request.method == 'POST':
-        employee_id = request.form.get('employee_id')
-        role_name = request.form.get('role_name')
-        
-        employee = Employee.query.get_or_404(employee_id)
-        
-        # Check if user already exists for this employee
-        if User.query.filter_by(email=employee.email).first():
-            flash('User already exists for this employee email.', 'warning')
-            return redirect(url_for('admin.create_user_from_employee'))
-        
-        # Get or create role
-        role = Role.query.filter_by(name=role_name).first()
-        if not role:
-            role = Role(name=role_name, description=f'{role_name} role')
-            db.session.add(role)
-            db.session.commit()
-        
-        # Generate secure password
-        alphabet = string.ascii_letters + string.digits + "!@#$%^&*()"
-        plain_password = ''.join(secrets.choice(alphabet) for _ in range(12))
-        hashed_password = bcrypt.generate_password_hash(plain_password).decode('utf-8')
-        
-        # Create user from employee
-        user = User(
-            name=f'{employee.firstname} {employee.lastname}',
-            email=employee.email,
-            phone=employee.phone,
-            password=hashed_password,
-            role_id=role.id,
-            status='active'
-        )
-        db.session.add(user)
-        db.session.commit()
-        
-        # Audit log
-        try:
-            log = AuditLog(
-                actor_id=current_user.id,
-                action='create_from_employee',
-                model='User',
-                record_id=user.id,
-                old_data=json.dumps({'employee_id': employee_id}),
-                new_data=json.dumps({'user_id': user.id, 'email': user.email, 'role': role_name}),
-                ip_address=request.remote_addr
-            )
-            db.session.add(log)
-            db.session.commit()
-        except Exception as e:
-            current_app.logger.error(f'Failed to write audit log: {e}')
-        
-        # Show credentials
-        return render_template('admin/superadmin/user_credentials.html', user=user, employee=employee, password=plain_password, role=role_name)
-    
-    # Get all employees without user accounts
-    employees = db.session.query(Employee).filter(
-        ~Employee.email.in_(db.session.query(User.email))
-    ).all()
-    
-    return render_template('admin/superadmin/create_user_from_employee.html', employees=employees)
-
-
-@bp.route('/audit-logs')
-@login_required
-def audit_logs():
+    # Provide a simple entry point for superadmins to create portal users from employees.
+    # For now redirect to the employee creation form which allows setting portal password.
     if current_user.role.name != 'superadmin':
         flash('Access denied', 'danger')
         return redirect(url_for('auth.login'))
 
-    logs = AuditLog.query.order_by(AuditLog.created_at.desc()).limit(200).all()
-    return render_template('admin/audit/logs.html', logs=logs)
+    return redirect(url_for('employee.create'))

@@ -4,7 +4,9 @@
 <h2>Holiday Management</h2>
 
 <div class="mb-3">
+    {% if current_user.is_authenticated and current_user.role and current_user.role.name in ['superadmin', 'admin', 'hr'] %}
     <a href="{{ url_for('attendance.create_holiday') }}" class="btn btn-primary">Add Holiday</a>
+    {% endif %}
 </div>
 
 <div class="table-responsive">

@@ -56,7 +56,7 @@ migrate.init_app(app, db)
 login_manager.login_view = 'auth.login'  # Route to the login page
 
 # Import models and routes after db initialization
-from models import User, Employee, Department, Designation, Schedule, Attendance, Leave, Payroll, Check, Salary, LateTime, OverTime, Role
+from models import User, Employee, Department, Designation, Schedule, Attendance, Leave, Payroll, Check, Salary, LateTime, OverTime, Role, WorkingDayConfig
 from routes import auth, admin, employee, department, designation, attendance, leave, payroll, schedule, user, hr
 
 # Register blueprints

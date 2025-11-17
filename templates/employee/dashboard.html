@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}My Dashboard - Employee Management System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="fas fa-user me-2"></i>My Dashboard</h2>
+        <p class="text-muted">Welcome back, {{ current_user.name }}!</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6 col-xl-3">
+        <div class="card bg-primary text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1">Department</h6>
+                        <h5 class="mb-0">{{ employee.department.name if employee and employee.department else 'N/A' }}</h5>
+                    </div>
+                    <i class="fas fa-building fa-3x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+        <div class="card bg-success text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1">Designation</h6>
+                        <h5 class="mb-0">{{ employee.designation.name if employee and employee.designation else 'N/A' }}</h5>
+                    </div>
+                    <i class="fas fa-briefcase fa-3x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+        <div class="card bg-warning text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1">Pending Leaves</h6>
+                        <h2 class="mb-0">{{ pending_leaves }}</h2>
+                    </div>
+                    <i class="fas fa-calendar-times fa-3x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+        <div class="card bg-info text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1">Latest Net Salary</h6>
+                        <h2 class="mb-0">{{ latest_payroll.net_salary if latest_payroll else '—' }}</h2>
+                    </div>
+                    <i class="fas fa-money-bill-wave fa-3x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Recent Attendance</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_attendance %}
+                <div class="table-responsive">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Time In</th>
+                                <th>Time Out</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for a in recent_attendance %}
+                            <tr>
+                                <td>{{ a.date.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ a.status or '—' }}</td>
+                                <td>{{ a.time_in.strftime('%H:%M') if a.time_in else '—' }}</td>
+                                <td>{{ a.time_out.strftime('%H:%M') if a.time_out else '—' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No attendance records found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-id-card me-2"></i>Profile</h5>
+            </div>
+            <div class="card-body">
+                {% if employee %}
+                <div class="row mb-2">
+                    <div class="col-5 text-muted">Name</div>
+                    <div class="col-7">{{ employee.firstname }} {{ employee.lastname }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-5 text-muted">Email</div>
+                    <div class="col-7">{{ employee.email or current_user.email }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-5 text-muted">Phone</div>
+                    <div class="col-7">{{ employee.phone or '—' }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-5 text-muted">Schedule</div>
+                    <div class="col-7">{{ employee.schedule.name if employee.schedule else '—' }}</div>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No employee profile is linked to your user (email: {{ current_user.email }}).</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
