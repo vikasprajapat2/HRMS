@@ -194,7 +194,7 @@ def apply_leave():
         db.session.add(leave)
         db.session.commit()
         flash('Leave request submitted successfully.', 'success')
-        return redirect(url_for('user.dashboard'))
+        return redirect(url_for('employee.leave_records'))
     return render_template('employee/apply_leave.html', employee=employee)
 
 @bp.route('/my-leaves', methods=['GET'])
