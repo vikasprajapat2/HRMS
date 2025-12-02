@@ -21,6 +21,23 @@ If you want the previous behavior (creating portal accounts from the Add Employe
 - **Schedule Management**: Define working hours and schedules
 - **User Management**: Manage system users with role-based access control
 
+## Screenshots
+
+### Login Page
+![Login Page](static/screenshots/login_page.png)
+
+### Dashboard
+![Dashboard](static/screenshots/dashboard.png)
+
+### Employee List
+![Employee List](static/screenshots/employee_list.png)
+
+### Department List
+![Department List](static/screenshots/department_list.png)
+
+### Attendance Management
+![Attendance Management](static/screenshots/attendance_management.png)
+
 ## Technologies Used
 
 - **Python 3.8+**
