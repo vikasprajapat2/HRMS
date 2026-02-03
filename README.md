@@ -127,12 +127,135 @@ python app.py
 
 The application will be available at `http://localhost:5000`
 
-## Default Login Credentials
+## Login Credentials
 
-After setting up, you'll need to create your first user. You can either:
+### 1. Default Superadmin Account
+The system automatically creates this account when you run `init_db.py`:
+- **Email**: `admin@example.com`
+- **Password**: `admin123`
+- **Role**: Superadmin
+- **Access**: Full system access including user management, employee management, departments, designations, attendance, leaves, payroll, schedules, and system settings
 
-1. Use the registration page at `/register`
-2. Manually insert a user into the database
+### 2. Test Development Account
+This account is referenced in development/debugging scripts:
+- **Email**: `vikas@gmail.com`
+- **Password**: `admin123`
+- **Role**: Superadmin (or as configured)
+- **Note**: This account may need to be created manually or via the registration page
+
+### 3. Employee Portal Login
+Employees use their Employee ID instead of email to log in:
+- **Username Format**: Employee ID (e.g., `EMP001`, `EMP002`, etc.)
+- **Password**: Set by admin when creating/updating the employee account
+- **Access**: Limited to employee self-service portal
+- **Features**: View personal info, check attendance, request leaves, view payroll
+
+**Example Employee Logins:**
+- Username: `EMP001` | Password: `(set by admin)`
+- Username: `EMP002` | Password: `(set by admin)`
+- Username: `EMP003` | Password: `(set by admin)`
+
+### 4. Sample Accounts for Each Role (For Testing)
+You can create these accounts for testing different role permissions:
+
+#### HR Manager Account
+- **Email**: `hr@example.com`
+- **Password**: `hr123`
+- **Role**: HR
+- **Access**: Employee management, leave approvals, attendance viewing
+
+#### Payroll Manager Account
+- **Email**: `payroll@example.com`
+- **Password**: `payroll123`
+- **Role**: Payroll Manager
+- **Access**: Payroll processing, salary management, deductions
+
+#### Admin Account
+- **Email**: `admin2@example.com`
+- **Password**: `admin123`
+- **Role**: Admin
+- **Access**: Most administrative features (similar to superadmin)
+
+#### Moderator/Attendance Manager Account
+- **Email**: `moderator@example.com`
+- **Password**: `mod123`
+- **Role**: Moderator
+- **Access**: Attendance management, check-in/check-out operations
+
+### 5. Available User Roles & Permissions
+
+| Role | Description | Key Permissions |
+|------|-------------|-----------------|
+| **Superadmin** | Highest level access | All system features, user management, system configuration |
+| **Admin** | Administrative access | Employee management, departments, designations, most features |
+| **HR** | Human Resources Manager | Employee CRUD, leave management, attendance viewing |
+| **Payroll** | Payroll Manager | Salary processing, payroll calculations, deductions |
+| **Moderator** | Attendance Moderator | Attendance management, check-in/out, attendance reports |
+| **Employee** | Regular Employee | Self-service portal, view own data, request leaves |
+
+### 6. Sample Departments
+Created by `init_db.py`:
+- IT
+- HR
+- Finance
+- Sales
+
+### 7. Sample Designations
+Created by `init_db.py`:
+- Manager
+- Senior Developer
+- Junior Developer
+- HR Executive
+- Accountant
+
+### 8. Sample Schedules
+Created by `init_db.py`:
+- **Day Shift**: 9:00 AM - 5:00 PM
+- **Night Shift**: 10:00 PM - 6:00 AM
+
+### How to Create Test Accounts
+
+#### Option 1: Via Registration Page
+1. Navigate to `http://localhost:5000/register`
+2. Fill in the registration form
+3. Select the desired role
+4. Submit to create account
+
+#### Option 2: Via User Management (Requires Admin Access)
+1. Log in as admin/superadmin
+2. Navigate to Users section
+3. Click "Add New User"
+4. Fill in details and assign role
+
+#### Option 3: Run Database Initialization Script
+```bash
+python init_db.py
+```
+This will create:
+- Default superadmin account (`admin@example.com`)
+- Sample departments
+- Sample designations
+- Sample schedules
+
+#### Option 4: Create Employee with Portal Access
+1. Log in as admin/superadmin
+2. Navigate to Employees → Add Employee
+3. Fill in employee details including Employee ID
+4. Set portal password to enable login
+5. Employee can now log in using their Employee ID
+
+### Database Reset & Setup
+
+To reset the database and create default data:
+```bash
+# Activate virtual environment first
+venv\Scripts\activate
+
+# Run initialization script
+python init_db.py
+```
+
+This will create all tables, roles, default superadmin, and sample data.
 
 ## Project Structure
 # Employee Management System - Python (Flask)
