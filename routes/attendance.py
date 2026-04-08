@@ -27,8 +27,116 @@ def index():
     for employee in employees:
         employee.generate_attendance(date_obj, date_obj)
 
-    attendances = Attendance.query.filter_by(date=date_obj).all()
-    return render_template('admin/attendance/index.html', attendances=attendances, employees=employees, date=date_obj)
+    # 1. Chart Data (Current month till last day)
+    year = date_obj.year
+    month = date_obj.month
+    _, last_day = monthrange(year, month)
+    
+    chart_labels = []
+    chart_on_time = []
+    chart_late = []
+    
+    start_date = datetime(year, month, 1).date()
+    end_date = datetime(year, month, last_day).date()
+    month_attendances = Attendance.query.filter(Attendance.date.between(start_date, end_date)).all()
+    
+    day_stats = defaultdict(lambda: {'on_time': 0, 'late': 0})
+    for att in month_attendances:
+        if att.status == 'present' and att.time_in and att.employee.schedule:
+            schedule_time = att.employee.schedule.time_in
+            if att.time_in > schedule_time:
+                day_stats[att.date.day]['late'] += 1
+            else:
+                day_stats[att.date.day]['on_time'] += 1
+
+    for d in range(1, last_day + 1):
+        curr = datetime(year, month, d).date()
+        day_str = f"{d}-{curr.strftime('%a')}"
+        chart_labels.append(day_str)
+        chart_on_time.append(day_stats[d]['on_time'])
+        chart_late.append(day_stats[d]['late'])
+
+    # 2. Daily stats (for `date_obj`) grouped by Department
+    from models import Department
+    departments = Department.query.all()
+    dept_stats = []
+    
+    todays_attendances = Attendance.query.filter_by(date=date_obj).all()
+    emp_login_lists = {'logged_in': [], 'on_time': [], 'late': []}
+    
+    for dept in departments:
+        dept_info = {
+            'name': dept.name,
+            'total': len(dept.employees),
+            'on_time': 0,
+            'late': 0,
+            'leave': 0
+        }
+        dept_stats.append(dept_info)
+        
+    dept_map = {d['name']: d for d in dept_stats}
+    
+    for att in todays_attendances:
+        emp = att.employee
+        dept_name = emp.department.name if emp.department else None
+        
+        att_status_detail = "Absent"
+        if att.status == 'leave':
+            if dept_name in dept_map: dept_map[dept_name]['leave'] += 1
+        elif att.status == 'present':
+            is_late = False
+            if att.time_in and emp.schedule and att.time_in > emp.schedule.time_in:
+                is_late = True
+                
+            if is_late:
+                if dept_name in dept_map: dept_map[dept_name]['late'] += 1
+                att_status_detail = "Late"
+            else:
+                if dept_name in dept_map: dept_map[dept_name]['on_time'] += 1
+                att_status_detail = "On-time"
+
+            emp_data = {
+                'id': emp.id,
+                'name': f"{emp.firstname} {emp.lastname}",
+                'designation': emp.designation.name if emp.designation else "Regular",
+                'image': emp.image,
+                'initials': f"{emp.firstname[0]}{emp.lastname[0]}" if emp.firstname and emp.lastname else "E",
+                'status': att_status_detail,
+                'time_in': att.time_in.strftime('%I:%M %p') if att.time_in else "-",
+                'time_out': att.time_out.strftime('%I:%M %p') if att.time_out else "-"
+            }
+            emp_login_lists['logged_in'].append(emp_data)
+            if is_late:
+                emp_login_lists['late'].append(emp_data)
+            else:
+                emp_login_lists['on_time'].append(emp_data)
+
+    # 3. Backlog calculation 
+    backlog_list = []
+    for att in todays_attendances:
+        if att.status in ['absent', 'leave'] and len(backlog_list) < 4:
+            emp = att.employee
+            backlog_list.append({
+                'name': f"{emp.firstname} {emp.lastname}",
+                'designation': emp.designation.name if emp.designation else "Regular",
+                'image': emp.image,
+                'initials': f"{emp.firstname[0]}{emp.lastname[0]}" if emp.firstname and emp.lastname else "E",
+                'no_days': 1,
+                'pending_hrs': '8h 0m'
+            })
+
+    return render_template(
+        'admin/attendance/index.html', 
+        date=date_obj,
+        chart_labels=chart_labels,
+        chart_on_time=chart_on_time,
+        chart_late=chart_late,
+        dept_stats=dept_stats,
+        emp_lists=emp_login_lists,
+        backlog_list=backlog_list,
+        month_name=date_obj.strftime('%b'),
+        year_name=date_obj.year
+    )
 
 
 @bp.route('/board')
