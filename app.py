@@ -32,14 +32,20 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here-change-
 app.logger.addHandler(handler)  # Add log handler to app
 app.logger.setLevel(logging.DEBUG)  # Set log level
 
-# Database configuration: prefer MySQL if provided, fallback to SQLite
+# Database configuration: prefer DATABASE_URL (e.g. Supabase), then MySQL, fallback to SQLite
+database_url = os.getenv('DATABASE_URL')
 mysql_user = os.getenv('MYSQL_USER')
 mysql_password = os.getenv('MYSQL_PASSWORD')
 mysql_host = os.getenv('MYSQL_HOST', '127.0.0.1')
 mysql_port = os.getenv('MYSQL_PORT', '3306')
 mysql_db = os.getenv('MYSQL_DATABASE')
 
-if mysql_user and mysql_password and mysql_db:
+if database_url:
+    # SQLAlchemy requires 'postgresql://' instead of 'postgres://'
+    if database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+elif mysql_user and mysql_password and mysql_db:
     app.config['SQLALCHEMY_DATABASE_URI'] = (
         f"mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_host}:{mysql_port}/{mysql_db}?charset=utf8mb4"
     )
