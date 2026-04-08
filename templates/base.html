@@ -90,6 +90,9 @@
                 <a href="{{ url_for('leave.index') }}" class="list-group-item list-group-item-action bg-dark text-white">
                     <i class="fas fa-calendar-times me-2"></i>Leaves
                 </a>
+                <a href="{{ url_for('leave_type.index') }}" class="list-group-item list-group-item-action bg-dark text-white">
+                    <i class="fas fa-tags me-2"></i>Leave Types
+                </a>
                 {% endif %}
                 
                 {% if role_name in ['superadmin', 'admin', 'payroll'] %}

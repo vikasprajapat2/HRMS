@@ -209,6 +209,16 @@ class Leave(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+class LeaveType(db.Model):
+    __tablename__ = 'leave_types'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False, unique=True)
+    description = db.Column(db.Text)
+    days_allowed = db.Column(db.Integer, default=0) # 0 means unlimited/no cap
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
 class Salary(db.Model):
     __tablename__ = 'salaries'
     

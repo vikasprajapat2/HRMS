@@ -68,7 +68,11 @@ def create():
         return redirect(url_for('leave.index'))
     
     employees = Employee.query.order_by(Employee.firstname).all()
-    return render_template('admin/leave/create.html', employees=employees)
+    leave_types = db.session.query(db.Model.metadata.tables['leave_types']).all() if 'leave_types' in db.Model.metadata.tables else []
+    # Actually, let's just import LeaveType from models
+    from models import LeaveType
+    leave_types = LeaveType.query.all()
+    return render_template('admin/leave/create.html', employees=employees, leave_types=leave_types)
 
 @bp.route('/<int:id>/edit', methods=['GET', 'POST'])
 @login_required
@@ -112,8 +116,10 @@ def edit(id):
         flash('Leave updated successfully!', 'success')
         return redirect(url_for('leave.index'))
     
+    from models import LeaveType
+    leave_types = LeaveType.query.all()
     employees = Employee.query.order_by(Employee.firstname).all()
-    return render_template('admin/leave/edit.html', leave=leave, employees=employees)
+    return render_template('admin/leave/edit.html', leave=leave, employees=employees, leave_types=leave_types)
 
 @bp.route('/<int:id>/process', methods=['POST'])
 @login_required

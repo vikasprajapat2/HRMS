@@ -1,7 +1,85 @@
-﻿{% extends "base.html" %}
-{% block title %}payroll{% endblock %}
+{% extends "base.html" %}
+{% block title %}Create Payroll{% endblock %}
 {% block content %}
-<h2>payroll Management</h2>
-<p>This template is a placeholder and needs to be completed.</p>
-<p>Module: payroll</p>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow mt-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Create Individual Payroll</h4>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('payroll.create') }}" method="POST">
+                    
+                    <div class="mb-4">
+                        <label for="employee_id" class="form-label">Select Employee <span class="text-danger">*</span></label>
+                        <select class="form-select" id="employee_id" name="employee_id" required>
+                            <option value="" disabled selected>-- Select an employee --</option>
+                            {% for employee in employees %}
+                            <option value="{{ employee.id }}">{{ employee.firstname }} {{ employee.lastname }} ({{ employee.unique_id }})</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Only employees with configured salaries can have payroll assigned.</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="month" class="form-label">Month <span class="text-danger">*</span></label>
+                            <select class="form-select" id="month" name="month" required>
+                                <option value="" disabled selected>Select Month</option>
+                                <option value="January">January</option>
+                                <option value="February">February</option>
+                                <option value="March">March</option>
+                                <option value="April">April</option>
+                                <option value="May">May</option>
+                                <option value="June">June</option>
+                                <option value="July">July</option>
+                                <option value="August">August</option>
+                                <option value="September">September</option>
+                                <option value="October">October</option>
+                                <option value="November">November</option>
+                                <option value="December">December</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="year" class="form-label">Year <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="year" name="year" required min="2000" max="2100" value="2024">
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+                    <h5 class="mb-3">Adjustments (Optional)</h5>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="allowances" class="form-label">Allowances (+)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" class="form-control" id="allowances" name="allowances" value="0.00">
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="overtime_amount" class="form-label">Overtime (+)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" class="form-control" id="overtime_amount" name="overtime_amount" value="0.00">
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="deductions" class="form-label">Deductions (-)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" class="form-control" id="deductions" name="deductions" value="0.00">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('payroll.index') }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i> Generate Payroll</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

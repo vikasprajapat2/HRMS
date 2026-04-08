@@ -1,7 +1,79 @@
-﻿{% extends "base.html" %}
-{% block title %}leave{% endblock %}
+{% extends "base.html" %}
+{% block title %}Edit Leave{% endblock %}
 {% block content %}
-<h2>leave Management</h2>
-<p>This template is a placeholder and needs to be completed.</p>
-<p>Module: leave</p>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow mt-4">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">Edit Leave Request</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('leave.edit', id=leave.id) }}">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Employee</label>
+                            <input type="text" class="form-control" value="{{ leave.employee.firstname }} {{ leave.employee.lastname }}" disabled>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="leave_type" class="form-label">Leave Type <span class="text-danger">*</span></label>
+                            <select name="leave_type" id="leave_type" class="form-select" required>
+                                {% for lt in leave_types %}
+                                <option value="{{ lt.name }}" {% if leave.leave_type == lt.name %}selected{% endif %}>{{ lt.name|title }} {% if lt.days_allowed > 0 %}(Max {{ lt.days_allowed }} days){% endif %}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="start_date" class="form-label">Start Date <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-calendar-day"></i></span>
+                                <input type="date" class="form-control" id="start_date" name="start_date" value="{{ leave.start_date }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="end_date" class="form-label">End Date <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-calendar-day"></i></span>
+                                <input type="date" class="form-control" id="end_date" name="end_date" value="{{ leave.end_date }}" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="reason" class="form-label">Reason for leave <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="reason" name="reason" rows="4" required>{{ leave.reason }}</textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('leave.index') }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-info text-white"><i class="fas fa-save me-1"></i> Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const startDate = document.getElementById('start_date');
+    const endDate = document.getElementById('end_date');
+    
+    startDate.addEventListener('change', function() {
+        endDate.min = this.value;
+        if (endDate.value && endDate.value < this.value) {
+            endDate.value = this.value;
+        }
+    });
+    
+    endDate.addEventListener('change', function() {
+        startDate.max = this.value;
+        if (startDate.value && startDate.value > this.value) {
+            startDate.value = this.value;
+        }
+    });
+});
+</script>
 {% endblock %}

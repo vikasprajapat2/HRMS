@@ -1,7 +1,35 @@
-﻿{% extends "base.html" %}
-{% block title %}schedule{% endblock %}
+{% extends "base.html" %}
+{% block title %}Create Schedule{% endblock %}
 {% block content %}
-<h2>schedule Management</h2>
-<p>This template is a placeholder and needs to be completed.</p>
-<p>Module: schedule</p>
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow mt-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Create New Schedule</h4>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('schedule.create') }}" method="POST">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Schedule Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="name" name="name" required placeholder="e.g. Morning Shift">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="time_in" class="form-label">Time In <span class="text-danger">*</span></label>
+                            <input type="time" class="form-control" id="time_in" name="time_in" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="time_out" class="form-label">Time Out <span class="text-danger">*</span></label>
+                            <input type="time" class="form-control" id="time_out" name="time_out" required>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('schedule.index') }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i> Save Schedule</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -63,19 +63,20 @@ login_manager.login_view = 'auth.login'  # Route to the login page
 
 # Import models and routes after db initialization
 from models import User, Employee, Department, Designation, Schedule, Attendance, Leave, Payroll, Check, Salary, LateTime, OverTime, Role, WorkingDayConfig
-from routes import auth, admin, employee, department, designation, attendance, leave, payroll, schedule, user, hr
+from routes import auth, admin, employee, attendance, department, designation, user, schedule, payroll, leave, leave_type, hr
 
 # Register blueprints
 app.register_blueprint(auth.bp)
 app.register_blueprint(admin.bp)
 app.register_blueprint(employee.bp)
+app.register_blueprint(attendance.bp)
 app.register_blueprint(department.bp)
 app.register_blueprint(designation.bp)
-app.register_blueprint(attendance.bp)
-app.register_blueprint(leave.bp)
-app.register_blueprint(payroll.bp)
-app.register_blueprint(schedule.bp)
 app.register_blueprint(user.bp)
+app.register_blueprint(schedule.bp)
+app.register_blueprint(payroll.bp)
+app.register_blueprint(leave.bp)
+app.register_blueprint(leave_type.bp)
 app.register_blueprint(hr.bp)
 
 @login_manager.user_loader

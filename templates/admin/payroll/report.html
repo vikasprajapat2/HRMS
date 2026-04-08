@@ -1,7 +1,89 @@
-﻿{% extends "base.html" %}
-{% block title %}payroll{% endblock %}
+{% extends "base.html" %}
+{% block title %}Payroll Report{% endblock %}
 {% block content %}
-<h2>payroll Management</h2>
-<p>This template is a placeholder and needs to be completed.</p>
-<p>Module: payroll</p>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Payroll Report</h2>
+    <a href="{{ url_for('payroll.index') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Payroll
+    </a>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-body bg-light">
+        <form action="{{ url_for('payroll.report') }}" method="GET" class="row align-items-end">
+            <div class="col-md-4 mb-3">
+                <label for="month" class="form-label">Filter by Month</label>
+                <select class="form-select" id="month" name="month">
+                    <option value="" selected>All Months</option>
+                    <option value="January" {% if request.args.get('month') == 'January' %}selected{% endif %}>January</option>
+                    <option value="February" {% if request.args.get('month') == 'February' %}selected{% endif %}>February</option>
+                    <option value="March" {% if request.args.get('month') == 'March' %}selected{% endif %}>March</option>
+                    <option value="April" {% if request.args.get('month') == 'April' %}selected{% endif %}>April</option>
+                    <option value="May" {% if request.args.get('month') == 'May' %}selected{% endif %}>May</option>
+                    <option value="June" {% if request.args.get('month') == 'June' %}selected{% endif %}>June</option>
+                    <option value="July" {% if request.args.get('month') == 'July' %}selected{% endif %}>July</option>
+                    <option value="August" {% if request.args.get('month') == 'August' %}selected{% endif %}>August</option>
+                    <option value="September" {% if request.args.get('month') == 'September' %}selected{% endif %}>September</option>
+                    <option value="October" {% if request.args.get('month') == 'October' %}selected{% endif %}>October</option>
+                    <option value="November" {% if request.args.get('month') == 'November' %}selected{% endif %}>November</option>
+                    <option value="December" {% if request.args.get('month') == 'December' %}selected{% endif %}>December</option>
+                </select>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="year" class="form-label">Filter by Year</label>
+                <input type="number" class="form-control" id="year" name="year" min="2000" max="2100" placeholder="e.g. 2024" value="{{ request.args.get('year', '') }}">
+            </div>
+            <div class="col-md-4 mb-3">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-filter me-1"></i> Apply Filter
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped table-bordered align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Employee</th>
+                        <th>Period</th>
+                        <th>Basic Salary</th>
+                        <th>Allowances</th>
+                        <th>Overtime</th>
+                        <th>Deductions</th>
+                        <th>Net Salary</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payroll in payrolls %}
+                    <tr>
+                        <td>{{ payroll.employee.firstname }} {{ payroll.employee.lastname }}</td>
+                        <td>{{ payroll.month }} {{ payroll.year }}</td>
+                        <td>${{ payroll.basic_salary }}</td>
+                        <td class="text-success">+${{ payroll.allowances }}</td>
+                        <td class="text-success">+${{ payroll.overtime_amount }}</td>
+                        <td class="text-danger">-${{ payroll.deductions }}</td>
+                        <td class="fw-bold">${{ payroll.net_salary }}</td>
+                        <td>
+                            {% if payroll.status == 'paid' %}
+                            <span class="badge bg-success">Paid</span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">No payroll data matches this report filter.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}

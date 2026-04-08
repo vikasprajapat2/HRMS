@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Create Leave Type{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow mt-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Create Leave Type</h4>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('leave_type.create') }}" method="POST">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Type Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="name" name="name" required placeholder="e.g. Bereavement">
+                        <div class="form-text">Will be saved in lowercase automatically.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <input type="text" class="form-control" id="description" name="description" placeholder="Short description of this leave">
+                    </div>
+                    <div class="mb-4">
+                        <label for="days_allowed" class="form-label">Max Days Allowed per Year</label>
+                        <input type="number" class="form-control" id="days_allowed" name="days_allowed" min="0" value="0">
+                        <div class="form-text">Leave as 0 for unlimited / no maximum.</div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('leave_type.index') }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i> Create Type</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

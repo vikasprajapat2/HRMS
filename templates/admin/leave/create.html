@@ -1,53 +1,68 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 {% block title %}Request Leave{% endblock %}
 {% block content %}
-<h2>Request Leave</h2>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow mt-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Request Employee Leave</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('leave.create') }}">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="employee_id" class="form-label">Employee <span class="text-danger">*</span></label>
+                            <select name="employee_id" id="employee_id" class="form-select" required>
+                                <option value="" disabled selected>-- Select Employee --</option>
+                                {% for emp in employees %}
+                                <option value="{{ emp.id }}" {% if leave and leave.employee_id == emp.id %}selected{% endif %}>
+                                    {{ emp.firstname }} {{ emp.lastname }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="leave_type" class="form-label">Leave Type <span class="text-danger">*</span></label>
+                            <select name="leave_type" id="leave_type" class="form-select" required>
+                                <option value="" disabled selected>-- Select Type --</option>
+                                {% for lt in leave_types %}
+                                <option value="{{ lt.name }}" {% if leave and leave.leave_type == lt.name %}selected{% endif %}>{{ lt.name|title }} {% if lt.days_allowed > 0 %}(Max {{ lt.days_allowed }} days){% endif %}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
 
-<form method="post" action="">
-    <div class="form-group">
-        <label for="employee_id">Employee</label>
-        <select name="employee_id" id="employee_id" class="form-control" required>
-            <option value="">-- Select Employee --</option>
-            {% for emp in employees %}
-            <option value="{{ emp.id }}" {% if leave and leave.employee_id == emp.id %}selected{% endif %}>
-                {{ emp.firstname }} {{ emp.lastname }}
-            </option>
-            {% endfor %}
-        </select>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="start_date" class="form-label">Start Date <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-calendar-day"></i></span>
+                                <input type="date" class="form-control" id="start_date" name="start_date" value="{% if leave %}{{ leave.start_date }}{% endif %}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="end_date" class="form-label">End Date <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-calendar-day"></i></span>
+                                <input type="date" class="form-control" id="end_date" name="end_date" value="{% if leave %}{{ leave.end_date }}{% endif %}" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="reason" class="form-label">Reason for leave <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="reason" name="reason" rows="4" required>{% if leave %}{{ leave.reason }}{% endif %}</textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('leave.index') }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-success"><i class="fas fa-paper-plane me-1"></i> Submit Request</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-
-    <div class="form-group">
-        <label for="leave_type">Leave Type</label>
-        <select name="leave_type" id="leave_type" class="form-control" required>
-            <option value="">-- Select Type --</option>
-            <option value="annual" {% if leave and leave.leave_type == 'annual' %}selected{% endif %}>Annual Leave</option>
-            <option value="sick" {% if leave and leave.leave_type == 'sick' %}selected{% endif %}>Sick Leave</option>
-            <option value="personal" {% if leave and leave.leave_type == 'personal' %}selected{% endif %}>Personal Leave</option>
-            <option value="unpaid" {% if leave and leave.leave_type == 'unpaid' %}selected{% endif %}>Unpaid Leave</option>
-            <option value="other" {% if leave and leave.leave_type == 'other' %}selected{% endif %}>Other</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label for="start_date">Start Date</label>
-        <input type="date" class="form-control" id="start_date" name="start_date" 
-               value="{% if leave %}{{ leave.start_date }}{% endif %}" required>
-    </div>
-
-    <div class="form-group">
-        <label for="end_date">End Date</label>
-        <input type="date" class="form-control" id="end_date" name="end_date" 
-               value="{% if leave %}{{ leave.end_date }}{% endif %}" required>
-    </div>
-
-    <div class="form-group">
-        <label for="reason">Reason</label>
-        <textarea class="form-control" id="reason" name="reason" rows="3" required>{% if leave %}{{ leave.reason }}{% endif %}</textarea>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Submit</button>
-    <a href="{{ url_for('leave.index') }}" class="btn btn-secondary">Cancel</a>
-</form>
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
