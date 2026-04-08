@@ -84,6 +84,9 @@
                 <a href="{{ url_for('schedule.index') }}" class="list-group-item list-group-item-action bg-dark text-white">
                     <i class="fas fa-clock me-2"></i>Schedule
                 </a>
+                <a href="{{ url_for('attendance.holidays') }}" class="list-group-item list-group-item-action bg-dark text-white">
+                    <i class="fas fa-umbrella-beach me-2"></i>Public Holidays
+                </a>
                 {% endif %}
                 
                 {% if role_name in ['superadmin', 'admin', 'hr'] %}
@@ -104,6 +107,12 @@
                 {% if role_name in ['superadmin', 'admin'] %}
                 <a href="{{ url_for('user.index') }}" class="list-group-item list-group-item-action bg-dark text-white">
                     <i class="fas fa-users me-2"></i>Users
+                </a>
+                {% endif %}
+                
+                {% if role_name == 'superadmin' %}
+                <a href="{{ url_for('admin.audit_logs') }}" class="list-group-item list-group-item-action bg-dark text-white">
+                    <i class="fas fa-shield-alt me-2"></i>Audit Logs
                 </a>
                 {% endif %}
             </div>

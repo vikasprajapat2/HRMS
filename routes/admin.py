@@ -147,3 +147,27 @@ def delete_user(id):
     db.session.commit()
     flash(f'User {user.name} deleted successfully!', 'success')
     return redirect(url_for('user.index'))
+
+@bp.route('/audit-logs')
+@login_required
+def audit_logs():
+    """View system audit logs (superadmin only)."""
+    if current_user.role.name != 'superadmin':
+        flash('Access denied. Only Super Admin can view audit logs.', 'danger')
+        return redirect(url_for('auth.login'))
+    
+    from models import AuditLog
+    
+    # Optional filtering
+    model_filter = request.args.get('model')
+    action_filter = request.args.get('action')
+    
+    query = AuditLog.query
+    if model_filter:
+        query = query.filter_by(model=model_filter)
+    if action_filter:
+        query = query.filter_by(action=action_filter)
+        
+    logs = query.order_by(AuditLog.created_at.desc()).limit(200).all()
+    
+    return render_template('admin/audit_logs.html', logs=logs)

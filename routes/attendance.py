@@ -56,7 +56,14 @@ def board():
 def check():
     employee_id = request.form.get('employee_id')
     action = request.form.get('action')  # 'in' or 'out'
-    current_time = datetime.now().time()
+    
+    time_str = request.form.get('time')
+    if time_str:
+        from datetime import datetime as _dt
+        current_time = _dt.strptime(time_str, '%H:%M').time()
+    else:
+        current_time = datetime.now().time()
+        
     current_date = datetime.now().date()
     
     # Only allow privileged roles to mark attendance
@@ -257,9 +264,19 @@ def monthly_report():
         total_days = emp_stats['present'] + emp_stats['absent']
         if total_days > 0:
             emp_stats['attendance_percentage'] = (emp_stats['present'] / total_days) * 100
+            
+    import calendar
+    cal_grid = calendar.monthcalendar(year, month)
+    
+    # Map attendances by employee and date day to easily render in calendar
+    att_by_emp_day = defaultdict(dict)
+    for att in attendances:
+        att_by_emp_day[att.employee_id][att.date.day] = att
     
     return render_template('admin/attendance/monthly_report.html',
                          attendances=attendances,
+                         att_by_emp_day=att_by_emp_day,
+                         cal_grid=cal_grid,
                          employees=employees,
                          stats=stats,
                          year=year,

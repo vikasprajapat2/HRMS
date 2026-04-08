@@ -1,163 +1,186 @@
 {% extends "base.html" %}
 {% block title %}Monthly Attendance Report - {{ month_name }} {{ year }}{% endblock %}
 {% block content %}
-<h2>Monthly Attendance Report - {{ month_name }} {{ year }}</h2>
-
-<div class="filters mb-4">
-    <form method="get" action="{{ url_for('attendance.monthly_report') }}" class="form-inline">
-        <div class="form-group mr-2">
-            <label for="month" class="mr-2">Month:</label>
-            <select name="month" id="month" class="form-control">
-                {% for m in range(1, 13) %}
-                <option value="{{ m }}" {% if month == m %}selected{% endif %}>
-                    {{ datetime(year, m, 1).strftime('%B') }}
-                </option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="form-group mr-2">
-            <label for="year" class="mr-2">Year:</label>
-            <select name="year" id="year" class="form-control">
-                {% for y in range(year-2, year+1) %}
-                <option value="{{ y }}" {% if year == y %}selected{% endif %}>{{ y }}</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="form-group mr-2">
-            <label for="employee_id" class="mr-2">Employee:</label>
-            <select name="employee_id" id="employee_id" class="form-control">
-                <option value="">All Employees</option>
-                {% for emp in employees %}
-                <option value="{{ emp.id }}" {% if selected_employee|string == emp.id|string %}selected{% endif %}>
-                    {{ emp.firstname }} {{ emp.lastname }}
-                </option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Generate Report</button>
-    </form>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Monthly Attendance Report - {{ month_name }} {{ year }}</h2>
+    <a href="{{ url_for('attendance.index') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Attendance
+    </a>
 </div>
 
-<div class="report-content">
-    <!-- Summary Statistics -->
-    <div class="statistics mb-4">
-        <h3>Summary Statistics</h3>
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Employee</th>
-                        <th>Present Days</th>
-                        <th>Absent Days</th>
-                        <th>Late Arrivals</th>
-                        <th>Early Departures</th>
-                        <th>Total Working Hours</th>
-                        <th>Attendance %</th>
-                    </tr>
-                </thead>
-                <tbody>
+<div class="card shadow mb-4">
+    <div class="card-body bg-light">
+        <form method="get" action="{{ url_for('attendance.monthly_report') }}" class="row align-items-end">
+            <div class="col-md-3 mb-3 mb-md-0">
+                <label for="month" class="form-label">Month</label>
+                <select name="month" id="month" class="form-select">
+                    {% for m in range(1, 13) %}
+                    <option value="{{ m }}" {% if month == m %}selected{% endif %}>
+                        {{ datetime(year, m, 1).strftime('%B') }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 mb-3 mb-md-0">
+                <label for="year" class="form-label">Year</label>
+                <select name="year" id="year" class="form-select">
+                    {% for y in range(year-2, year+1) %}
+                    <option value="{{ y }}" {% if year == y %}selected{% endif %}>{{ y }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0">
+                <label for="employee_id" class="form-label">Employee</label>
+                <select name="employee_id" id="employee_id" class="form-select">
+                    <option value="">All Employees</option>
                     {% for emp in employees %}
-                        {% if not selected_employee or selected_employee|string == emp.id|string %}
-                            {% set emp_stats = stats[emp.id] %}
-                            <tr>
-                                <td>{{ emp.firstname }} {{ emp.lastname }}</td>
-                                <td>{{ emp_stats['present'] }}</td>
-                                <td>{{ emp_stats['absent'] }}</td>
-                                <td>{{ emp_stats['late'] }}</td>
-                                <td>{{ emp_stats['early_out'] }}</td>
-                                <td>{{ '%d:%02d' | format(
-                                    emp_stats['working_hours'].total_seconds() // 3600,
-                                    (emp_stats['working_hours'].total_seconds() % 3600) // 60
-                                ) }}</td>
-                                <td>{{ '%.1f%%' | format(emp_stats['attendance_percentage']) }}</td>
-                            </tr>
-                        {% endif %}
+                    <option value="{{ emp.id }}" {% if selected_employee|string == emp.id|string %}selected{% endif %}>
+                        {{ emp.firstname }} {{ emp.lastname }}
+                    </option>
                     {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Detailed Records -->
-    <div class="detailed-records">
-        <h3>Detailed Attendance Records</h3>
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Employee</th>
-                        <th>Status</th>
-                        <th>Time In</th>
-                        <th>Time Out</th>
-                        <th>Working Hours</th>
-                        <th>Notes</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for attendance in attendances %}
-                    <tr>
-                        <td>{{ attendance.date }}</td>
-                        <td>{{ attendance.employee.firstname }} {{ attendance.employee.lastname }}</td>
-                        <td>
-                            <span class="badge {% if attendance.status == 'present' %}badge-success{% else %}badge-danger{% endif %}">
-                                {{ attendance.status }}
-                            </span>
-                        </td>
-                        <td>{{ attendance.time_in or '-' }}</td>
-                        <td>{{ attendance.time_out or '-' }}</td>
-                        <td>
-                            {% if attendance.time_in and attendance.time_out %}
-                                {% set duration = (attendance.time_out.hour * 60 + attendance.time_out.minute) - 
-                                                (attendance.time_in.hour * 60 + attendance.time_in.minute) %}
-                                {{ '%d:%02d' | format(duration // 60, duration % 60) }}
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if attendance.status == 'present' and attendance.employee.schedule %}
-                                {% if attendance.time_in > attendance.employee.schedule.time_in %}
-                                    <span class="text-warning">Late</span>
-                                {% endif %}
-                                {% if attendance.time_out and attendance.time_out < attendance.employee.schedule.time_out %}
-                                    <span class="text-warning">Left Early</span>
-                                {% endif %}
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100"><i class="fas fa-filter me-1"></i> Generate</button>
+            </div>
+        </form>
     </div>
 </div>
 
-<style>
-.statistics table td,
-.statistics table th,
-.detailed-records table td,
-.detailed-records table th {
-    border: 1px solid #dee2e6;
-    padding: 8px;
-}
-.text-warning {
-    color: #ffc107;
-}
-.badge {
-    padding: 5px 10px;
-    border-radius: 4px;
-}
-.badge-success {
-    background-color: #28a745;
-    color: white;
-}
-.badge-danger {
-    background-color: #dc3545;
-    color: white;
-}
-</style>
+<div class="row">
+    <!-- Summary Statistics -->
+    <div class="col-12 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Summary Statistics</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered align-middle text-center mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-start">Employee</th>
+                                <th>Present <br><small class="text-muted">(Days)</small></th>
+                                <th>Absent <br><small class="text-muted">(Days)</small></th>
+                                <th>Late <br><small class="text-muted">(Arrivals)</small></th>
+                                <th>Early <br><small class="text-muted">(Departures)</small></th>
+                                <th>Total Hours</th>
+                                <th>Attendance Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for emp in employees %}
+                                {% if not selected_employee or selected_employee|string == emp.id|string %}
+                                    {% set emp_stats = stats[emp.id] %}
+                                    <tr>
+                                        <td class="text-start fw-bold">{{ emp.firstname }} {{ emp.lastname }}</td>
+                                        <td><span class="badge bg-success bg-opacity-75 fs-6">{{ emp_stats['present'] }}</span></td>
+                                        <td><span class="badge bg-danger bg-opacity-75 fs-6">{{ emp_stats['absent'] }}</span></td>
+                                        <td><span class="badge bg-warning text-dark bg-opacity-75 fs-6">{{ emp_stats['late'] }}</span></td>
+                                        <td><span class="badge bg-secondary bg-opacity-75 fs-6">{{ emp_stats['early_out'] }}</span></td>
+                                        <td class="fw-bold text-primary">{{ '%d:%02d' | format(
+                                            emp_stats['working_hours'].total_seconds() // 3600,
+                                            (emp_stats['working_hours'].total_seconds() % 3600) // 60
+                                        ) }}</td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar {% if emp_stats['attendance_percentage'] >= 90 %}bg-success{% elif emp_stats['attendance_percentage'] >= 75 %}bg-info{% else %}bg-danger{% endif %}" role="progressbar" style="width: {{ emp_stats['attendance_percentage'] }}%;" aria-valuenow="{{ emp_stats['attendance_percentage'] }}" aria-valuemin="0" aria-valuemax="100">{{ '%.1f%%' | format(emp_stats['attendance_percentage']) }}</div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Records Calendar View -->
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header bg-info text-dark">
+                <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Detailed Attendance Calendar</h5>
+            </div>
+            <div class="card-body">
+                {% for emp in employees %}
+                    {% if not selected_employee or selected_employee|string == emp.id|string %}
+                    <div class="mb-5">
+                        <h4 class="mb-3 border-bottom pb-2 text-primary">{{ emp.firstname }} {{ emp.lastname }}</h4>
+                        <div class="table-responsive">
+                            <table class="table table-bordered text-center calendar-table bg-white">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 14.28%">Mon</th>
+                                        <th style="width: 14.28%">Tue</th>
+                                        <th style="width: 14.28%">Wed</th>
+                                        <th style="width: 14.28%">Thu</th>
+                                        <th style="width: 14.28%">Fri</th>
+                                        <th style="width: 14.28%">Sat</th>
+                                        <th style="width: 14.28%">Sun</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for week in cal_grid %}
+                                    <tr>
+                                        {% for day in week %}
+                                        <td class="p-2 {% if day == 0 %}bg-light{% endif %}" style="height: 120px; vertical-align: top;">
+                                            {% if day != 0 %}
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <span class="badge bg-secondary rounded-circle fs-6">{{ day }}</span>
+                                                </div>
+                                                {% set att = att_by_emp_day[emp.id].get(day) %}
+                                                {% if att %}
+                                                    {% if att.status == 'present' %}
+                                                        <div class="p-2 mb-1 bg-success text-white rounded shadow-sm" style="font-size: 0.85rem;">
+                                                            <strong><i class="fas fa-check-circle"></i> Present</strong>
+                                                            {% if att.time_in %}
+                                                                <br>{{ att.time_in.strftime('%H:%M') }} - {{ att.time_out.strftime('%H:%M') if att.time_out else '?' }}
+                                                            {% endif %}
+                                                        </div>
+                                                        {% if att.employee.schedule and att.time_in %}
+                                                            {% if att.time_in > att.employee.schedule.time_in %}
+                                                                <div class="text-warning fw-bold mt-1" style="font-size: 0.75rem;"><i class="fas fa-clock"></i> Late</div>
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    {% elif att.status == 'absent' %}
+                                                        <div class="p-2 mb-1 bg-danger text-white rounded shadow-sm" style="font-size: 0.85rem;">
+                                                            <strong><i class="fas fa-times-circle"></i> Absent</strong>
+                                                        </div>
+                                                    {% elif att.status == 'holiday' %}
+                                                        <div class="p-2 mb-1 bg-primary text-white rounded shadow-sm" style="font-size: 0.85rem;">
+                                                            <strong><i class="fas fa-umbrella-beach"></i> Holiday</strong><br>
+                                                            <small>{{ att.description|truncate(20) }}</small>
+                                                        </div>
+                                                    {% elif att.status == 'leave' %}
+                                                        <div class="p-2 mb-1 bg-info text-dark rounded shadow-sm" style="font-size: 0.85rem;">
+                                                            <strong><i class="fas fa-plane"></i> On Leave</strong><br>
+                                                            <small>{{ att.description|truncate(20) }}</small>
+                                                        </div>
+                                                    {% elif att.status == 'weekend' %}
+                                                        <div class="text-muted fst-italic mt-4" style="font-size: 0.85rem;">Weekend</div>
+                                                    {% else %}
+                                                        <div class="p-2 mb-1 bg-secondary text-white rounded shadow-sm" style="font-size: 0.85rem;">
+                                                            <strong>{{ att.status|title }}</strong>
+                                                        </div>
+                                                    {% endif %}
+                                                {% endif %}
+                                            {% endif %}
+                                        </td>
+                                        {% endfor %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <div class="alert alert-info">No employee records found.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
