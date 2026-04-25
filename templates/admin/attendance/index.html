@@ -4,141 +4,121 @@
 
 {% block extra_css %}
 <style>
-    body {
-        background-color: #f8f9fe;
-        font-family: 'Inter', sans-serif;
-    }
-    .text-muted-custom {
-        color: #8898aa;
-    }
     .card-modern {
-        border-radius: 1rem;
-        border: none;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.02);
         background: #ffffff;
-        transition: all 0.3s ease;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
     .card-modern:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 25px rgba(0,0,0,0.05);
     }
-    .h-100-modern {
-        height: 100%;
-    }
-    .bg-light-blue {
-        background-color: #f4f6fc;
-    }
     .dept-card {
-        border-radius: 12px;
+        border-radius: 10px;
         padding: 1.25rem;
         margin-bottom: 1rem;
-        border: 1px solid #edf2f9;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        transition: all 0.2s ease;
+    }
+    .dept-card:hover {
         background: #ffffff;
-    }
-    .text-primary-custom {
-        color: #5e72e4;
-    }
-    .text-info-custom {
-        color: #11cdef;
+        border-color: #cbd5e1;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
     }
     .avatar-sm {
-        width: 38px;
-        height: 38px;
-        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
         object-fit: cover;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
     .avatar-initial-sm {
-        width: 38px;
-        height: 38px;
-        border-radius: 50%;
-        background-color: #e2e8f0;
-        color: #475569;
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        background-color: #475569;
+        color: #ffffff;
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 600;
         font-size: 14px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
     .employee-list-item {
-        padding: 1rem 0;
-        border-bottom: 1px solid #f1f3f6;
+        padding: 1rem;
+        border-bottom: 1px solid #f1f5f9;
+        border-radius: 8px;
+        transition: background-color 0.2s;
+    }
+    .employee-list-item:hover {
+        background-color: #f8fafc;
     }
     .employee-list-item:last-child {
         border-bottom: none;
     }
     .status-dot {
-        width: 8px;
-        height: 8px;
+        width: 10px;
+        height: 10px;
         border-radius: 50%;
         display: inline-block;
         margin-right: 6px;
     }
-    .status-dot.ontime {
-        background-color: #5e72e4;
-    }
-    .status-dot.late {
-        background-color: #11cdef;
-    }
+    .status-dot.ontime { background-color: #10b981; }
+    .status-dot.late { background-color: #f59e0b; }
+    
     .nav-tabs-custom {
-        border-bottom: 1px solid #e2e8f0;
+        border-bottom: 2px solid #e2e8f0;
     }
     .nav-tabs-custom .nav-link {
         border: none;
-        color: #94a3b8;
+        color: #64748b;
         font-weight: 600;
-        padding: 0.5rem 1rem;
-        margin-bottom: -1px;
+        padding: 0.75rem 1rem;
+        margin-bottom: -2px;
+        background: transparent;
+    }
+    .nav-tabs-custom .nav-link:hover {
+        color: #334155;
     }
     .nav-tabs-custom .nav-link.active {
-        color: #5e72e4;
-        border-bottom: 2px solid #5e72e4;
-        background-color: transparent;
+        color: #0f172a;
+        border-bottom: 2px solid #3b82f6;
     }
     .search-pill {
-        border-radius: 20px;
         background-color: #f8fafc;
         border: 1px solid #e2e8f0;
-    }
-    
-    .add-profile-placeholder {
-        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="%23f1f5f9"/></svg>') center center no-repeat;
-        background-size: contain;
-        height: 120px;
-        margin-top: 15px;
+        border-radius: 6px;
     }
 </style>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
 <!-- Top Header Bar -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div class="d-flex align-items-center">
-        <h3 class="mb-0 fw-bold me-4">Attendance</h3>
-        <div class="d-flex align-items-center text-muted-custom">
-            <h5 class="mb-0 fw-bold text-dark me-2">{{ date.strftime('%b %d, %Y') }}</h5>
-            <i class="fas fa-calendar-alt"></i>
-        </div>
-        <div class="ms-4 border-start ps-4">
-            <p class="mb-0 small text-muted-custom">Dashboard Mode</p>
-            <h6 class="mb-0 fw-bold">Daily Overview</h6>
+        <div>
+            <h2 class="fw-bold text-dark mb-1"><i class="fas fa-chart-pie text-primary me-2"></i>Attendance Overview</h2>
+            <p class="text-muted mb-0 fs-5">{{ date.strftime('%A, %B %d, %Y') }}</p>
         </div>
     </div>
     
-    <!-- Restoring the classic action buttons -->
-    <div class="btn-group" role="group">
-        <a class="btn btn-outline-primary" href="{{ url_for('attendance.board') }}">
-            <i class="fas fa-th me-2"></i>Board
+    <div class="btn-group shadow-sm" role="group">
+        <a class="btn btn-white border fw-bold text-dark" href="{{ url_for('attendance.board') }}">
+            <i class="fas fa-clipboard-list me-2 text-primary"></i>Daily Board
         </a>
-        <a class="btn btn-outline-success" href="{{ url_for('attendance.create') }}">
-            <i class="fas fa-plus me-2"></i>Add Record
+        <a class="btn btn-white border fw-bold text-dark" href="{{ url_for('attendance.create') }}">
+            <i class="fas fa-plus-circle me-2 text-success"></i>Add Record
         </a>
-        <a class="btn btn-outline-info" href="{{ url_for('attendance.monthly_report') }}">
-            <i class="fas fa-chart-bar me-2"></i>Monthly Report
+        <a class="btn btn-white border fw-bold text-dark" href="{{ url_for('attendance.monthly_report') }}">
+            <i class="fas fa-calendar-alt me-2 text-info"></i>Monthly Report
         </a>
-        {% if current_user.is_authenticated and current_user.role and current_user.role.name in ['superadmin', 'admin', 'hr'] %}
-        <a class="btn btn-outline-warning" href="{{ url_for('attendance.manage_working_days') }}">
-            <i class="fas fa-calendar-alt me-2"></i>Working Days
+        {% if current_user.is_authenticated and current_user.role and current_user.role.name in ['superadmin', 'hr'] %}
+        <a class="btn btn-white border fw-bold text-dark" href="{{ url_for('attendance.manage_working_days') }}">
+            <i class="fas fa-cogs me-2 text-warning"></i>Working Days
         </a>
         {% endif %}
     </div>
@@ -240,34 +220,35 @@
 
     <!-- Center Column: All Departments Stats -->
     <div class="col-xl-2 col-lg-5 col-md-6 mb-4">
-        <h6 class="fw-bold mb-4">All Departments</h6>
+        <h6 class="fw-bold text-dark mb-4 border-bottom pb-2">All Departments</h6>
         
         {% for dept in dept_stats %}
         <div class="dept-card">
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="text-center me-3 border-end pe-3">
-                    <p class="text-muted-custom small mb-0">Total</p>
-                    <h3 class="fw-bold mb-0">{{ dept.total }}</h3>
-                </div>
-                <div class="w-100">
-                    <div class="d-flex justify-content-between small">
-                        <span class="text-muted-custom">On-time</span>
-                        <span class="fw-bold">{{ dept.on_time }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between small">
-                        <span class="text-muted-custom">Late</span>
-                        <span class="fw-bold">{{ dept.late }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between small">
-                        <span class="text-muted-custom">Leave</span>
-                        <span class="fw-bold">{{ dept.leave }}</span>
-                    </div>
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                <div class="text-center w-100">
+                    <h3 class="fw-bold text-dark mb-0">{{ dept.total }}</h3>
+                    <p class="text-muted small mb-0 text-uppercase fw-bold" style="letter-spacing: 0.5px;">Total Logins</p>
                 </div>
             </div>
-            <div class="mt-3 small text-muted-custom"><i class="fas fa-code me-1"></i>{{ dept.name }}</div>
+            <div class="w-100 mt-2">
+                <div class="d-flex justify-content-between small mb-1">
+                    <span class="text-secondary"><span class="status-dot ontime"></span>On-time</span>
+                    <span class="fw-bold text-dark">{{ dept.on_time }}</span>
+                </div>
+                <div class="d-flex justify-content-between small mb-1">
+                    <span class="text-secondary"><span class="status-dot late"></span>Late</span>
+                    <span class="fw-bold text-dark">{{ dept.late }}</span>
+                </div>
+                <div class="d-flex justify-content-between small">
+                    <span class="text-secondary"><span class="status-dot bg-secondary"></span>Leave</span>
+                    <span class="fw-bold text-dark">{{ dept.leave }}</span>
+                </div>
+            </div>
+            <div class="mt-3 pt-2 border-top text-center fw-bold text-dark">
+                <i class="fas fa-building text-primary me-2"></i>{{ dept.name }}
+            </div>
         </div>
         {% endfor %}
-        
     </div>
 
     <!-- Right Column: Sidebar list -->
@@ -397,14 +378,27 @@
 {% block extra_js %}
 <!-- Chart JS CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Embedded Chart Data -->
+<script id="attendance-chart-data" type="application/json">
+{
+    "labels": {{ chart_labels | tojson | safe }},
+    "onTime": {{ chart_on_time | tojson | safe }},
+    "late": {{ chart_late | tojson | safe }}
+}
+</script>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const ctx = document.getElementById('attendanceChart').getContext('2d');
         
-        // Pass data from Jinja to JS
-        const labels = {{ chart_labels | tojson }};
-        const onTimeData = {{ chart_on_time | tojson }};
-        const lateData = {{ chart_late | tojson }};
+        // Parse data from embedded JSON script
+        const rawData = document.getElementById('attendance-chart-data').textContent;
+        const chartData = JSON.parse(rawData);
+        
+        const labels = chartData.labels;
+        const onTimeData = chartData.onTime;
+        const lateData = chartData.late;
         
         new Chart(ctx, {
             type: 'bar',
@@ -457,21 +451,21 @@
                             drawBorder: false
                         },
                         ticks: {
-                            color: '#8898aa',
-                            font: { size: 11, family: 'Inter' }
+                            color: '#64748b',
+                            font: { size: 12, family: 'Inter', weight: '500' }
                         }
                     },
                     y: {
                         beginAtZero: true,
+                        suggestedMax: 10,
                         grid: {
-                            color: '#edf2f9',
+                            color: '#f1f5f9',
                             drawBorder: false
                         },
                         ticks: {
-                            color: '#8898aa',
-                            font: { size: 11, family: 'Inter' },
-                            stepSize: 25,
-                            max: 125
+                            color: '#64748b',
+                            font: { size: 12, family: 'Inter', weight: '500' },
+                            stepSize: 1
                         }
                     }
                 }

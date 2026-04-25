@@ -43,11 +43,16 @@ def index():
     day_stats = defaultdict(lambda: {'on_time': 0, 'late': 0})
     for att in month_attendances:
         if att.status == 'present' and att.time_in and att.employee.schedule:
-            schedule_time = att.employee.schedule.time_in
-            if att.time_in > schedule_time:
-                day_stats[att.date.day]['late'] += 1
-            else:
+            schedule = att.employee.schedule
+            if schedule.is_flexible:
+                # Flexible shifts aren't late based on check-in time
                 day_stats[att.date.day]['on_time'] += 1
+            else:
+                allowed_time = (datetime.combine(att.date, schedule.time_in) + timedelta(minutes=schedule.grace_period_minutes)).time()
+                if att.time_in > allowed_time:
+                    day_stats[att.date.day]['late'] += 1
+                else:
+                    day_stats[att.date.day]['on_time'] += 1
 
     for d in range(1, last_day + 1):
         curr = datetime(year, month, d).date()
@@ -85,8 +90,13 @@ def index():
             if dept_name in dept_map: dept_map[dept_name]['leave'] += 1
         elif att.status == 'present':
             is_late = False
-            if att.time_in and emp.schedule and att.time_in > emp.schedule.time_in:
-                is_late = True
+            if att.time_in and emp.schedule:
+                if emp.schedule.is_flexible:
+                    is_late = False
+                else:
+                    allowed_time = (datetime.combine(att.date, emp.schedule.time_in) + timedelta(minutes=emp.schedule.grace_period_minutes)).time()
+                    if att.time_in > allowed_time:
+                        is_late = True
                 
             if is_late:
                 if dept_name in dept_map: dept_map[dept_name]['late'] += 1
@@ -148,7 +158,7 @@ def board():
     Actions (check-in / check-out) post to the existing `/attendance/check` endpoint.
     """
     # restrict access to managers and HR
-    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin', 'moderator', 'hr']:
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'hr']:
         flash('Access denied', 'danger')
         return redirect(url_for('auth.login'))
     current_date = datetime.now().date()
@@ -175,7 +185,7 @@ def check():
     current_date = datetime.now().date()
     
     # Only allow privileged roles to mark attendance
-    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin', 'moderator', 'hr']:
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'hr']:
         flash('Access denied', 'danger')
         return redirect(url_for('auth.login'))
 
@@ -211,7 +221,7 @@ def create():
 
     Only `superadmin`, `admin`, `moderator`, and `hr` may create manual records.
     """
-    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin', 'moderator', 'hr']:
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'hr']:
         flash('Access denied', 'danger')
         return redirect(url_for('auth.login'))
 
@@ -253,7 +263,7 @@ def create():
 @login_required
 def edit(attendance_id):
     # Only privileged roles can edit attendance
-    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin', 'moderator', 'hr']:
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'hr']:
         flash('Access denied', 'danger')
         return redirect(url_for('auth.login'))
 
@@ -293,7 +303,7 @@ def edit(attendance_id):
 @login_required
 def delete(attendance_id):
     # Only privileged roles can delete attendance
-    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin', 'moderator', 'hr']:
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'hr']:
         flash('Access denied', 'danger')
         return redirect(url_for('auth.login'))
 
@@ -310,7 +320,7 @@ def delete(attendance_id):
 def monthly_report():
     """Generate monthly attendance report with statistics."""
     # Only privileged roles can view reports
-    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin', 'moderator', 'hr']:
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'hr']:
         flash('Access denied', 'danger')
         return redirect(url_for('auth.login'))
 
@@ -361,10 +371,16 @@ def monthly_report():
                 # Check if employee's schedule exists and compare
                 if attendance.employee.schedule:
                     schedule = attendance.employee.schedule
-                    if attendance.time_in > datetime.combine(attendance.date, schedule.time_in).time():
-                        emp_stats['late'] += 1
-                    if attendance.time_out < datetime.combine(attendance.date, schedule.time_out).time():
-                        emp_stats['early_out'] += 1
+                    if schedule.is_flexible:
+                        # For flexible shifts, check if they met working hours instead of late time
+                        if working_hours.total_seconds() / 3600 < float(schedule.working_hours):
+                            emp_stats['early_out'] += 1 # Technically under-hours
+                    else:
+                        allowed_time = (datetime.combine(attendance.date, schedule.time_in) + timedelta(minutes=schedule.grace_period_minutes)).time()
+                        if attendance.time_in > allowed_time:
+                            emp_stats['late'] += 1
+                        if attendance.time_out < datetime.combine(attendance.date, schedule.time_out).time():
+                            emp_stats['early_out'] += 1
         else:
             emp_stats['absent'] += 1
         
@@ -397,7 +413,7 @@ def monthly_report():
 @login_required
 def report():
     # Only privileged roles can view general reports
-    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin', 'moderator', 'hr']:
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'hr']:
         flash('Access denied', 'danger')
         return redirect(url_for('auth.login'))
 
@@ -415,7 +431,7 @@ def report():
 @login_required
 def holidays():
     # Only allow superadmin, admin or hr to view/manage holidays
-    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin', 'hr']:
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'hr']:
         flash('Access denied', 'danger')
         return redirect(url_for('auth.login'))
 
@@ -426,7 +442,7 @@ def holidays():
 @login_required
 def create_holiday():
     # Only superadmin, admin or hr can create holidays
-    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin', 'hr']:
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'hr']:
         flash('Access denied', 'danger')
         return redirect(url_for('auth.login'))
 
@@ -467,7 +483,7 @@ def create_holiday():
 @login_required
 def edit_holiday(holiday_id):
     # Only superadmin, admin or hr can edit holidays
-    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin', 'hr']:
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'hr']:
         flash('Access denied', 'danger')
         return redirect(url_for('auth.login'))
 
@@ -502,7 +518,7 @@ def edit_holiday(holiday_id):
 @login_required
 def delete_holiday(holiday_id):
     # Only superadmin, admin or hr can delete holidays
-    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin', 'hr']:
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'hr']:
         flash('Access denied', 'danger')
         return redirect(url_for('auth.login'))
 
@@ -528,7 +544,7 @@ def manage_working_days():
     
     Only superadmin, admin, and hr can access.
     """
-    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin', 'hr']:
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'hr']:
         flash('Access denied', 'danger')
         return redirect(url_for('auth.login'))
     
@@ -558,7 +574,7 @@ def toggle_working_day(weekday):
     
     Only superadmin, admin, and hr can toggle.
     """
-    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin', 'hr']:
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'hr']:
         flash('Access denied', 'danger')
         return redirect(url_for('auth.login'))
     

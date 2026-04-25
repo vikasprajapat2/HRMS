@@ -16,8 +16,7 @@
                     <tr>
                         <th>ID</th>
                         <th>Name</th>
-                        <th>Time In</th>
-                        <th>Time Out</th>
+                        <th>Details</th>
                         <th class="text-center">Actions</th>
                     </tr>
                 </thead>
@@ -26,8 +25,16 @@
                     <tr>
                         <td>{{ schedule.id }}</td>
                         <td>{{ schedule.name }}</td>
-                        <td>{{ schedule.time_in.strftime('%H:%M') }}</td>
-                        <td>{{ schedule.time_out.strftime('%H:%M') }}</td>
+                        <td>
+                            {% if schedule.is_flexible %}
+                                <span class="badge bg-success">Flexible ({{ schedule.working_hours }} Hrs)</span>
+                            {% else %}
+                                {{ schedule.time_in.strftime('%H:%M') }} - {{ schedule.time_out.strftime('%H:%M') }}
+                                {% if schedule.grace_period_minutes %}
+                                    <small class="text-muted d-block">Grace: {{ schedule.grace_period_minutes }}m</small>
+                                {% endif %}
+                            {% endif %}
+                        </td>
                         <td class="text-center">
                             <a href="{{ url_for('schedule.edit', id=schedule.id) }}" class="btn btn-sm btn-info text-white" title="Edit">
                                 <i class="fas fa-edit"></i>
@@ -41,7 +48,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="5" class="text-center py-4 text-muted">No schedules found. Create one to get started!</td>
+                        <td colspan="4" class="text-center py-4 text-muted">No schedules found. Create one to get started!</td>
                     </tr>
                     {% endfor %}
                 </tbody>

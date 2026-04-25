@@ -4,6 +4,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Leave Management</h2>
     <div>
+        <a href="{{ url_for('leave_type.index') }}" class="btn btn-outline-secondary me-2"><i class="fas fa-tags"></i> Manage Leave Types</a>
         <a href="{{ url_for('leave.report') }}" class="btn btn-outline-info me-2"><i class="fas fa-file-alt"></i> View Report</a>
         <a href="{{ url_for('leave.create') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Request Leave</a>
     </div>

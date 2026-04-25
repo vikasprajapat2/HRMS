@@ -1,8 +1,7 @@
-
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user
 from database import db
-from models import User, Role, Employee, Attendance, Leave, Payroll, AuditLog
+from models import User, Role, Employee, Attendance, Leave, Payroll, Notification
 from flask_bcrypt import Bcrypt
 import json
 from functools import wraps
@@ -15,39 +14,21 @@ from flask import current_app
 bp = Blueprint('user', __name__, url_prefix='/user')
 bcrypt = Bcrypt()
 
-# ...existing code...
-
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
-from flask_login import login_required, current_user
-from database import db
-from models import User, Role, Employee, Attendance, Leave, Payroll, AuditLog
-from flask_bcrypt import Bcrypt
-import json
-from functools import wraps
-from database import db
-from datetime import datetime
-import os
-from werkzeug.utils import secure_filename
-from flask import current_app
-
-bp = Blueprint('user', __name__, url_prefix='/user')
-bcrypt = Bcrypt()
-
-def admin_required(f):
+def superadmin_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        if not current_user.is_authenticated or current_user.role.name not in ['admin', 'superadmin']:
-            flash('Admin access required.', 'danger')
+        if not current_user.is_authenticated or current_user.role.name != 'superadmin':
+            flash('Superadmin access required.', 'danger')
             return redirect(url_for('admin.admin_dashboard'))
         return f(*args, **kwargs)
     return decorated
 
 @bp.route('/')
 @login_required
-@admin_required
+@superadmin_required
 def index():
-    # Restrict to superadmin and admin only
-    if not current_user.is_authenticated or current_user.role.name not in ['admin', 'superadmin']:
+    # Restrict to superadmin only
+    if not current_user.is_authenticated or current_user.role.name != 'superadmin':
         flash('Access denied', 'danger')
         return redirect(url_for('auth.login'))
     
@@ -70,7 +51,7 @@ def index():
 
 @bp.route('/create', methods=['GET', 'POST'])
 @login_required
-@admin_required
+@superadmin_required
 def create():
     if request.method == 'POST':
         hashed_password = bcrypt.generate_password_hash(request.form.get('password')).decode('utf-8')
@@ -86,21 +67,7 @@ def create():
         db.session.add(user)
         db.session.commit()
         
-        # Audit log
-        try:
-            log = AuditLog(
-                actor_id=current_user.id,
-                action='create',
-                model='User',
-                record_id=user.id,
-                old_data=None,
-                new_data=json.dumps({'name': user.name, 'email': user.email, 'role_id': user.role_id}),
-                ip_address=request.remote_addr
-            )
-            db.session.add(log)
-            db.session.commit()
-        except Exception as e:
-            current_app.logger.error(f'Failed to write audit log: {e}')
+
         
         flash('User created successfully!', 'success')
         return redirect(url_for('user.index'))
@@ -110,10 +77,10 @@ def create():
 
 @bp.route('/create-from-employee', methods=['GET', 'POST'])
 @login_required
-@admin_required
+@superadmin_required
 def create_from_employee():
-    """Create user account from selected employee (superadmin/admin only)."""
-    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin']:
+    """Create user account from selected employee (superadmin only)."""
+    if not current_user.is_authenticated or current_user.role.name != 'superadmin':
         flash('Access denied', 'danger')
         return redirect(url_for('auth.login'))
     
@@ -157,21 +124,7 @@ def create_from_employee():
         db.session.add(user)
         db.session.commit()
         
-        # Audit log
-        try:
-            log = AuditLog(
-                actor_id=current_user.id,
-                action='create',
-                model='User',
-                record_id=user.id,
-                old_data=None,
-                new_data=json.dumps({'name': user.name, 'email': user.email, 'role_id': role_id, 'employee_id': employee_id}),
-                ip_address=request.remote_addr
-            )
-            db.session.add(log)
-            db.session.commit()
-        except Exception as e:
-            current_app.logger.error(f'Failed to write audit log: {e}')
+
         
         flash(f'User account created for {employee.firstname} {employee.lastname}!', 'success')
         return redirect(url_for('user.index'))
@@ -182,39 +135,12 @@ def create_from_employee():
 
 @bp.route('/<int:id>/edit', methods=['GET', 'POST'])
 @login_required
-@admin_required
+@superadmin_required
 def edit(id):
     user = User.query.get_or_404(id)
     
     if request.method == 'POST':
-        old_data = json.dumps({'name': user.name, 'email': user.email, 'role_id': user.role_id, 'status': user.status})
-        
-        user.name = request.form.get('name')
-        user.email = request.form.get('email')
-        user.phone = request.form.get('phone')
-        user.role_id = request.form.get('role_id')
-        user.status = request.form.get('status')
-        
-        if request.form.get('password'):
-            user.password = bcrypt.generate_password_hash(request.form.get('password')).decode('utf-8')
-        
-        db.session.commit()
-        
-        # Audit log
-        try:
-            log = AuditLog(
-                actor_id=current_user.id,
-                action='update',
-                model='User',
-                record_id=user.id,
-                old_data=old_data,
-                new_data=json.dumps({'name': user.name, 'email': user.email, 'role_id': user.role_id, 'status': user.status}),
-                ip_address=request.remote_addr
-            )
-            db.session.add(log)
-            db.session.commit()
-        except Exception as e:
-            current_app.logger.error(f'Failed to write audit log: {e}')
+
         
         flash('User updated successfully!', 'success')
         return redirect(url_for('user.index'))
@@ -224,25 +150,11 @@ def edit(id):
 
 @bp.route('/<int:id>/delete', methods=['POST'])
 @login_required
-@admin_required
+@superadmin_required
 def delete(id):
     user = User.query.get_or_404(id)
     
-    # Audit log before deletion
-    try:
-        log = AuditLog(
-            actor_id=current_user.id,
-            action='delete',
-            model='User',
-            record_id=user.id,
-            old_data=json.dumps({'name': user.name, 'email': user.email, 'role_id': user.role_id}),
-            new_data=None,
-            ip_address=request.remote_addr
-        )
-        db.session.add(log)
-        db.session.commit()
-    except Exception as e:
-        current_app.logger.error(f'Failed to write audit log: {e}')
+
     
     db.session.delete(user)
     db.session.commit()
@@ -258,6 +170,7 @@ def dashboard():
     attendances = []
     leaves = []
     payrolls = []
+    today_attendance = None
 
     # Try to find a linked Employee record by email
     try:
@@ -269,6 +182,10 @@ def dashboard():
         attendances = Attendance.query.filter_by(employee_id=employee.id).order_by(Attendance.date.desc()).limit(7).all()
         leaves = Leave.query.filter_by(employee_id=employee.id).order_by(Leave.created_at.desc()).limit(5).all()
         payrolls = Payroll.query.filter_by(employee_id=employee.id).order_by(Payroll.year.desc(), Payroll.month.desc()).limit(6).all()
+        
+        # Get today's attendance for self check-in widget
+        today = datetime.now().date()
+        today_attendance = Attendance.query.filter_by(employee_id=employee.id, date=today).first()
 
         # Compute basic leave balances for display (year-to-date, approved leaves)
         try:
@@ -299,19 +216,101 @@ def dashboard():
             pending_leaves = Leave.query.filter_by(employee_id=employee.id, status='pending').count()
             approved_leaves_ytd = Leave.query.filter(Leave.employee_id == employee.id, Leave.status == 'approved').filter(Leave.start_date >= datetime(current_year, 1, 1).date()).count()
             payrolls_this_year = Payroll.query.filter_by(employee_id=employee.id, year=current_year).count()
+            
+            # Check for missed attendance (absent on past days this month)
+            missed_attendances = Attendance.query.filter(
+                Attendance.employee_id == employee.id,
+                Attendance.date >= first_of_month,
+                Attendance.date < today,
+                Attendance.status == 'absent'
+            ).order_by(Attendance.date.desc()).all()
+            
         except Exception:
             present_days_month = 0
             pending_leaves = 0
             approved_leaves_ytd = 0
             payrolls_this_year = 0
+            missed_attendances = []
     else:
         leave_balance = {'annual': 0, 'sick': 0, 'casual': 0}
         present_days_month = 0
         pending_leaves = 0
         approved_leaves_ytd = 0
         payrolls_this_year = 0
+        missed_attendances = []
 
-    return render_template('admin/user/dashboard.html', user=user, employee=employee, attendances=attendances, leaves=leaves, payrolls=payrolls, leave_balance=leave_balance, present_days_month=present_days_month, pending_leaves=pending_leaves, approved_leaves_ytd=approved_leaves_ytd, payrolls_this_year=payrolls_this_year)
+    return render_template('admin/user/dashboard.html', user=user, employee=employee, attendances=attendances, leaves=leaves, payrolls=payrolls, leave_balance=leave_balance, present_days_month=present_days_month, pending_leaves=pending_leaves, approved_leaves_ytd=approved_leaves_ytd, payrolls_this_year=payrolls_this_year, today_attendance=today_attendance, missed_attendances=missed_attendances)
+
+@bp.route('/self-check', methods=['POST'])
+@login_required
+def self_check():
+    """Endpoint for employees to check themselves in and out."""
+    user = current_user
+    try:
+        employee = Employee.query.filter_by(email=user.email).first()
+    except Exception:
+        employee = None
+
+    if not employee:
+        flash('Employee record not found. Cannot mark attendance.', 'danger')
+        return redirect(url_for('user.dashboard'))
+
+    action = request.form.get('action')
+    now = datetime.now()
+    current_date = now.date()
+    current_time = now.time()
+
+    attendance = Attendance.query.filter_by(employee_id=employee.id, date=current_date).first()
+
+    if action == 'in':
+        if not attendance:
+            attendance = Attendance(
+                employee_id=employee.id,
+                date=current_date,
+                time_in=current_time,
+                status='present'
+            )
+            db.session.add(attendance)
+        else:
+            attendance.time_in = current_time
+            if attendance.status in ['absent', 'weekend', 'leave']:
+                attendance.status = 'present'
+        flash('Successfully Checked In!', 'success')
+    elif action == 'out':
+        if attendance:
+            attendance.time_out = current_time
+            flash('Successfully Checked Out!', 'success')
+        else:
+            flash('Cannot check out without checking in first.', 'danger')
+
+    db.session.commit()
+    return redirect(url_for('user.dashboard'))
+
+@bp.route('/directory')
+@login_required
+def directory():
+    """Company Directory accessible to employees."""
+    employees = Employee.query.filter_by(status='active').order_by(Employee.firstname).all()
+    return render_template('admin/user/directory.html', employees=employees)
+
+@bp.route('/payslip/<int:id>')
+@login_required
+def payslip(id):
+    """View/Print specific payslip."""
+    payroll = Payroll.query.get_or_404(id)
+    
+    # Ensure they can only view their own payslip (superadmin/hr can view all)
+    if current_user.role.name not in ['superadmin', 'hr']:
+        try:
+            employee = Employee.query.filter_by(email=current_user.email).first()
+            if not employee or payroll.employee_id != employee.id:
+                flash('Access denied.', 'danger')
+                return redirect(url_for('user.dashboard'))
+        except Exception:
+            flash('Access denied.', 'danger')
+            return redirect(url_for('user.dashboard'))
+            
+    return render_template('admin/user/payslip.html', payroll=payroll)
 
 
 @bp.route('/leave/apply', methods=['GET', 'POST'])
@@ -354,7 +353,7 @@ def apply_leave():
         from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
         from flask_login import login_required, current_user
         from database import db
-        from models import User, Role, Employee, Attendance, Leave, Payroll, AuditLog
+        from models import User, Role, Employee, Attendance, Leave, Payroll, AuditLog, Notification
         from flask_bcrypt import Bcrypt
         import json
         from functools import wraps
@@ -454,6 +453,23 @@ def edit_profile():
             if employee:
                 employee.image = filename
 
+        # Handle document uploads
+        if employee:
+            docs_folder = os.path.join(current_app.root_path, 'static', 'uploads', 'documents')
+            os.makedirs(docs_folder, exist_ok=True)
+            
+            aadhar = request.files.get('aadhar_file')
+            if aadhar and aadhar.filename:
+                aadhar_filename = secure_filename(f"{employee.unique_id}_aadhar_{aadhar.filename}")
+                aadhar.save(os.path.join(docs_folder, aadhar_filename))
+                employee.aadhar_file = aadhar_filename
+                
+            resume = request.files.get('resume_file')
+            if resume and resume.filename:
+                resume_filename = secure_filename(f"{employee.unique_id}_resume_{resume.filename}")
+                resume.save(os.path.join(docs_folder, resume_filename))
+                employee.resume_file = resume_filename
+
         db.session.commit()
         flash('Profile updated successfully!', 'success')
         return redirect(url_for('user.profile'))
@@ -484,6 +500,16 @@ def change_password():
 
     return render_template('admin/user/change_password.html')
 
+
+@bp.route('/notifications/read/<int:id>')
+@login_required
+def read_notification(id):
+    """Mark a notification as read and redirect back."""
+    notif = Notification.query.get_or_404(id)
+    if notif.user_id == current_user.id:
+        notif.is_read = True
+        db.session.commit()
+    return redirect(request.referrer or url_for('user.dashboard'))
 
 @bp.route('/leave/<int:id>/cancel', methods=['POST'])
 @login_required

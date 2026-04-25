@@ -38,7 +38,7 @@
                 <a href="{{ url_for(dashboard_endpoint) }}" class="list-group-item list-group-item-action bg-dark text-white">
                     <i class="fas fa-tachometer-alt me-2"></i>Dashboard
                 </a>
-                {% if role_name in ['superadmin', 'admin', 'hr'] %}
+                {% if role_name in ['superadmin', 'hr'] %}
                 <a href="{{ url_for('employee.index') }}" class="list-group-item list-group-item-action bg-dark text-white">
                     <i class="fas fa-user-tie me-2"></i>Employees
                 </a>
@@ -77,7 +77,7 @@
                 </a>
                 {% endif %}
                 
-                {% if role_name in ['superadmin', 'admin', 'moderator', 'hr'] %}
+                {% if role_name in ['superadmin', 'hr'] %}
                 <a href="{{ url_for('attendance.index') }}" class="list-group-item list-group-item-action bg-dark text-white">
                     <i class="fas fa-calendar-check me-2"></i>Attendance
                 </a>
@@ -89,22 +89,19 @@
                 </a>
                 {% endif %}
                 
-                {% if role_name in ['superadmin', 'admin', 'hr'] %}
+                {% if role_name in ['superadmin', 'hr'] %}
                 <a href="{{ url_for('leave.index') }}" class="list-group-item list-group-item-action bg-dark text-white">
                     <i class="fas fa-calendar-times me-2"></i>Leaves
                 </a>
-                <a href="{{ url_for('leave_type.index') }}" class="list-group-item list-group-item-action bg-dark text-white">
-                    <i class="fas fa-tags me-2"></i>Leave Types
-                </a>
                 {% endif %}
                 
-                {% if role_name in ['superadmin', 'admin', 'payroll'] %}
+                {% if role_name in ['superadmin', 'hr'] %}
                 <a href="{{ url_for('payroll.index') }}" class="list-group-item list-group-item-action bg-dark text-white">
                     <i class="fas fa-money-bill-wave me-2"></i>Payroll
                 </a>
                 {% endif %}
                 
-                {% if role_name in ['superadmin', 'admin'] %}
+                {% if role_name == 'superadmin' %}
                 <a href="{{ url_for('user.index') }}" class="list-group-item list-group-item-action bg-dark text-white">
                     <i class="fas fa-users me-2"></i>Users
                 </a>
@@ -128,6 +125,44 @@
                     </button>
                     
                     <div class="ms-auto d-flex align-items-center">
+                        <!-- Notifications Dropdown -->
+                        <div class="dropdown me-3">
+                            <a class="nav-link dropdown-toggle position-relative text-dark" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-bell fs-5"></i>
+                                {% if unread_notifications_count > 0 %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65em;">
+                                    {{ unread_notifications_count }}
+                                </span>
+                                {% endif %}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="notificationsDropdown" style="width: 320px; max-height: 400px; overflow-y: auto;">
+                                <li class="dropdown-header fw-bold text-dark border-bottom">Notifications</li>
+                                {% if recent_notifications %}
+                                    {% for notif in recent_notifications %}
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center py-2 border-bottom {{ 'bg-light' if not notif.is_read else '' }}" href="{{ url_for('user.read_notification', id=notif.id) }}">
+                                            <div class="me-3">
+                                                {% if notif.type == 'leave' %}
+                                                    <i class="fas fa-calendar-check text-success fs-4"></i>
+                                                {% elif notif.type == 'salary' %}
+                                                    <i class="fas fa-money-check-alt text-primary fs-4"></i>
+                                                {% else %}
+                                                    <i class="fas fa-info-circle text-info fs-4"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <div class="small fw-bold {{ 'text-dark' if not notif.is_read else 'text-muted' }} text-wrap" style="line-height: 1.2;">{{ notif.message }}</div>
+                                                <div class="text-muted" style="font-size: 0.7em;">{{ notif.created_at.strftime('%b %d, %H:%M') }}</div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    {% endfor %}
+                                {% else %}
+                                    <li><span class="dropdown-item text-muted text-center py-3">No notifications</span></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+
                         <span class="me-3">
                             <i class="fas fa-user-circle me-1"></i>{{ current_user.name }}
                         </span>

@@ -7,6 +7,7 @@ from app import app
 from database import db
 from models import Role, User, Department, Designation, Schedule
 from flask_bcrypt import Bcrypt
+import os
 
 bcrypt = Bcrypt()
 
@@ -20,10 +21,7 @@ def init_database():
         print("Creating roles...")
         roles_data = [
             {'name': 'superadmin', 'description': 'Super Administrator with full access'},
-            {'name': 'admin', 'description': 'Administrator with administrative access'},
             {'name': 'hr', 'description': 'HR Manager with HR management access'},
-            {'name': 'payroll', 'description': 'Payroll Manager with payroll access'},
-            {'name': 'moderator', 'description': 'Moderator with attendance management access'},
             {'name': 'employee', 'description': 'Employee self-service'},
         ]
         
@@ -39,14 +37,17 @@ def init_database():
         print("Creating default superadmin user...")
         superadmin_role = Role.query.filter_by(name='superadmin').first()
         
-        admin_user = User.query.filter_by(email='admin@example.com').first()
+        admin_email = os.environ.get('ADMIN_EMAIL', 'admin@example.com')
+        admin_password = os.environ.get('ADMIN_PASSWORD', 'admin123')
+        
+        admin_user = User.query.filter_by(email=admin_email).first()
         if not admin_user:
             admin_user = User(
                 role_id=superadmin_role.id,
                 name='Super Admin',
-                email='admin@example.com',
+                email=admin_email,
                 phone='1234567890',
-                password=bcrypt.generate_password_hash('admin123').decode('utf-8'),
+                password=bcrypt.generate_password_hash(admin_password).decode('utf-8'),
                 status='active'
             )
             db.session.add(admin_user)
@@ -86,8 +87,9 @@ def init_database():
         print("Creating sample schedules...")
         from datetime import time
         schedules = [
-            {'name': 'Day Shift', 'time_in': time(9, 0), 'time_out': time(17, 0)},
-            {'name': 'Night Shift', 'time_in': time(22, 0), 'time_out': time(6, 0)},
+            {'name': 'Day Shift', 'time_in': time(9, 0), 'time_out': time(17, 0), 'grace_period_minutes': 15},
+            {'name': 'Night Shift', 'time_in': time(22, 0), 'time_out': time(6, 0), 'grace_period_minutes': 15},
+            {'name': 'Flexible Shift (8 Hrs)', 'time_in': None, 'time_out': None, 'is_flexible': True, 'working_hours': 8.0},
         ]
         
         for sched_data in schedules:
@@ -100,8 +102,8 @@ def init_database():
         
         print("\nDatabase initialized successfully!")
         print("\nDefault Login Credentials:")
-        print("Email: admin@example.com")
-        print("Password: admin123")
+        print(f"Email: {admin_email}")
+        print(f"Password: {admin_password}")
         print("\nYou can now run the application with: python app.py")
 
 if __name__ == '__main__':

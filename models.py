@@ -82,8 +82,11 @@ class Schedule(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    time_in = db.Column(db.Time, nullable=False)
-    time_out = db.Column(db.Time, nullable=False)
+    time_in = db.Column(db.Time, nullable=True)
+    time_out = db.Column(db.Time, nullable=True)
+    is_flexible = db.Column(db.Boolean, default=False)
+    working_hours = db.Column(db.Numeric(5, 2), default=8.0)
+    grace_period_minutes = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -107,6 +110,8 @@ class Employee(db.Model):
     religion = db.Column(db.String(50))
     marital = db.Column(db.String(20))
     image = db.Column(db.String(255))  # Store image filename
+    aadhar_file = db.Column(db.String(255))
+    resume_file = db.Column(db.String(255))
     status = db.Column(db.String(20), default='active')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -118,6 +123,8 @@ class Employee(db.Model):
     late_times = db.relationship('LateTime', backref='employee', lazy=True, cascade='all, delete-orphan')
     over_times = db.relationship('OverTime', backref='employee', lazy=True, cascade='all, delete-orphan')
     payrolls = db.relationship('Payroll', backref='employee', lazy=True, cascade='all, delete-orphan')
+    documents = db.relationship('Document', backref='employee', lazy=True, cascade='all, delete-orphan')
+    reviews = db.relationship('PerformanceReview', backref='employee', lazy=True, cascade='all, delete-orphan', foreign_keys='PerformanceReview.employee_id')
 
     def generate_attendance(self, start_date, end_date):
         """Generate attendance records for the employee between given dates."""
@@ -284,3 +291,45 @@ class AuditLog(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     actor = db.relationship('User', backref='audit_logs', lazy=True)
+
+class Notification(db.Model):
+    __tablename__ = 'notifications'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    message = db.Column(db.String(255), nullable=False)
+    type = db.Column(db.String(50))  # 'leave', 'salary', 'system'
+    is_read = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref='notifications', lazy=True)
+
+class Document(db.Model):
+    __tablename__ = 'documents'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    employee_id = db.Column(db.Integer, db.ForeignKey('employees.id'), nullable=False)
+    title = db.Column(db.String(150), nullable=False)
+    doc_type = db.Column(db.String(50), nullable=False) # 'offer_letter', 'contract', 'salary_slip', 'other'
+    file_path = db.Column(db.String(255), nullable=False)
+    uploaded_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    uploader = db.relationship('User', backref='uploaded_documents', lazy=True)
+
+class PerformanceReview(db.Model):
+    __tablename__ = 'performance_reviews'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    employee_id = db.Column(db.Integer, db.ForeignKey('employees.id'), nullable=False)
+    reviewer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    review_period = db.Column(db.String(100), nullable=False)  # e.g., 'Q1 2026', 'Annual 2026'
+    rating = db.Column(db.Integer, nullable=False)  # 1 to 5
+    feedback = db.Column(db.Text, nullable=False)
+    goals_achieved = db.Column(db.Text)
+    areas_for_improvement = db.Column(db.Text)
+    status = db.Column(db.String(50), default='published')  # draft, published, acknowledged
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    reviewer = db.relationship('User', backref='conducted_reviews', foreign_keys=[reviewer_id], lazy=True)

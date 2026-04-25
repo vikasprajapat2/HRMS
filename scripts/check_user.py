@@ -6,8 +6,15 @@ from database import db
 from models import User
 from flask_bcrypt import Bcrypt
 
-email = 'vikas@gmail.com'
-password = 'admin123'
+import argparse
+
+parser = argparse.ArgumentParser(description="Check user credentials")
+parser.add_argument("--email", default=os.environ.get("CHECK_EMAIL", "admin@example.com"), help="User email to check")
+parser.add_argument("--password", default=os.environ.get("CHECK_PASSWORD", "admin123"), help="User password to check")
+args, _ = parser.parse_known_args()
+
+email = args.email
+password = args.password
 
 with app.app_context():
     user = User.query.filter_by(email=email).first()

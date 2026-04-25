@@ -33,6 +33,105 @@
           <li class="list-group-item"><strong>Role:</strong> {{ current_user.role.name if current_user.role else '-' }}</li>
         </ul>
       </div>
+
+      {% if employee %}
+      <div class="card mt-3">
+        <div class="card-header bg-dark text-white">
+          <h5 class="mb-0"><i class="fas fa-file-contract me-2"></i>Official Documents</h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover table-sm align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-3">Title</th>
+                  <th>Type</th>
+                  <th>Date</th>
+                  <th class="text-end pe-3">Download</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for doc in employee.documents|sort(attribute='uploaded_at', reverse=True) %}
+                <tr>
+                  <td class="ps-3 fw-bold">{{ doc.title }}</td>
+                  <td>
+                    {% if doc.doc_type == 'offer_letter' %}
+                    <span class="badge bg-primary">Offer Letter</span>
+                    {% elif doc.doc_type == 'contract' %}
+                    <span class="badge bg-success">Contract</span>
+                    {% elif doc.doc_type == 'salary_slip' %}
+                    <span class="badge bg-info text-dark">Salary Slip</span>
+                    {% else %}
+                    <span class="badge bg-secondary">{{ doc.doc_type|title }}</span>
+                    {% endif %}
+                  </td>
+                  <td><small class="text-muted">{{ doc.uploaded_at.strftime('%b %d, %Y') }}</small></td>
+                  <td class="text-end pe-3">
+                    <a href="{{ url_for('document.download', doc_id=doc.id) }}" class="btn btn-sm btn-outline-primary" title="Download">
+                      <i class="fas fa-download"></i>
+                    </a>
+                  </td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td colspan="4" class="text-center py-4 text-muted fst-italic">No official documents available.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mt-4">
+        <div class="card-header bg-dark text-white">
+          <h5 class="mb-0"><i class="fas fa-star text-warning me-2"></i>My Appraisals</h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="accordion accordion-flush" id="reviewsAccordion">
+            {% set published_reviews = employee.reviews|selectattr('status', 'equalto', 'published')|list %}
+            {% for review in published_reviews|sort(attribute='created_at', reverse=True) %}
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="heading{{ review.id }}">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ review.id }}" aria-expanded="false" aria-controls="collapse{{ review.id }}">
+                  <div class="w-100 d-flex justify-content-between align-items-center me-3">
+                    <span class="fw-bold">{{ review.review_period }}</span>
+                    <span>
+                      {% for i in range(review.rating) %}<i class="fas fa-star text-warning"></i>{% endfor %}
+                      {% for i in range(5 - review.rating) %}<i class="far fa-star text-muted"></i>{% endfor %}
+                    </span>
+                  </div>
+                </button>
+              </h2>
+              <div id="collapse{{ review.id }}" class="accordion-collapse collapse" aria-labelledby="heading{{ review.id }}" data-bs-parent="#reviewsAccordion">
+                <div class="accordion-body bg-light">
+                  <h6><strong>General Feedback</strong></h6>
+                  <p class="text-muted">{{ review.feedback }}</p>
+                  
+                  <div class="row mt-3">
+                    <div class="col-md-6">
+                      <h6 class="text-success"><i class="fas fa-check-circle me-1"></i> Goals Achieved</h6>
+                      <div class="p-2 bg-white border rounded">
+                        {{ review.goals_achieved or 'Not specified.' }}
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <h6 class="text-danger"><i class="fas fa-arrow-trend-up me-1"></i> Areas for Improvement</h6>
+                      <div class="p-2 bg-white border rounded">
+                        {{ review.areas_for_improvement or 'Not specified.' }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% else %}
+            <div class="p-4 text-center text-muted fst-italic">No performance appraisals available.</div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
     </div>
   </div>
 </div>

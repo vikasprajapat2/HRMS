@@ -1,18 +1,75 @@
 {% extends "base.html" %}
 {% block title %}Monthly Attendance Report - {{ month_name }} {{ year }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .kpi-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .kpi-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .calendar-day {
+        min-height: 120px;
+        border: 1px solid #e2e8f0;
+        transition: background-color 0.2s;
+    }
+    .calendar-day:hover {
+        background-color: #f8fafc;
+    }
+    .calendar-header {
+        background-color: #f1f5f9;
+        font-weight: 600;
+        color: #334155;
+        font-size: 0.85rem;
+    }
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 0.4em 0.6em;
+        border-radius: 4px;
+        font-weight: 500;
+    }
+    .table-modern th {
+        font-size: 0.8rem;
+        color: #475569;
+        border-bottom: 2px solid #e2e8f0;
+        background-color: #f8fafc;
+    }
+    .badge-soft-success { background-color: #dcfce7; color: #166534; }
+    .badge-soft-danger { background-color: #fee2e2; color: #991b1b; }
+    .badge-soft-warning { background-color: #fef3c7; color: #92400e; }
+    .badge-soft-secondary { background-color: #f1f5f9; color: #475569; }
+    
+    .badge-solid-success { background-color: #15803d; color: #ffffff; }
+    .badge-solid-danger { background-color: #b91c1c; color: #ffffff; }
+    .badge-solid-warning { background-color: #d97706; color: #ffffff; }
+    .badge-solid-primary { background-color: #1d4ed8; color: #ffffff; }
+    .badge-solid-info { background-color: #0369a1; color: #ffffff; }
+    .badge-solid-secondary { background-color: #475569; color: #ffffff; }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Monthly Attendance Report - {{ month_name }} {{ year }}</h2>
-    <a href="{{ url_for('attendance.index') }}" class="btn btn-outline-secondary">
-        <i class="fas fa-arrow-left"></i> Back to Attendance
+    <div>
+        <h2 class="fw-bold text-dark mb-1"><i class="fas fa-chart-line text-primary me-2"></i>Monthly Insights</h2>
+        <p class="text-muted mb-0 fs-5">{{ month_name }} {{ year }} Attendance Overview</p>
+    </div>
+    <a href="{{ url_for('attendance.index') }}" class="btn btn-light shadow-sm fw-bold">
+        <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
     </a>
 </div>
 
-<div class="card shadow mb-4">
-    <div class="card-body bg-light">
-        <form method="get" action="{{ url_for('attendance.monthly_report') }}" class="row align-items-end">
-            <div class="col-md-3 mb-3 mb-md-0">
-                <label for="month" class="form-label">Month</label>
+<!-- Filters -->
+<div class="card mb-4 shadow-sm border-0">
+    <div class="card-body p-4 bg-white border rounded">
+        <form method="get" action="{{ url_for('attendance.monthly_report') }}" class="row align-items-end g-3">
+            <input type="hidden" name="active_tab" id="active_tab" value="{{ request.args.get('active_tab', 'summary') }}">
+            <div class="col-md-3">
+                <label for="month" class="form-label fw-bold text-secondary small">Month</label>
                 <select name="month" id="month" class="form-select">
                     {% for m in range(1, 13) %}
                     <option value="{{ m }}" {% if month == m %}selected{% endif %}>
@@ -21,18 +78,18 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-3 mb-3 mb-md-0">
-                <label for="year" class="form-label">Year</label>
+            <div class="col-md-3">
+                <label for="year" class="form-label fw-bold text-secondary small">Year</label>
                 <select name="year" id="year" class="form-select">
                     {% for y in range(year-2, year+1) %}
                     <option value="{{ y }}" {% if year == y %}selected{% endif %}>{{ y }}</option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-4 mb-3 mb-md-0">
-                <label for="employee_id" class="form-label">Employee</label>
+            <div class="col-md-4">
+                <label for="employee_id" class="form-label fw-bold text-secondary small">Employee</label>
                 <select name="employee_id" id="employee_id" class="form-select">
-                    <option value="">All Employees</option>
+                    <option value="">-- All Employees --</option>
                     {% for emp in employees %}
                     <option value="{{ emp.id }}" {% if selected_employee|string == emp.id|string %}selected{% endif %}>
                         {{ emp.firstname }} {{ emp.lastname }}
@@ -41,145 +98,233 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <button type="submit" class="btn btn-primary w-100"><i class="fas fa-filter me-1"></i> Generate</button>
+                <button type="submit" class="btn btn-primary w-100 fw-bold">
+                    <i class="fas fa-filter me-2"></i> Update
+                </button>
             </div>
         </form>
     </div>
 </div>
 
-<div class="row">
-    <!-- Summary Statistics -->
-    <div class="col-12 mb-4">
-        <div class="card shadow">
-            <div class="card-header bg-dark text-white">
-                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Summary Statistics</h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover table-bordered align-middle text-center mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="text-start">Employee</th>
-                                <th>Present <br><small class="text-muted">(Days)</small></th>
-                                <th>Absent <br><small class="text-muted">(Days)</small></th>
-                                <th>Late <br><small class="text-muted">(Arrivals)</small></th>
-                                <th>Early <br><small class="text-muted">(Departures)</small></th>
-                                <th>Total Hours</th>
-                                <th>Attendance Rate</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for emp in employees %}
-                                {% if not selected_employee or selected_employee|string == emp.id|string %}
-                                    {% set emp_stats = stats[emp.id] %}
-                                    <tr>
-                                        <td class="text-start fw-bold">{{ emp.firstname }} {{ emp.lastname }}</td>
-                                        <td><span class="badge bg-success bg-opacity-75 fs-6">{{ emp_stats['present'] }}</span></td>
-                                        <td><span class="badge bg-danger bg-opacity-75 fs-6">{{ emp_stats['absent'] }}</span></td>
-                                        <td><span class="badge bg-warning text-dark bg-opacity-75 fs-6">{{ emp_stats['late'] }}</span></td>
-                                        <td><span class="badge bg-secondary bg-opacity-75 fs-6">{{ emp_stats['early_out'] }}</span></td>
-                                        <td class="fw-bold text-primary">{{ '%d:%02d' | format(
-                                            emp_stats['working_hours'].total_seconds() // 3600,
-                                            (emp_stats['working_hours'].total_seconds() % 3600) // 60
-                                        ) }}</td>
-                                        <td>
-                                            <div class="progress" style="height: 20px;">
-                                                <div class="progress-bar {% if emp_stats['attendance_percentage'] >= 90 %}bg-success{% elif emp_stats['attendance_percentage'] >= 75 %}bg-info{% else %}bg-danger{% endif %}" role="progressbar" style="width: {{ emp_stats['attendance_percentage'] }}%;" aria-valuenow="{{ emp_stats['attendance_percentage'] }}" aria-valuemin="0" aria-valuemax="100">{{ '%.1f%%' | format(emp_stats['attendance_percentage']) }}</div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                {% endif %}
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+{% set total_emps = employees|length %}
+{% set total_present = 0 %}
+{% set total_absent = 0 %}
+{% set total_late = 0 %}
+{% set avg_rate = 0 %}
+{% set filtered_emp_count = 0 %}
 
-    <!-- Detailed Records Calendar View -->
+{% for emp in employees %}
+    {% if not selected_employee or selected_employee|string == emp.id|string %}
+        {% set emp_stats = stats[emp.id] %}
+        {% set _ = total_present.update({'value': total_present + emp_stats['present']}) if total_present is mapping else '' %}
+        {% set _ = total_absent.update({'value': total_absent + emp_stats['absent']}) if total_absent is mapping else '' %}
+        {% set _ = total_late.update({'value': total_late + emp_stats['late']}) if total_late is mapping else '' %}
+        {% set _ = avg_rate.update({'value': avg_rate + emp_stats['attendance_percentage']}) if avg_rate is mapping else '' %}
+        {% set filtered_emp_count = filtered_emp_count + 1 %}
+    {% endif %}
+{% endfor %}
+
+<div class="row">
     <div class="col-12">
-        <div class="card shadow">
-            <div class="card-header bg-info text-dark">
-                <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Detailed Attendance Calendar</h5>
-            </div>
-            <div class="card-body">
-                {% for emp in employees %}
-                    {% if not selected_employee or selected_employee|string == emp.id|string %}
-                    <div class="mb-5">
-                        <h4 class="mb-3 border-bottom pb-2 text-primary">{{ emp.firstname }} {{ emp.lastname }}</h4>
+        <!-- Tab Navigation -->
+        <ul class="nav nav-tabs mb-4 border-bottom" id="reportTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link {% if not request.args.get('active_tab') or request.args.get('active_tab') == 'summary' %}active{% endif %} fw-bold px-4 py-3" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab" aria-controls="summary" aria-selected="true" style="color: #334155;" onclick="document.getElementById('active_tab').value='summary'">
+                    <i class="fas fa-table me-2 text-primary"></i> Performance Summary
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link {% if request.args.get('active_tab') == 'calendar' %}active{% endif %} fw-bold px-4 py-3" id="calendar-tab" data-bs-toggle="tab" data-bs-target="#calendar" type="button" role="tab" aria-controls="calendar" aria-selected="false" style="color: #334155;" onclick="document.getElementById('active_tab').value='calendar'">
+                    <i class="fas fa-calendar-alt me-2 text-primary"></i> Timesheet Calendar
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="reportTabsContent">
+            
+            <!-- Summary Tab -->
+            <div class="tab-pane fade {% if not request.args.get('active_tab') or request.args.get('active_tab') == 'summary' %}show active{% endif %}" id="summary" role="tabpanel" aria-labelledby="summary-tab">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white border-bottom pt-3 pb-2">
+                        <h5 class="fw-bold text-dark mb-0">Performance Summary</h5>
+                    </div>
+                    <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-bordered text-center calendar-table bg-white">
-                                <thead class="table-light">
+                            <table class="table table-hover table-modern align-middle text-center mb-0">
+                                <thead>
                                     <tr>
-                                        <th style="width: 14.28%">Mon</th>
-                                        <th style="width: 14.28%">Tue</th>
-                                        <th style="width: 14.28%">Wed</th>
-                                        <th style="width: 14.28%">Thu</th>
-                                        <th style="width: 14.28%">Fri</th>
-                                        <th style="width: 14.28%">Sat</th>
-                                        <th style="width: 14.28%">Sun</th>
+                                        <th class="text-start ps-4">Employee</th>
+                                        <th>Present</th>
+                                        <th>Absent</th>
+                                        <th>Late</th>
+                                        <th>Early Out</th>
+                                        <th>Total Hours</th>
+                                        <th class="pe-4" style="width: 200px;">Attendance Rate</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    {% for week in cal_grid %}
-                                    <tr>
-                                        {% for day in week %}
-                                        <td class="p-2 {% if day == 0 %}bg-light{% endif %}" style="height: 120px; vertical-align: top;">
-                                            {% if day != 0 %}
-                                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                                    <span class="badge bg-secondary rounded-circle fs-6">{{ day }}</span>
-                                                </div>
-                                                {% set att = att_by_emp_day[emp.id].get(day) %}
-                                                {% if att %}
-                                                    {% if att.status == 'present' %}
-                                                        <div class="p-2 mb-1 bg-success text-white rounded shadow-sm" style="font-size: 0.85rem;">
-                                                            <strong><i class="fas fa-check-circle"></i> Present</strong>
-                                                            {% if att.time_in %}
-                                                                <br>{{ att.time_in.strftime('%H:%M') }} - {{ att.time_out.strftime('%H:%M') if att.time_out else '?' }}
-                                                            {% endif %}
+                                <tbody class="border-top-0">
+                                    {% for emp in employees %}
+                                        {% if not selected_employee or selected_employee|string == emp.id|string %}
+                                            {% set emp_stats = stats[emp.id] %}
+                                            <tr>
+                                                <td class="text-start ps-4 py-3">
+                                                    <div class="d-flex align-items-center">
+                                                        {% if emp.image %}
+                                                        <img src="{{ url_for('static', filename='uploads/employees/' ~ emp.image) }}" class="rounded-circle me-3 border" width="35" height="35" style="object-fit: cover;">
+                                                        {% else %}
+                                                        <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-3" style="width:35px;height:35px;font-size:0.9rem;">
+                                                            {{ emp.firstname[0] }}{{ emp.lastname[0] }}
                                                         </div>
-                                                        {% if att.employee.schedule and att.time_in %}
-                                                            {% if att.time_in > att.employee.schedule.time_in %}
-                                                                <div class="text-warning fw-bold mt-1" style="font-size: 0.75rem;"><i class="fas fa-clock"></i> Late</div>
-                                                            {% endif %}
                                                         {% endif %}
-                                                    {% elif att.status == 'absent' %}
-                                                        <div class="p-2 mb-1 bg-danger text-white rounded shadow-sm" style="font-size: 0.85rem;">
-                                                            <strong><i class="fas fa-times-circle"></i> Absent</strong>
+                                                        <div>
+                                                            <div class="fw-bold text-dark">{{ emp.firstname }} {{ emp.lastname }}</div>
+                                                            <div class="small text-muted">{{ emp.designation.name if emp.designation else 'Staff' }}</div>
                                                         </div>
-                                                    {% elif att.status == 'holiday' %}
-                                                        <div class="p-2 mb-1 bg-primary text-white rounded shadow-sm" style="font-size: 0.85rem;">
-                                                            <strong><i class="fas fa-umbrella-beach"></i> Holiday</strong><br>
-                                                            <small>{{ att.description|truncate(20) }}</small>
-                                                        </div>
-                                                    {% elif att.status == 'leave' %}
-                                                        <div class="p-2 mb-1 bg-info text-dark rounded shadow-sm" style="font-size: 0.85rem;">
-                                                            <strong><i class="fas fa-plane"></i> On Leave</strong><br>
-                                                            <small>{{ att.description|truncate(20) }}</small>
-                                                        </div>
-                                                    {% elif att.status == 'weekend' %}
-                                                        <div class="text-muted fst-italic mt-4" style="font-size: 0.85rem;">Weekend</div>
-                                                    {% else %}
-                                                        <div class="p-2 mb-1 bg-secondary text-white rounded shadow-sm" style="font-size: 0.85rem;">
-                                                            <strong>{{ att.status|title }}</strong>
-                                                        </div>
-                                                    {% endif %}
-                                                {% endif %}
-                                            {% endif %}
-                                        </td>
-                                        {% endfor %}
-                                    </tr>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge badge-soft-success py-2 px-3 border border-success border-opacity-25">{{ emp_stats['present'] }}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge badge-soft-danger py-2 px-3 border border-danger border-opacity-25">{{ emp_stats['absent'] }}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge badge-soft-warning py-2 px-3 border border-warning border-opacity-25">{{ emp_stats['late'] }}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge badge-soft-secondary py-2 px-3 border border-secondary border-opacity-25">{{ emp_stats['early_out'] }}</span>
+                                                </td>
+                                                <td class="fw-bold text-dark">
+                                                    {{ '%d' | format(emp_stats['working_hours'].total_seconds() // 3600) }}<span class="text-muted fw-normal">h</span> {{ '%02d' | format((emp_stats['working_hours'].total_seconds() % 3600) // 60) }}<span class="text-muted fw-normal">m</span>
+                                                </td>
+                                                <td class="pe-4">
+                                                    <div class="d-flex align-items-center justify-content-between mb-1">
+                                                        <span class="fw-bold text-dark small">
+                                                            {{ '%.1f%%' | format(emp_stats['attendance_percentage']) }}
+                                                        </span>
+                                                    </div>
+                                                    <div class="progress rounded-0" style="height: 6px; background-color: #e2e8f0;">
+                                                        <div class="progress-bar {% if emp_stats['attendance_percentage'] >= 90 %}bg-success{% elif emp_stats['attendance_percentage'] >= 75 %}bg-warning{% else %}bg-danger{% endif %}" role="progressbar" style="width: {{ emp_stats['attendance_percentage'] }}%;"></div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endif %}
                                     {% endfor %}
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                    {% endif %}
-                {% else %}
-                    <div class="alert alert-info">No employee records found.</div>
-                {% endfor %}
+                </div>
             </div>
+
+            <!-- Calendar Tab -->
+            <div class="tab-pane fade {% if request.args.get('active_tab') == 'calendar' %}show active{% endif %}" id="calendar" role="tabpanel" aria-labelledby="calendar-tab">
+                <div class="accordion" id="calendarAccordion">
+                    {% for emp in employees %}
+                        {% if not selected_employee or selected_employee|string == emp.id|string %}
+                        <div class="accordion-item mb-3 border-0 shadow-sm rounded overflow-hidden">
+                            <h2 class="accordion-header" id="heading{{ emp.id }}">
+                                <button class="accordion-button {% if selected_employee|string != emp.id|string %}collapsed{% endif %} bg-white border-bottom" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ emp.id }}" aria-expanded="{% if selected_employee|string == emp.id|string %}true{% else %}false{% endif %}" aria-controls="collapse{{ emp.id }}">
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded bg-secondary text-white d-flex align-items-center justify-content-center me-3" style="width:40px;height:40px;font-weight:600;">
+                                            {{ emp.firstname[0] }}{{ emp.lastname[0] }}
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 fw-bold text-dark">{{ emp.firstname }} {{ emp.lastname }}</h6>
+                                            <small class="text-muted">ID: {{ emp.unique_id }}</small>
+                                        </div>
+                                    </div>
+                                </button>
+                            </h2>
+                            <div id="collapse{{ emp.id }}" class="accordion-collapse collapse {% if selected_employee|string == emp.id|string %}show{% endif %}" aria-labelledby="heading{{ emp.id }}" data-bs-parent="#calendarAccordion">
+                                <div class="accordion-body p-0 bg-light">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered mb-0">
+                                            <thead class="calendar-header text-center">
+                                                <tr>
+                                                    <th class="py-2" style="width: 14.28%">Mon</th>
+                                                    <th class="py-2" style="width: 14.28%">Tue</th>
+                                                    <th class="py-2" style="width: 14.28%">Wed</th>
+                                                    <th class="py-2" style="width: 14.28%">Thu</th>
+                                                    <th class="py-2" style="width: 14.28%">Fri</th>
+                                                    <th class="py-2 text-danger" style="width: 14.28%">Sat</th>
+                                                    <th class="py-2 text-danger" style="width: 14.28%">Sun</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for week in cal_grid %}
+                                                <tr>
+                                                    {% for day in week %}
+                                                    <td class="p-2 calendar-day {% if day == 0 %}bg-light opacity-50{% endif %}">
+                                                        {% if day != 0 %}
+                                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                                <span class="fw-bold text-secondary">{{ day }}</span>
+                                                            </div>
+                                                            {% set att = att_by_emp_day[emp.id].get(day) %}
+                                                            {% if att %}
+                                                                {% if att.status == 'present' %}
+                                                                    <div class="status-badge badge-solid-success mb-2">
+                                                                        Present
+                                                                    </div>
+                                                                    {% if att.time_in %}
+                                                                        <div class="small text-muted fw-bold mb-1" style="font-size: 0.7rem;">
+                                                                            IN: {{ att.time_in.strftime('%H:%M') }}
+                                                                        </div>
+                                                                        <div class="small text-muted fw-bold" style="font-size: 0.7rem;">
+                                                                            OUT: {{ att.time_out.strftime('%H:%M') if att.time_out else '--:--' }}
+                                                                        </div>
+                                                                    {% endif %}
+                                                                    {% if att.employee.schedule and att.time_in %}
+                                                                        {% if att.time_in > att.employee.schedule.time_in %}
+                                                                            <div class="status-badge badge-soft-warning mt-1" style="font-size: 0.65rem;">
+                                                                                Late Arrival
+                                                                            </div>
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                {% elif att.status == 'absent' %}
+                                                                    <div class="status-badge badge-solid-danger">
+                                                                        Absent
+                                                                    </div>
+                                                                {% elif att.status == 'holiday' %}
+                                                                    <div class="status-badge badge-solid-info">
+                                                                        Holiday
+                                                                    </div>
+                                                                    <div class="small text-muted mt-1" style="font-size: 0.7rem;">{{ att.description|truncate(20) }}</div>
+                                                                {% elif att.status == 'leave' %}
+                                                                    <div class="status-badge badge-solid-primary">
+                                                                        On Leave
+                                                                    </div>
+                                                                    <div class="small text-muted mt-1" style="font-size: 0.7rem;">{{ att.description|truncate(20) }}</div>
+                                                                {% elif att.status == 'weekend' %}
+                                                                    <div class="text-muted small" style="font-size: 0.7rem;">Weekend</div>
+                                                                {% else %}
+                                                                    <div class="status-badge badge-solid-secondary">
+                                                                        {{ att.status|title }}
+                                                                    </div>
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    </td>
+                                                    {% endfor %}
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-light border text-center p-4">
+                            <i class="fas fa-info-circle fa-2x text-muted mb-2"></i>
+                            <p class="mb-0 text-muted">No attendance data to display for the selected filters.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
         </div>
     </div>
 </div>

@@ -1,63 +1,159 @@
 {% extends "base.html" %}
 {% block title %}Attendance Board{% endblock %}
+
+{% block extra_css %}
+<style>
+    .table-modern th {
+        font-size: 0.8rem;
+        color: #475569;
+        border-bottom: 2px solid #e2e8f0;
+        background-color: #f8fafc;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 0.4em 0.8em;
+        border-radius: 4px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    .badge-soft-success { background-color: #dcfce7; color: #166534; border: 1px solid rgba(22, 101, 52, 0.2); }
+    .badge-soft-danger { background-color: #fee2e2; color: #991b1b; border: 1px solid rgba(153, 27, 27, 0.2); }
+    .badge-soft-warning { background-color: #fef3c7; color: #92400e; border: 1px solid rgba(146, 64, 14, 0.2); }
+    .badge-soft-info { background-color: #e0f2fe; color: #075985; border: 1px solid rgba(7, 89, 133, 0.2); }
+    
+    .time-badge {
+        font-size: 0.9rem;
+        font-weight: 600;
+        background-color: #f1f5f9;
+        color: #334155;
+        padding: 0.4em 0.8em;
+        border-radius: 6px;
+        border: 1px solid #cbd5e1;
+        display: inline-block;
+        min-width: 75px;
+        text-align: center;
+    }
+    .action-input {
+        background-color: #f8fafc;
+        border: 1px solid #cbd5e1;
+        transition: border-color 0.2s;
+    }
+    .action-input:focus {
+        border-color: #94a3b8;
+        box-shadow: none;
+    }
+    .emp-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: white;
+        background-color: #64748b;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Attendance Board - {{ date.strftime('%B %d, %Y') }}</h2>
-    <a href="{{ url_for('attendance.index') }}" class="btn btn-outline-secondary">
-        <i class="fas fa-arrow-left"></i> Back to Attendance
+    <div>
+        <h2 class="fw-bold text-dark mb-1"><i class="fas fa-clipboard-list text-primary me-2"></i>Daily Attendance Board</h2>
+        <p class="text-muted mb-0 fs-5">{{ date.strftime('%A, %B %d, %Y') }}</p>
+    </div>
+    <a href="{{ url_for('attendance.index') }}" class="btn btn-light shadow-sm fw-bold border">
+        <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
     </a>
 </div>
 
-<div class="card shadow">
-    <div class="card-header bg-primary text-white">
-        <h5 class="mb-0"><i class="fas fa-clipboard-check"></i> Quick Check-in/Out</h5>
+<div class="card shadow-sm border-0 mb-5">
+    <div class="card-header bg-white border-bottom pt-4 pb-3">
+        <h5 class="fw-bold text-dark mb-0"><i class="fas fa-user-clock me-2 text-primary"></i>Quick Check-in / Check-out</h5>
+        <small class="text-muted">Manually log time entries for employees. Leave time blank to use current server time.</small>
     </div>
-    <div class="card-body">
+    <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover table-bordered align-middle">
-                <thead class="table-light">
+            <table class="table table-hover table-modern align-middle mb-0">
+                <thead>
                     <tr>
-                        <th>#</th>
+                        <th class="ps-4" style="width: 50px;">#</th>
                         <th>Employee</th>
-                        <th>Status</th>
-                        <th>Time In</th>
-                        <th>Time Out</th>
-                        <th>Actions (Leave time blank to use current time)</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-center">Time In</th>
+                        <th class="text-center">Time Out</th>
+                        <th style="min-width: 320px;">Manual Logging Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="border-top-0">
                 {% for emp in employees %}
                     {% set a = attendance_map.get(emp.id) %}
                     <tr>
-                        <td>{{ loop.index }}</td>
-                        <td class="fw-bold">{{ emp.firstname }} {{ emp.lastname }}</td>
-                        <td>
+                        <td class="ps-4 fw-bold text-muted">{{ loop.index }}</td>
+                        <td class="py-3">
+                            <div class="d-flex align-items-center">
+                                {% if emp.image %}
+                                <img src="{{ url_for('static', filename='uploads/employees/' ~ emp.image) }}" class="emp-avatar me-3 shadow-sm" style="object-fit: cover;">
+                                {% else %}
+                                <div class="emp-avatar me-3 shadow-sm" style="background-color: #475569;">
+                                    {{ emp.firstname[0] }}{{ emp.lastname[0] }}
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <div class="fw-bold text-dark">{{ emp.firstname }} {{ emp.lastname }}</div>
+                                    <div class="small text-muted">{{ emp.designation.name if emp.designation else 'Staff' }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-center">
                             {% if a and (a.status == 'present' or a.status == 'late' or a.status == 'early_out') %}
-                                <span class="badge bg-success">Present</span>
+                                <span class="status-badge badge-soft-success"><i class="fas fa-check-circle me-1"></i> Present</span>
                             {% elif a and a.status == 'absent' %}
-                                <span class="badge bg-danger">Absent</span>
+                                <span class="status-badge badge-soft-danger"><i class="fas fa-times-circle me-1"></i> Absent</span>
                             {% elif a and a.status == 'leave' %}
-                                <span class="badge bg-info text-white">On Leave</span>
+                                <span class="status-badge badge-soft-info"><i class="fas fa-plane me-1"></i> On Leave</span>
                             {% else %}
-                                <span class="badge bg-warning text-dark">Absent</span>
+                                <span class="status-badge badge-soft-warning text-dark"><i class="fas fa-minus-circle me-1"></i> No Record</span>
                             {% endif %}
                         </td>
-                        <td>{% if a and a.time_in %}<h5><span class="badge bg-light text-dark border">{{ a.time_in.strftime('%H:%M') }}</span></h5>{% else %}-{% endif %}</td>
-                        <td>{% if a and a.time_out %}<h5><span class="badge bg-light text-dark border">{{ a.time_out.strftime('%H:%M') }}</span></h5>{% else %}-{% endif %}</td>
-                        <td>
-                            <div class="d-flex flex-wrap gap-2">
-                                <form method="post" action="{{ url_for('attendance.check') }}" class="d-flex gx-0">
-                                    <input type="hidden" name="employee_id" value="{{ emp.id }}">
-                                    <input type="hidden" name="action" value="in">
-                                    <input type="time" name="time" class="form-control form-control-sm me-1" style="width: 105px;" title="Specific check-in time">
-                                    <button class="btn btn-sm btn-success" type="submit"><i class="fas fa-sign-in-alt me-1"></i> In</button>
-                                </form>
-                                <form method="post" action="{{ url_for('attendance.check') }}" class="d-flex gx-0">
-                                    <input type="hidden" name="employee_id" value="{{ emp.id }}">
-                                    <input type="hidden" name="action" value="out">
-                                    <input type="time" name="time" class="form-control form-control-sm me-1" style="width: 105px;" title="Specific check-out time">
-                                    <button class="btn btn-sm btn-danger" type="submit"><i class="fas fa-sign-out-alt me-1"></i> Out</button>
-                                </form>
+                        <td class="text-center">
+                            {% if a and a.time_in %}
+                                <div class="time-badge">{{ a.time_in.strftime('%H:%M') }}</div>
+                            {% else %}
+                                <span class="text-muted fw-bold">--:--</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if a and a.time_out %}
+                                <div class="time-badge">{{ a.time_out.strftime('%H:%M') }}</div>
+                            {% else %}
+                                <span class="text-muted fw-bold">--:--</span>
+                            {% endif %}
+                        </td>
+                        <td style="min-width: 250px;">
+                            <div class="row g-2">
+                                <div class="col-12 col-xl-6">
+                                    <form method="post" action="{{ url_for('attendance.check') }}">
+                                        <input type="hidden" name="employee_id" value="{{ emp.id }}">
+                                        <input type="hidden" name="action" value="in">
+                                        <div class="input-group input-group-sm">
+                                            <input type="time" name="time" class="form-control" title="Specific check-in time">
+                                            <button class="btn btn-outline-success fw-bold" type="submit"><i class="fas fa-sign-in-alt"></i> IN</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="col-12 col-xl-6">
+                                    <form method="post" action="{{ url_for('attendance.check') }}">
+                                        <input type="hidden" name="employee_id" value="{{ emp.id }}">
+                                        <input type="hidden" name="action" value="out">
+                                        <div class="input-group input-group-sm">
+                                            <input type="time" name="time" class="form-control" title="Specific check-out time">
+                                            <button class="btn btn-outline-danger fw-bold" type="submit" {% if not a or not a.time_in %}disabled{% endif %}>OUT <i class="fas fa-sign-out-alt"></i></button>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
                         </td>
                     </tr>

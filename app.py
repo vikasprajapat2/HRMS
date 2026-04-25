@@ -62,8 +62,11 @@ migrate.init_app(app, db)
 login_manager.login_view = 'auth.login'  # Route to the login page
 
 # Import models and routes after db initialization
-from models import User, Employee, Department, Designation, Schedule, Attendance, Leave, Payroll, Check, Salary, LateTime, OverTime, Role, WorkingDayConfig
-from routes import auth, admin, employee, attendance, department, designation, user, schedule, payroll, leave, leave_type, hr
+from models import User, Employee, Department, Designation, Schedule, Attendance, Leave, Payroll, Check, Salary, LateTime, OverTime, Role, WorkingDayConfig, Notification, Document, PerformanceReview
+from routes import auth, admin, employee, attendance, department, designation, user, schedule, payroll, leave, leave_type, hr, api, document, review
+
+from audit import register_audit_listeners
+register_audit_listeners()
 
 # Register blueprints
 app.register_blueprint(auth.bp)
@@ -78,6 +81,9 @@ app.register_blueprint(payroll.bp)
 app.register_blueprint(leave.bp)
 app.register_blueprint(leave_type.bp)
 app.register_blueprint(hr.bp)
+app.register_blueprint(api.bp)
+app.register_blueprint(document.bp)
+app.register_blueprint(review.bp)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -97,19 +103,10 @@ def superadmin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-def admin_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or current_user.role.name not in ['admin', 'superadmin']:
-            flash('You do not have permission to access this page.', 'danger')
-            return redirect(url_for('auth.login'))
-        return f(*args, **kwargs)
-    return decorated_function
-
 def hr_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or current_user.role.name not in ['hr', 'admin', 'superadmin']:
+        if not current_user.is_authenticated or current_user.role.name not in ['hr', 'superadmin']:
             flash('You do not have permission to access this page.', 'danger')
             return redirect(url_for('auth.login'))
         return f(*args, **kwargs)  
@@ -129,13 +126,20 @@ def index():
 def inject_user():
     # Provide current_user plus pending leaves count for notifications
     pending_leaves = 0
+    unread_notifications_count = 0
+    recent_notifications = []
     try:
-        if current_user.is_authenticated and getattr(current_user, 'role', None) and current_user.role.name in ['superadmin', 'admin', 'hr']:
-            from models import Leave
-            pending_leaves = Leave.query.filter_by(status='pending').count()
+        if current_user.is_authenticated:
+            if getattr(current_user, 'role', None) and current_user.role.name in ['superadmin', 'hr']:
+                from models import Leave
+                pending_leaves = Leave.query.filter_by(status='pending').count()
+            
+            # Fetch unread notifications for current user
+            unread_notifications_count = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
+            recent_notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).limit(5).all()
     except Exception:
-        pending_leaves = 0
-    return dict(current_user=current_user, pending_leaves=pending_leaves)
+        pass
+    return dict(current_user=current_user, pending_leaves=pending_leaves, unread_notifications_count=unread_notifications_count, recent_notifications=recent_notifications)
 
 # Error handlers
 @app.errorhandler(404)

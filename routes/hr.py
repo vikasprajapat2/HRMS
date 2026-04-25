@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user
 from database import db
-from models import User, Role, AuditLog
+from models import User, Role
 from flask_bcrypt import Bcrypt
 import secrets
 import string
@@ -42,7 +42,7 @@ def index():
 @login_required
 def attendance_board():
     # Allow HR, admin, superadmin
-    if current_user.role.name not in ['hr', 'admin', 'superadmin']:
+    if current_user.role.name not in ['hr', 'superadmin']:
         flash('Access denied', 'danger')
         return redirect(url_for('auth.login'))
 
@@ -99,21 +99,7 @@ def create():
         db.session.add(user)
         db.session.commit()
 
-        # Audit log
-        try:
-            log = AuditLog(
-                actor_id=current_user.id,
-                action='create',
-                model='User',
-                record_id=user.id,
-                old_data=None,
-                new_data=json.dumps({'name': name, 'email': email, 'phone': phone, 'role': 'hr'}),
-                ip_address=request.remote_addr
-            )
-            db.session.add(log)
-            db.session.commit()
-        except Exception as e:
-            current_app.logger.error(f'Failed to write audit log: {e}')
+
 
         flash(f'HR user created. Generated password: {plain_password} (show only once)', 'success')
         return redirect(url_for('hr.index'))
@@ -131,17 +117,7 @@ def deactivate(user_id):
     user.status = 'inactive'
     db.session.commit()
 
-    log = AuditLog(
-        actor_id=current_user.id,
-        action='deactivate',
-        model='User',
-        record_id=user.id,
-        old_data=json.dumps({'status': 'active'}),
-        new_data=json.dumps({'status': 'inactive'}),
-        ip_address=request.remote_addr
-    )
-    db.session.add(log)
-    db.session.commit()
+
 
     flash('HR user deactivated', 'success')
     return redirect(url_for('hr.index'))

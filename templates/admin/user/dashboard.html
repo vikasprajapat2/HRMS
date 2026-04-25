@@ -8,6 +8,21 @@
     </div>
   </div>
 
+  {% if missed_attendances %}
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="alert alert-danger border-danger shadow-sm alert-dismissible fade show d-flex align-items-center" role="alert">
+        <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+        <div>
+          <h5 class="alert-heading fw-bold mb-1">Missed Attendance Alert</h5>
+          <p class="mb-0">You have <strong>{{ missed_attendances|length }}</strong> past days marked as Absent this month. Please ensure you check in daily or apply for leave if applicable.</p>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   <div class="row g-3 mb-3">
     <div class="col-md-6 col-xl-3">
       <div class="card bg-primary text-white h-100">
@@ -85,6 +100,41 @@
         </div>
       </div>
 
+      <div class="card mb-3 border-0 shadow-sm">
+        <div class="card-body">
+          <h6 class="card-title mb-3"><i class="fas fa-clock me-2 text-primary"></i>Live Attendance</h6>
+          <div class="text-center p-3 bg-light rounded mb-3">
+            <h3 id="current-time" class="mb-0 fw-bold">--:--:--</h3>
+            <p class="text-muted small mb-0">{{ user.employee_date | default(datetime.now().strftime('%A, %b %d, %Y'), true) }}</p>
+          </div>
+          {% if employee %}
+            <form action="{{ url_for('user.self_check') }}" method="POST">
+              {% if not today_attendance or not today_attendance.time_in %}
+                <input type="hidden" name="action" value="in">
+                <button type="submit" class="btn btn-success w-100 py-2 fw-bold text-uppercase">
+                  <i class="fas fa-sign-in-alt me-2"></i>Check In Now
+                </button>
+              {% elif not today_attendance.time_out %}
+                <input type="hidden" name="action" value="out">
+                <div class="alert alert-success py-2 text-center mb-2">
+                  <small>Checked In at {{ today_attendance.time_in.strftime('%I:%M %p') }}</small>
+                </div>
+                <button type="submit" class="btn btn-warning w-100 py-2 fw-bold text-uppercase text-dark">
+                  <i class="fas fa-sign-out-alt me-2"></i>Check Out
+                </button>
+              {% else %}
+                <div class="alert alert-secondary py-2 text-center mb-0">
+                  <strong>Shift Completed</strong><br>
+                  <small>In: {{ today_attendance.time_in.strftime('%I:%M %p') }} | Out: {{ today_attendance.time_out.strftime('%I:%M %p') }}</small>
+                </div>
+              {% endif %}
+            </form>
+          {% else %}
+            <div class="alert alert-warning text-center small mb-0">No employee profile linked to this account.</div>
+          {% endif %}
+        </div>
+      </div>
+
       <div class="card mb-3">
         <div class="card-body">
           <h6 class="card-title mb-3">Leave Balances <span class="text-muted">(YTD)</span></h6>
@@ -113,6 +163,7 @@
             <a href="{{ url_for('user.attendance_list') }}" class="btn btn-outline-primary"><i class="fas fa-user-check me-2"></i>My Attendance</a>
             <a href="{{ url_for('user.leaves_list') }}" class="btn btn-outline-warning"><i class="fas fa-calendar-alt me-2"></i>My Leaves</a>
             <a href="{{ url_for('user.payrolls_list') }}" class="btn btn-outline-success"><i class="fas fa-money-bill-wave me-2"></i>Payslips</a>
+            <a href="{{ url_for('user.directory') }}" class="btn btn-outline-info"><i class="fas fa-address-book me-2"></i>Company Directory</a>
           </div>
         </div>
       </div>
@@ -242,8 +293,11 @@
                       <strong>{{ p.month }} {{ p.year }}</strong>
                       <span class="text-success ms-2">₹{{ p.net_salary }}</span>
                       <div class="small text-muted">{{ p.status|title if p.status else '' }}</div>
+                    <div class="text-end">
+                      <a href="{{ url_for('user.payslip', id=p.id) }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                        <i class="fas fa-print"></i> View
+                      </a>
                     </div>
-                    <!-- Download button removed -->
                   </li>
                   {% endfor %}
                 {% else %}
@@ -258,4 +312,19 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Live clock for the attendance widget
+  function updateTime() {
+    const timeEl = document.getElementById('current-time');
+    if(timeEl) {
+      const now = new Date();
+      timeEl.textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+    }
+  }
+  setInterval(updateTime, 1000);
+  updateTime();
+</script>
 {% endblock %}

@@ -165,4 +165,138 @@
         </div>
     </div>
 </div>
+
+<!-- Analytics Section -->
+{% if analytics is defined %}
+<div class="row mt-4 mb-5">
+    <div class="col-12">
+        <h4 class="mb-3"><i class="fas fa-chart-pie me-2"></i>Analytics</h4>
+    </div>
+    
+    <!-- Attendance Pie Chart -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-header bg-white border-bottom-0 pt-3">
+                <h6 class="mb-0 fw-bold text-muted text-uppercase">Monthly Attendance %</h6>
+            </div>
+            <div class="card-body">
+                <div style="position: relative; height:250px;">
+                    <canvas id="attendanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Leave Trends Line Chart -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-header bg-white border-bottom-0 pt-3">
+                <h6 class="mb-0 fw-bold text-muted text-uppercase">Leave Trends (6 Mo)</h6>
+            </div>
+            <div class="card-body">
+                <div style="position: relative; height:250px;">
+                    <canvas id="leaveChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Salary Cost Bar Chart -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-header bg-white border-bottom-0 pt-3">
+                <h6 class="mb-0 fw-bold text-muted text-uppercase">Salary Cost (6 Mo)</h6>
+            </div>
+            <div class="card-body">
+                <div style="position: relative; height:250px;">
+                    <canvas id="salaryChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+{% if analytics is defined %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Shared Chart Options
+    const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'bottom' }
+        }
+    };
+
+    // 1. Attendance Chart (Pie)
+    const attData = {{ analytics.attendance | safe }};
+    const ctxAtt = document.getElementById('attendanceChart').getContext('2d');
+    new Chart(ctxAtt, {
+        type: 'doughnut',
+        data: {
+            labels: attData.labels,
+            datasets: [{
+                data: attData.data,
+                backgroundColor: ['#198754', '#dc3545', '#ffc107', '#0dcaf0', '#6c757d'],
+                borderWidth: 0
+            }]
+        },
+        options: commonOptions
+    });
+
+    // 2. Leave Chart (Line)
+    const leaveData = {{ analytics.leaves | safe }};
+    const ctxLeave = document.getElementById('leaveChart').getContext('2d');
+    new Chart(ctxLeave, {
+        type: 'line',
+        data: {
+            labels: leaveData.labels,
+            datasets: [{
+                label: 'Approved Leaves',
+                data: leaveData.data,
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3,
+                pointBackgroundColor: '#0d6efd'
+            }]
+        },
+        options: {
+            ...commonOptions,
+            scales: {
+                y: { beginAtZero: true, ticks: { precision: 0 } }
+            }
+        }
+    });
+
+    // 3. Salary Chart (Bar)
+    const salaryData = {{ analytics.salary | safe }};
+    const ctxSalary = document.getElementById('salaryChart').getContext('2d');
+    new Chart(ctxSalary, {
+        type: 'bar',
+        data: {
+            labels: salaryData.labels,
+            datasets: [{
+                label: 'Total Payout (₹)',
+                data: salaryData.data,
+                backgroundColor: '#6f42c1',
+                borderRadius: 4
+            }]
+        },
+        options: {
+            ...commonOptions,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+});
+</script>
+{% endif %}
 {% endblock %}

@@ -6,7 +6,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2><i class="fas fa-user me-2"></i>Employee Details</h2>
     <div>
-        {% if current_user.is_authenticated and current_user.role and current_user.role.name in ['superadmin', 'admin'] %}
+        {% if current_user.is_authenticated and current_user.role and current_user.role.name in ['superadmin', 'hr'] %}
         <a href="{{ url_for('employee.create_user_for_employee', id=employee.id) }}" class="btn btn-info">
             <i class="fas fa-user-plus me-2"></i>Create/Edit User Account
         </a>
@@ -101,6 +101,97 @@
                 <div class="row mb-3">
                     <div class="col-md-4"><strong>Joined Date:</strong></div>
                     <div class="col-md-8">{{ employee.created_at.strftime('%Y-%m-%d') if employee.created_at else 'N/A' }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="card mt-3">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-file-contract me-2"></i>Official Documents</h5>
+                {% if current_user.role.name in ['superadmin', 'hr'] %}
+                <button class="btn btn-sm btn-light" type="button" data-bs-toggle="collapse" data-bs-target="#uploadDocForm" aria-expanded="false" aria-controls="uploadDocForm">
+                    <i class="fas fa-upload me-1"></i> Upload
+                </button>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if current_user.role.name in ['superadmin', 'hr'] %}
+                <div class="collapse mb-4" id="uploadDocForm">
+                    <div class="card card-body bg-light border-primary">
+                        <form action="{{ url_for('document.upload', employee_id=employee.id) }}" method="POST" enctype="multipart/form-data">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Document Title</label>
+                                    <input type="text" name="title" class="form-control form-control-sm" placeholder="e.g. 2026 Offer Letter" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Document Type</label>
+                                    <select name="doc_type" class="form-select form-select-sm" required>
+                                        <option value="offer_letter">Offer Letter</option>
+                                        <option value="contract">Employment Contract</option>
+                                        <option value="salary_slip">Manual Salary Slip</option>
+                                        <option value="policy">Policy Acknowledgment</option>
+                                        <option value="other">Other Official Document</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Select File</label>
+                                    <input type="file" name="file" class="form-control form-control-sm" accept=".pdf,.doc,.docx,.jpg,.png" required>
+                                </div>
+                                <div class="col-12 mt-3">
+                                    <button type="submit" class="btn btn-sm btn-primary w-100">Save Document</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Title</th>
+                                <th>Type</th>
+                                <th>Uploaded On</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doc in employee.documents|sort(attribute='uploaded_at', reverse=True) %}
+                            <tr>
+                                <td class="fw-bold">{{ doc.title }}</td>
+                                <td>
+                                    {% if doc.doc_type == 'offer_letter' %}
+                                    <span class="badge bg-primary">Offer Letter</span>
+                                    {% elif doc.doc_type == 'contract' %}
+                                    <span class="badge bg-success">Contract</span>
+                                    {% elif doc.doc_type == 'salary_slip' %}
+                                    <span class="badge bg-info text-dark">Salary Slip</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">{{ doc.doc_type|title }}</span>
+                                    {% endif %}
+                                </td>
+                                <td><small class="text-muted">{{ doc.uploaded_at.strftime('%Y-%m-%d') }}</small></td>
+                                <td class="text-end">
+                                    <a href="{{ url_for('document.download', doc_id=doc.id) }}" class="btn btn-sm btn-outline-primary" title="Download">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                    {% if current_user.role.name in ['superadmin', 'hr'] %}
+                                    <form action="{{ url_for('document.delete', doc_id=doc.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this official document permanently?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted fst-italic">No official documents have been uploaded for this employee.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

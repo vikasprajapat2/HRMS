@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Conduct Performance Review{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-star text-warning me-2"></i>Conduct Performance Review</h2>
+    <a href="{{ url_for('review.index') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Reviews
+    </a>
+</div>
+
+<div class="card shadow">
+    <div class="card-body bg-light">
+        <form method="POST" action="{{ url_for('review.create') }}">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Select Employee</label>
+                    <select name="employee_id" class="form-select" required>
+                        <option value="">-- Choose Employee --</option>
+                        {% for emp in employees %}
+                        <option value="{{ emp.id }}">{{ emp.firstname }} {{ emp.lastname }} ({{ emp.unique_id }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Review Period</label>
+                    <input type="text" name="review_period" class="form-control" placeholder="e.g. Q1 2026, Annual 2025" required>
+                </div>
+                
+                <div class="col-12">
+                    <label class="form-label fw-bold">Overall Rating (Out of 5)</label>
+                    <div class="d-flex gap-4">
+                        {% for i in range(1, 6) %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="rating" id="rating{{ i }}" value="{{ i }}" required>
+                            <label class="form-check-label fs-5 text-warning" for="rating{{ i }}">
+                                {% for j in range(i) %}<i class="fas fa-star"></i>{% endfor %}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <label class="form-label fw-bold">General Feedback</label>
+                    <textarea name="feedback" class="form-control" rows="3" placeholder="Provide overall feedback on the employee's performance..." required></textarea>
+                </div>
+                
+                <div class="col-md-6">
+                    <label class="form-label fw-bold text-success"><i class="fas fa-check-circle me-1"></i>Goals Achieved</label>
+                    <textarea name="goals_achieved" class="form-control" rows="4" placeholder="List key achievements and completed goals..."></textarea>
+                </div>
+                
+                <div class="col-md-6">
+                    <label class="form-label fw-bold text-danger"><i class="fas fa-arrow-trend-up me-1"></i>Areas for Improvement</label>
+                    <textarea name="areas_for_improvement" class="form-control" rows="4" placeholder="List skills or areas where the employee can improve..."></textarea>
+                </div>
+                
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="published">Published (Visible to Employee)</option>
+                        <option value="draft">Draft (Hidden)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <hr class="my-4">
+            
+            <div class="text-end">
+                <button type="submit" class="btn btn-primary px-5 py-2 fw-bold">
+                    <i class="fas fa-save me-2"></i>Save Performance Review
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

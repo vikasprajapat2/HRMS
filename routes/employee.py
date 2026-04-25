@@ -34,7 +34,7 @@ def _get_logged_in_employee():
 @login_required
 def create_user_for_employee(id):
     """Create or update a user account for a specific employee (superadmin/admin only)."""
-    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'admin']:
+    if not current_user.is_authenticated or current_user.role.name not in ['superadmin', 'hr']:
         flash('Access denied', 'danger')
         return redirect(url_for('auth.login'))
     
@@ -326,6 +326,16 @@ def create():
                 existing_user.name = f"{employee.firstname} {employee.lastname}"
                 existing_user.phone = employee.phone
                 db.session.commit()
+                
+            # Fire Onboarding Email
+            from utils.emails import send_onboarding_email
+            login_url = request.url_root.rstrip('/') + url_for('auth.login')
+            send_onboarding_email(
+                name=f"{employee.firstname} {employee.lastname}",
+                email=email_for_user,
+                password=portal_password,
+                login_url=login_url
+            )
         
         flash('Employee created successfully!', 'success')
         return redirect(url_for('employee.index'))
@@ -341,7 +351,7 @@ def create():
 @bp.route('/<int:id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit(id):
-    if current_user.role.name not in ['admin', 'superadmin']:
+    if current_user.role.name not in ['superadmin', 'hr']:
         flash('Access denied.', 'danger')
         return redirect(url_for('auth.login'))
     employee = Employee.query.get_or_404(id)

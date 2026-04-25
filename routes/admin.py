@@ -2,8 +2,87 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from database import db
 from models import Employee, Department, Designation, User, Attendance, Leave, Payroll
-from sqlalchemy import func
-from datetime import datetime
+from sqlalchemy import func, extract
+from datetime import datetime, date, timedelta
+import json
+
+def get_analytics_data():
+    today = date.today()
+    first_day_of_month = today.replace(day=1)
+    
+    # 1. Monthly Attendance %
+    attendance_stats = db.session.query(
+        Attendance.status, func.count(Attendance.id)
+    ).filter(
+        Attendance.date >= first_day_of_month,
+        Attendance.date <= today
+    ).group_by(Attendance.status).all()
+    
+    attendance_data = {
+        'labels': [],
+        'data': []
+    }
+    for stat in attendance_stats:
+        attendance_data['labels'].append(stat[0].title())
+        attendance_data['data'].append(stat[1])
+        
+    # If no data, provide empty structure
+    if not attendance_data['labels']:
+        attendance_data['labels'] = ['No Data']
+        attendance_data['data'] = [1]
+        
+    # Generate last 6 months labels
+    last_6_months = []
+    for i in range(5, -1, -1):
+        # Subtracting i months from today
+        month = today.month - i
+        year = today.year
+        while month <= 0:
+            month += 12
+            year -= 1
+        month_date = date(year, month, 1)
+        last_6_months.append({
+            'label': month_date.strftime('%b %Y'),
+            'month': month_date.month,
+            'year': month_date.year
+        })
+        
+    # 2. Leave Trends (Last 6 months)
+    leave_data = {'labels': [m['label'] for m in last_6_months], 'data': [0] * 6}
+    for i, m in enumerate(last_6_months):
+        start_date = date(m['year'], m['month'], 1)
+        # Get next month to find end date
+        next_month = m['month'] + 1
+        next_year = m['year']
+        if next_month > 12:
+            next_month = 1
+            next_year += 1
+        end_date = date(next_year, next_month, 1) - timedelta(days=1)
+        leave_count = Leave.query.filter(
+            Leave.status == 'approved',
+            Leave.start_date <= end_date,
+            Leave.end_date >= start_date
+        ).count()
+        leave_data['data'][i] = leave_count
+        
+    # 3. Salary Cost (Last 6 months)
+    salary_data = {'labels': [m['label'] for m in last_6_months], 'data': [0] * 6}
+    for i, m in enumerate(last_6_months):
+        month_name = m['label'].split(' ')[0] # e.g. 'Oct' or 'October'
+        # In our system, payroll.month might be full name or abbreviation. Let's just sum by year and month.
+        # Actually Payroll model stores month as string 'January', 'February' etc.
+        full_month_name = date(m['year'], m['month'], 1).strftime('%B')
+        total_salary = db.session.query(func.sum(Payroll.net_salary)).filter(
+            Payroll.year == m['year'],
+            Payroll.month == full_month_name
+        ).scalar()
+        salary_data['data'][i] = float(total_salary or 0)
+
+    return {
+        'attendance': json.dumps(attendance_data),
+        'leaves': json.dumps(leave_data),
+        'salary': json.dumps(salary_data)
+    }
 
 bp = Blueprint('admin', __name__)
 
@@ -19,36 +98,20 @@ def superadmin_dashboard():
     total_users = User.query.count()
     today_attendance = Attendance.query.filter_by(date=datetime.now().date()).count()
     
+    analytics = get_analytics_data()
+    
     return render_template('admin/dashboard.html', 
                          total_employees=total_employees,
                          total_departments=total_departments,
                          total_users=total_users,
                          today_attendance=today_attendance,
-                         role='superadmin')
-
-@bp.route('/admin')
-@login_required
-def admin_dashboard():
-    if current_user.role.name not in ['admin', 'superadmin']:
-        flash('Access denied', 'danger')
-        return redirect(url_for('auth.login'))
-    
-    total_employees = Employee.query.count()
-    total_departments = Department.query.count()
-    pending_leaves = Leave.query.filter_by(status='pending').count()
-    today_attendance = Attendance.query.filter_by(date=datetime.now().date()).count()
-    
-    return render_template('admin/dashboard.html', 
-                         total_employees=total_employees,
-                         total_departments=total_departments,
-                         pending_leaves=pending_leaves,
-                         today_attendance=today_attendance,
-                         role='admin')
+                         role='superadmin',
+                         analytics=analytics)
 
 @bp.route('/hr-manager')
 @login_required
 def hr_dashboard():
-    if current_user.role.name not in ['hr', 'admin', 'superadmin']:
+    if current_user.role.name not in ['hr', 'superadmin']:
         flash('Access denied', 'danger')
         return redirect(url_for('auth.login'))
     
@@ -56,44 +119,14 @@ def hr_dashboard():
     total_departments = Department.query.count()
     pending_leaves = Leave.query.filter_by(status='pending').count()
     
+    analytics = get_analytics_data()
+    
     return render_template('admin/dashboard.html', 
                          total_employees=total_employees,
                          total_departments=total_departments,
                          pending_leaves=pending_leaves,
-                         role='hr')
-
-@bp.route('/manager')
-@login_required
-def payroll_dashboard():
-    if current_user.role.name not in ['payroll', 'admin', 'superadmin']:
-        flash('Access denied', 'danger')
-        return redirect(url_for('auth.login'))
-    
-    total_employees = Employee.query.count()
-    current_month_payrolls = Payroll.query.filter_by(
-        month=datetime.now().strftime('%B'),
-        year=datetime.now().year
-    ).count()
-    
-    return render_template('admin/dashboard.html', 
-                         total_employees=total_employees,
-                         current_month_payrolls=current_month_payrolls,
-                         role='payroll')
-
-@bp.route('/moderator')
-@login_required
-def moderator_dashboard():
-    if current_user.role.name not in ['moderator', 'admin', 'superadmin']:
-        flash('Access denied', 'danger')
-        return redirect(url_for('auth.login'))
-    
-    today_attendance = Attendance.query.filter_by(date=datetime.now().date()).count()
-    total_employees = Employee.query.count()
-    
-    return render_template('admin/dashboard.html', 
-                         total_employees=total_employees,
-                         today_attendance=today_attendance,
-                         role='moderator')
+                         role='hr',
+                         analytics=analytics)
 
 
 @bp.route('/create-user-from-employee')
@@ -169,5 +202,21 @@ def audit_logs():
         query = query.filter_by(action=action_filter)
         
     logs = query.order_by(AuditLog.created_at.desc()).limit(200).all()
+    
+    # Parse JSON strings into dictionaries for the template
+    for log in logs:
+        try:
+            log.parsed_old = json.loads(log.old_data) if log.old_data else {}
+            log.parsed_new = json.loads(log.new_data) if log.new_data else {}
+            
+            # Combine keys for easy iteration in the template
+            keys = set()
+            keys.update(log.parsed_old.keys())
+            keys.update(log.parsed_new.keys())
+            log.changed_keys = sorted(list(keys))
+        except:
+            log.parsed_old = {}
+            log.parsed_new = {}
+            log.changed_keys = []
     
     return render_template('admin/audit_logs.html', logs=logs)

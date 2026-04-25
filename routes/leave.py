@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
 from database import db
-from models import Leave, Employee
 from datetime import datetime, date
+from models import Leave, Employee, Notification, User
 
 bp = Blueprint('leave', __name__, url_prefix='/leaves')
 
@@ -137,6 +137,32 @@ def process_leave(id):
     leave.processed_by = current_user.id
     leave.processed_at = datetime.now()
     
+    # Send notification to the employee's user account
+    if leave.employee.email:
+        user_account = User.query.filter_by(email=leave.employee.email).first()
+        if not user_account and '@' not in leave.employee.email:
+            user_account = User.query.filter_by(email=f"{leave.employee.unique_id}@employee.local").first()
+            
+        if user_account:
+            notif = Notification(
+                user_id=user_account.id,
+                message=f"Your {leave.leave_type} leave request from {leave.start_date.strftime('%b %d')} to {leave.end_date.strftime('%b %d')} has been {leave.status}.",
+                type='leave'
+            )
+            db.session.add(notif)
+            
+            # Send Email
+            if leave.employee.email:
+                from utils.emails import send_leave_approval_email
+                send_leave_approval_email(
+                    name=f"{leave.employee.firstname} {leave.employee.lastname}",
+                    email=leave.employee.email,
+                    leave_type=leave.leave_type,
+                    start_date=leave.start_date.strftime('%Y-%m-%d'),
+                    end_date=leave.end_date.strftime('%Y-%m-%d'),
+                    status=new_status
+                )
+                
     db.session.commit()
     flash(f'Leave {leave.status}', 'success')
     return redirect(url_for('leave.index'))

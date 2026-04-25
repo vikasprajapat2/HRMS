@@ -28,10 +28,41 @@
           </div>
           {% endif %}
 
-          <div class="mb-3">
-            <label class="form-label">Profile Photo</label>
-            <input type="file" name="image" class="form-control">
+          <div class="mb-4">
+            <h6 class="text-primary border-bottom pb-2 mb-3">Profile Identity</h6>
+            <div class="mb-3">
+              <label class="form-label">Profile Photo</label>
+              <input type="file" name="image" class="form-control" accept="image/*">
+            </div>
           </div>
+
+          {% if employee %}
+          <div class="mb-4">
+            <h6 class="text-primary border-bottom pb-2 mb-3">Employee Documents</h6>
+            
+            <div class="mb-3">
+              <label class="form-label">Aadhar Card</label>
+              <input type="file" name="aadhar_file" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+              {% if employee.aadhar_file %}
+                <small class="text-success mt-1 d-block">
+                  <i class="fas fa-check-circle me-1"></i> Uploaded: 
+                  <a href="{{ url_for('static', filename='uploads/documents/' ~ employee.aadhar_file) }}" target="_blank">View Aadhar</a>
+                </small>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Resume / CV</label>
+              <input type="file" name="resume_file" class="form-control" accept=".pdf,.doc,.docx">
+              {% if employee.resume_file %}
+                <small class="text-success mt-1 d-block">
+                  <i class="fas fa-check-circle me-1"></i> Uploaded: 
+                  <a href="{{ url_for('static', filename='uploads/documents/' ~ employee.resume_file) }}" target="_blank">View Resume</a>
+                </small>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
 
           <div class="d-flex gap-2">
             <button class="btn btn-primary">Save</button>

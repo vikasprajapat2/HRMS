@@ -97,7 +97,7 @@ employee-management-python/
 
 ## 🎯 Key features (high level)
 
-- Multi-role authentication (superadmin, admin, hr, payroll manager, moderator)
+- Multi-role authentication (superadmin, hr, employee)
 - Employee CRUD, departments, designations, schedules
 - Attendance with check-in/out, monthly reports, auto-generation honoring holidays/weekends/leaves
 - Leave management workflow and payroll calculation features

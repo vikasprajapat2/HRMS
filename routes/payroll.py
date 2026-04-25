@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required
 from database import db
-from models import Payroll, Employee, Salary
+from models import Payroll, Employee, Salary, Notification, User
 from datetime import datetime
 from decimal import Decimal
 
@@ -45,6 +45,21 @@ def create():
         )
         
         db.session.add(payroll)
+        
+        # Send notification to the employee
+        if employee.email:
+            user_account = User.query.filter_by(email=employee.email).first()
+            if not user_account and '@' not in employee.email:
+                user_account = User.query.filter_by(email=f"{employee.unique_id}@employee.local").first()
+                
+            if user_account:
+                notif = Notification(
+                    user_id=user_account.id,
+                    message=f"Your payslip for {month} {year} has been generated.",
+                    type='salary'
+                )
+                db.session.add(notif)
+                
         db.session.commit()
         flash('Payroll created successfully!', 'success')
         return redirect(url_for('payroll.index'))
@@ -99,6 +114,20 @@ def calculate():
             net_salary=net_salary
         )
         db.session.add(payroll)
+        
+        # Send notification to the employee
+        if employee.email:
+            user_account = User.query.filter_by(email=employee.email).first()
+            if not user_account and '@' not in employee.email:
+                user_account = User.query.filter_by(email=f"{employee.unique_id}@employee.local").first()
+                
+            if user_account:
+                notif = Notification(
+                    user_id=user_account.id,
+                    message=f"Your payslip for {month} {year} has been generated.",
+                    type='salary'
+                )
+                db.session.add(notif)
     
     db.session.commit()
     flash('Payroll calculated for all employees!', 'success')

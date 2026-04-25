@@ -13,16 +13,39 @@
                         <label for="name" class="form-label">Schedule Name <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="name" name="name" value="{{ schedule.name }}" required>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="time_in" class="form-label">Time In <span class="text-danger">*</span></label>
-                            <input type="time" class="form-control" id="time_in" name="time_in" value="{{ schedule.time_in.strftime('%H:%M') }}" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="time_out" class="form-label">Time Out <span class="text-danger">*</span></label>
-                            <input type="time" class="form-control" id="time_out" name="time_out" value="{{ schedule.time_out.strftime('%H:%M') }}" required>
+
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="is_flexible" name="is_flexible" {% if schedule.is_flexible %}checked{% endif %}>
+                        <label class="form-check-label" for="is_flexible">Is Flexible Shift?</label>
+                    </div>
+
+                    <div id="fixed_time_container">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="time_in" class="form-label">Time In <span class="text-danger">*</span></label>
+                                <input type="time" class="form-control" id="time_in" name="time_in" value="{% if schedule.time_in %}{{ schedule.time_in.strftime('%H:%M') }}{% endif %}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="time_out" class="form-label">Time Out <span class="text-danger">*</span></label>
+                                <input type="time" class="form-control" id="time_out" name="time_out" value="{% if schedule.time_out %}{{ schedule.time_out.strftime('%H:%M') }}{% endif %}" required>
+                            </div>
                         </div>
                     </div>
+
+                    <div id="flexible_time_container" style="display: none;">
+                        <div class="mb-3">
+                            <label for="working_hours" class="form-label">Required Working Hours</label>
+                            <input type="number" step="0.1" class="form-control" id="working_hours" name="working_hours" value="{{ schedule.working_hours or 8.0 }}">
+                            <small class="text-muted">Total hours required per day (e.g. 8.5)</small>
+                        </div>
+                    </div>
+
+                    <div class="mb-3" id="grace_period_container">
+                        <label for="grace_period_minutes" class="form-label">Grace Period (Minutes)</label>
+                        <input type="number" class="form-control" id="grace_period_minutes" name="grace_period_minutes" value="{{ schedule.grace_period_minutes or 0 }}">
+                        <small class="text-muted">Allowed delay before marked as Late</small>
+                    </div>
+
                     <div class="d-flex justify-content-between mt-4">
                         <a href="{{ url_for('schedule.index') }}" class="btn btn-secondary">Cancel</a>
                         <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i> Update Schedule</button>
@@ -32,4 +55,36 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const flexibleCheckbox = document.getElementById('is_flexible');
+        const fixedTimeContainer = document.getElementById('fixed_time_container');
+        const flexibleTimeContainer = document.getElementById('flexible_time_container');
+        const gracePeriodContainer = document.getElementById('grace_period_container');
+        const timeIn = document.getElementById('time_in');
+        const timeOut = document.getElementById('time_out');
+
+        function toggleFields() {
+            if (flexibleCheckbox.checked) {
+                fixedTimeContainer.style.display = 'none';
+                flexibleTimeContainer.style.display = 'block';
+                gracePeriodContainer.style.display = 'none';
+                timeIn.removeAttribute('required');
+                timeOut.removeAttribute('required');
+            } else {
+                fixedTimeContainer.style.display = 'block';
+                flexibleTimeContainer.style.display = 'none';
+                gracePeriodContainer.style.display = 'block';
+                timeIn.setAttribute('required', 'required');
+                timeOut.setAttribute('required', 'required');
+            }
+        }
+
+        flexibleCheckbox.addEventListener('change', toggleFields);
+        toggleFields();
+    });
+</script>
 {% endblock %}

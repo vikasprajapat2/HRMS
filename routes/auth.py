@@ -22,14 +22,8 @@ def login():
 
             if user.role.name == 'superadmin':
                 return redirect(url_for('admin.superadmin_dashboard'))
-            elif user.role.name == 'admin':
-                return redirect(url_for('admin.admin_dashboard'))
             elif user.role.name == 'hr':
                 return redirect(url_for('admin.hr_dashboard'))
-            elif user.role.name == 'payroll':
-                return redirect(url_for('admin.payroll_dashboard'))
-            elif user.role.name == 'moderator':
-                return redirect(url_for('admin.moderator_dashboard'))
             else:
                 return redirect(url_for('user.dashboard'))
 

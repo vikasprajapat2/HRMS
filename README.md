@@ -12,7 +12,7 @@ If you want the previous behavior (creating portal accounts from the Add Employe
 
 ## Features
 
-- **User Authentication**: Multi-role authentication system (Superadmin, Admin, HR, Payroll Manager, Moderator)
+- **User Authentication**: Multi-role authentication system (Superadmin, HR, Employee)
 - **Employee Management**: Create, edit, view, and manage employee profiles
 - **Department & Designation Management**: Organize employees by departments and designations
 - **Attendance System**: Track daily attendance with check-in/check-out functionality
@@ -162,35 +162,14 @@ You can create these accounts for testing different role permissions:
 - **Email**: `hr@example.com`
 - **Password**: `hr123`
 - **Role**: HR
-- **Access**: Employee management, leave approvals, attendance viewing
-
-#### Payroll Manager Account
-- **Email**: `payroll@example.com`
-- **Password**: `payroll123`
-- **Role**: Payroll Manager
-- **Access**: Payroll processing, salary management, deductions
-
-#### Admin Account
-- **Email**: `admin2@example.com`
-- **Password**: `admin123`
-- **Role**: Admin
-- **Access**: Most administrative features (similar to superadmin)
-
-#### Moderator/Attendance Manager Account
-- **Email**: `moderator@example.com`
-- **Password**: `mod123`
-- **Role**: Moderator
-- **Access**: Attendance management, check-in/check-out operations
+- **Access**: Employee management, leave approvals, attendance viewing, payroll processing
 
 ### 5. Available User Roles & Permissions
 
 | Role | Description | Key Permissions |
 |------|-------------|-----------------|
 | **Superadmin** | Highest level access | All system features, user management, system configuration |
-| **Admin** | Administrative access | Employee management, departments, designations, most features |
-| **HR** | Human Resources Manager | Employee CRUD, leave management, attendance viewing |
-| **Payroll** | Payroll Manager | Salary processing, payroll calculations, deductions |
-| **Moderator** | Attendance Moderator | Attendance management, check-in/out, attendance reports |
+| **HR** | Human Resources Manager | Employee CRUD, leave management, attendance viewing, payroll |
 | **Employee** | Regular Employee | Self-service portal, view own data, request leaves |
 
 ### 6. Sample Departments
