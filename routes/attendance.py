@@ -355,6 +355,11 @@ def monthly_report():
         'attendance_percentage': 0
     })
     
+    # Eagerly initialize all employees to prevent Jinja UndefinedErrors
+    for emp in employees:
+        _ = stats[emp.id]
+
+    
     for attendance in attendances:
         emp_stats = stats[attendance.employee_id]
         
