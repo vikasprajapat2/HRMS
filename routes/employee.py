@@ -282,7 +282,6 @@ def create():
         employee = Employee(
             firstname=request.form.get('firstname'),
             lastname=request.form.get('lastname'),
-            unique_id=request.form.get('unique_id'),
             email=request.form.get('email'),
             phone=request.form.get('phone'),
             address=request.form.get('address'),
@@ -307,6 +306,13 @@ def create():
             employee.image = filename
 
         db.session.add(employee)
+        db.session.commit()
+
+        # Auto-generate Employee ID: YY + DeptID + Serial
+        yy = datetime.now().strftime('%y')
+        dept_id = f"{int(employee.department_id):02d}" if employee.department_id else "00"
+        serial = f"{employee.id:03d}"
+        employee.unique_id = f"{yy}{dept_id}{serial}"
         db.session.commit()
 
         # Handle official documents upload
