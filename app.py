@@ -156,4 +156,16 @@ with app.app_context():
     db.create_all()
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == '--dev':
+        print("Starting in DEVELOPMENT mode...")
+        app.run(debug=True, host='0.0.0.0', port=5000)
+    else:
+        print("Starting in PRODUCTION mode using Waitress WSGI server on http://0.0.0.0:5000...")
+        try:
+            from waitress import serve
+            serve(app, host='0.0.0.0', port=5000)
+        except ImportError:
+            print("Warning: Waitress is not installed. Run 'pip install waitress' for a true production server.")
+            print("Falling back to basic Flask server (debug=False)...")
+            app.run(debug=False, host='0.0.0.0', port=5000)

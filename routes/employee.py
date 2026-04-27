@@ -1,7 +1,9 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user
+import os
+from werkzeug.utils import secure_filename
 from database import db
-from models import Employee, Department, Designation, Schedule, User, Role, Leave
+from models import Employee, Department, Designation, Schedule, User, Role, Leave, Document
 from datetime import datetime
 from flask_bcrypt import Bcrypt
 
@@ -293,7 +295,49 @@ def create():
             schedule_id=request.form.get('schedule_id'),
             status='active'
         )
+        
+        # Handle profile picture upload
+        file = request.files.get('image')
+        if file and file.filename:
+            filename = secure_filename(file.filename)
+            upload_folder = os.path.join(current_app.root_path, current_app.config.get('UPLOAD_FOLDER', 'static/uploads'), 'employees')
+            os.makedirs(upload_folder, exist_ok=True)
+            path = os.path.join(upload_folder, filename)
+            file.save(path)
+            employee.image = filename
+
         db.session.add(employee)
+        db.session.commit()
+
+        # Handle official documents upload
+        official_docs = [
+            ('aadhar_file', 'Aadhar Card', 'aadhar_card'),
+            ('pan_file', 'PAN Card', 'pan_card'),
+            ('offer_letter_file', 'Offer Letter', 'offer_letter'),
+            ('contract_file', 'Employment Contract', 'contract')
+        ]
+        
+        doc_upload_folder = os.path.join(current_app.root_path, 'static', 'uploads', 'documents', 'official')
+        os.makedirs(doc_upload_folder, exist_ok=True)
+        
+        import uuid
+        for field_name, title, doc_type in official_docs:
+            doc_file = request.files.get(field_name)
+            if doc_file and doc_file.filename:
+                ext = doc_file.filename.rsplit('.', 1)[-1].lower() if '.' in doc_file.filename else 'pdf'
+                unique_filename = f"{employee.unique_id}_{uuid.uuid4().hex[:8]}.{ext}"
+                file_path = os.path.join(doc_upload_folder, unique_filename)
+                doc_file.save(file_path)
+                
+                new_doc = Document(
+                    employee_id=employee.id,
+                    title=title,
+                    doc_type=doc_type,
+                    file_path=unique_filename,
+                    uploaded_by=current_user.id
+                )
+                db.session.add(new_doc)
+        
         db.session.commit()
 
         # Create or update linked portal user using admin-provided password

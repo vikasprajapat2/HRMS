@@ -9,7 +9,7 @@
 
 <div class="card">
     <div class="card-body">
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="firstname" class="form-label">First Name <span class="text-danger">*</span></label>
@@ -32,7 +32,14 @@
                 </div>
             </div>
 
-            <!-- Portal account creation removed from add-employee UI per request -->
+            <h5 class="mt-4 mb-3 pb-2 border-bottom"><i class="fas fa-key me-2"></i>Portal Access (Optional)</h5>
+            <div class="row bg-light rounded p-3 mb-4 mx-0 border">
+                <div class="col-md-6 mb-3">
+                    <label for="portal_password" class="form-label">Set Login Password</label>
+                    <input type="password" class="form-control" id="portal_password" name="portal_password" placeholder="Enter password">
+                    <div class="form-text"><i class="fas fa-info-circle me-1"></i>If provided, the system will automatically create a login account. The User ID will be their Email (or Employee ID if no email).</div>
+                </div>
+            </div>
 
             <div class="row">
                 <div class="col-md-6 mb-3">
@@ -67,9 +74,39 @@
                 </div>
             </div>
 
-            <div class="mb-3">
-                <label for="address" class="form-label">Address</label>
-                <textarea class="form-control" id="address" name="address" rows="2"></textarea>
+            <div class="row">
+                <div class="col-md-12 mb-3">
+                    <label for="address" class="form-label">Address</label>
+                    <textarea class="form-control" id="address" name="address" rows="2"></textarea>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <label for="image" class="form-label fw-bold">Profile Picture (Optional)</label>
+                    <input class="form-control" type="file" id="image" name="image" accept="image/*">
+                    <div class="form-text">Recommended size: 400x400px. Max size: 2MB.</div>
+                </div>
+            </div>
+
+            <h5 class="mt-4 mb-3 pb-2 border-bottom"><i class="fas fa-file-contract me-2"></i>Official Documents (Optional)</h5>
+            <div class="row bg-light rounded p-3 mb-4 mx-0 border">
+                <div class="col-md-6 mb-3">
+                    <label for="aadhar_file" class="form-label">Aadhar Card</label>
+                    <input class="form-control" type="file" id="aadhar_file" name="aadhar_file" accept=".pdf,.jpg,.jpeg,.png">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="pan_file" class="form-label">PAN Card</label>
+                    <input class="form-control" type="file" id="pan_file" name="pan_file" accept=".pdf,.jpg,.jpeg,.png">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="offer_letter_file" class="form-label">Offer Letter</label>
+                    <input class="form-control" type="file" id="offer_letter_file" name="offer_letter_file" accept=".pdf,.doc,.docx">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="contract_file" class="form-label">Employment Contract</label>
+                    <input class="form-control" type="file" id="contract_file" name="contract_file" accept=".pdf,.doc,.docx">
+                </div>
+                <div class="col-12">
+                    <div class="form-text"><i class="fas fa-info-circle me-1"></i>You can securely attach official documents now or add them later from the employee profile. Accepted formats: PDF, DOC, JPG, PNG.</div>
+                </div>
             </div>
 
             <div class="row">

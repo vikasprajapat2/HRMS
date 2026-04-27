@@ -106,23 +106,6 @@
     </div>
 </div>
 
-{% set total_emps = employees|length %}
-{% set total_present = 0 %}
-{% set total_absent = 0 %}
-{% set total_late = 0 %}
-{% set avg_rate = 0 %}
-{% set filtered_emp_count = 0 %}
-
-{% for emp in employees %}
-    {% if not selected_employee or selected_employee|string == emp.id|string %}
-        {% set emp_stats = stats[emp.id] %}
-        {% set _ = total_present.update({'value': total_present + emp_stats['present']}) if total_present is mapping else '' %}
-        {% set _ = total_absent.update({'value': total_absent + emp_stats['absent']}) if total_absent is mapping else '' %}
-        {% set _ = total_late.update({'value': total_late + emp_stats['late']}) if total_late is mapping else '' %}
-        {% set _ = avg_rate.update({'value': avg_rate + emp_stats['attendance_percentage']}) if avg_rate is mapping else '' %}
-        {% set filtered_emp_count = filtered_emp_count + 1 %}
-    {% endif %}
-{% endfor %}
 
 <div class="row">
     <div class="col-12">
