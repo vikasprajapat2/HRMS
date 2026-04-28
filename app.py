@@ -59,6 +59,10 @@ else:
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 
+@app.context_processor
+def inject_now():
+    return {'datetime': datetime}
+
 # Initialize extensions with app
 db.init_app(app)
 bcrypt.init_app(app)

@@ -1,316 +1,247 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container-fluid mt-4">
-  <div class="row mb-3">
-    <div class="col-12">
-      <h2><i class="fas fa-tachometer-alt me-2"></i>Dashboard</h2>
-      <p class="text-muted">Welcome back, {{ user.name }}!</p>
-    </div>
-  </div>
-
-  {% if missed_attendances %}
-  <div class="row mb-4">
-    <div class="col-12">
-      <div class="alert alert-danger border-danger shadow-sm alert-dismissible fade show d-flex align-items-center" role="alert">
-        <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
-        <div>
-          <h5 class="alert-heading fw-bold mb-1">Missed Attendance Alert</h5>
-          <p class="mb-0">You have <strong>{{ missed_attendances|length }}</strong> past days marked as Absent this month. Please ensure you check in daily or apply for leave if applicable.</p>
+<div class="container-fluid animate-fade-in">
+    <!-- Header Section -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h2 class="fw-bold text-dark mb-1">Dashboard</h2>
+            <p class="text-secondary mb-0">Welcome back, <span class="text-primary fw-semibold">{{ user.name }}</span>! Here's your overview.</p>
         </div>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-    </div>
-  </div>
-  {% endif %}
-
-  <div class="row g-3 mb-3">
-    <div class="col-md-6 col-xl-3">
-      <div class="card bg-primary text-white h-100">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-uppercase mb-1">Present (This Month)</h6>
-              <h2 class="mb-0">{{ present_days_month }}</h2>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <div class="badge bg-light text-dark border p-2 px-3">
+                <i class="far fa-calendar-alt me-2 text-primary"></i>{{ datetime.now().strftime('%B %d, %Y') if datetime else 'Today' }}
             </div>
-            <i class="fas fa-user-check fa-3x opacity-50"></i>
-          </div>
         </div>
-      </div>
     </div>
 
-    <div class="col-md-6 col-xl-3">
-      <div class="card bg-danger text-white h-100">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-uppercase mb-1">Pending Leaves</h6>
-              <h2 class="mb-0">{{ pending_leaves }}</h2>
-            </div>
-            <i class="fas fa-calendar-times fa-3x opacity-50"></i>
-          </div>
+    <!-- Alert Section -->
+    {% if missed_attendances %}
+    <div class="alert alert-danger border-0 shadow-sm d-flex align-items-center mb-4 p-3 animate-fade-in" style="border-radius: 1rem;">
+        <div class="bg-danger text-white rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+            <i class="fas fa-exclamation-triangle"></i>
         </div>
-      </div>
+        <div class="flex-grow-1">
+            <h6 class="mb-0 fw-bold">Missed Attendance Alert</h6>
+            <p class="mb-0 small text-danger-emphasis">You have <strong>{{ missed_attendances|length }}</strong> absent marks this month. Please check in daily.</p>
+        </div>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
     </div>
+    {% endif %}
 
-    <div class="col-md-6 col-xl-3">
-      <div class="card bg-success text-white h-100">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-uppercase mb-1">Approved Leaves (YTD)</h6>
-              <h2 class="mb-0">{{ approved_leaves_ytd }}</h2>
-            </div>
-            <i class="fas fa-calendar-check fa-3x opacity-50"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-6 col-xl-3">
-      <div class="card bg-secondary text-white h-100">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-uppercase mb-1">Payslips (This Year)</h6>
-              <h2 class="mb-0">{{ payrolls_this_year }}</h2>
-            </div>
-            <i class="fas fa-money-bill-wave fa-3x opacity-50"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="row g-4">
-    <!-- Left column: profile & quick stats -->
-    <div class="col-lg-4">
-      <div class="card mb-3">
-        <div class="card-body text-center">
-          {% if employee and employee.image %}
-            <img src="{{ url_for('static', filename='uploads/employees/' ~ employee.image) }}" class="rounded-circle mb-3" style="width:120px;height:120px;object-fit:cover;">
-          {% else %}
-            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mb-3" style="width:120px;height:120px;font-size:36px">{{ (employee.firstname[0] if employee else user.name[0])|upper }}</div>
-          {% endif %}
-          <h5 class="mb-0">{{ user.name }}</h5>
-          <div class="text-muted mb-2">{{ user.email }}</div>
-          <div class="d-flex justify-content-center gap-2">
-            <a href="{{ url_for('user.profile') }}" class="btn btn-outline-primary btn-sm">Profile</a>
-            <a href="{{ url_for('user.edit_profile') }}" class="btn btn-outline-secondary btn-sm">Edit</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="card mb-3 border-0 shadow-sm">
-        <div class="card-body">
-          <h6 class="card-title mb-3"><i class="fas fa-clock me-2 text-primary"></i>Live Attendance</h6>
-          <div class="text-center p-3 bg-light rounded mb-3">
-            <h3 id="current-time" class="mb-0 fw-bold">--:--:--</h3>
-            <p class="text-muted small mb-0">{{ user.employee_date | default(datetime.now().strftime('%A, %b %d, %Y'), true) }}</p>
-          </div>
-          {% if employee %}
-            <form action="{{ url_for('user.self_check') }}" method="POST">
-              {% if not today_attendance or not today_attendance.time_in %}
-                <input type="hidden" name="action" value="in">
-                <button type="submit" class="btn btn-success w-100 py-2 fw-bold text-uppercase">
-                  <i class="fas fa-sign-in-alt me-2"></i>Check In Now
-                </button>
-              {% elif not today_attendance.time_out %}
-                <input type="hidden" name="action" value="out">
-                <div class="alert alert-success py-2 text-center mb-2">
-                  <small>Checked In at {{ today_attendance.time_in.strftime('%I:%M %p') }}</small>
+    <div class="row g-4">
+        <!-- Main Content Area -->
+        <div class="col-lg-9">
+            <!-- Stats Grid - More Compact -->
+            <div class="row g-3 mb-4">
+                {% set stats = [
+                    {'label': 'Present', 'val': present_days_month, 'icon': 'fa-user-check', 'grad': 'primary'},
+                    {'label': 'Pending', 'val': pending_leaves, 'icon': 'fa-clock', 'grad': 'warning'},
+                    {'label': 'Approved', 'val': approved_leaves_ytd, 'icon': 'fa-check-double', 'grad': 'success'},
+                    {'label': 'Payslips', 'val': payrolls_this_year, 'icon': 'fa-file-invoice', 'grad': 'info'}
+                ] %}
+                {% for stat in stats %}
+                <div class="col-6 col-md-3">
+                    <div class="card bg-gradient-{{ stat.grad }} text-white border-0 shadow-sm p-2">
+                        <div class="card-body p-2 d-flex align-items-center">
+                            <div class="bg-white bg-opacity-25 rounded-circle p-2 me-3">
+                                <i class="fas {{ stat.icon }} fa-fw"></i>
+                            </div>
+                            <div>
+                                <h4 class="fw-bold mb-0">{{ stat.val }}</h4>
+                                <p class="mb-0 text-white-50 x-small fw-medium text-uppercase">{{ stat.label }}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-warning w-100 py-2 fw-bold text-uppercase text-dark">
-                  <i class="fas fa-sign-out-alt me-2"></i>Check Out
-                </button>
-              {% else %}
-                <div class="alert alert-secondary py-2 text-center mb-0">
-                  <strong>Shift Completed</strong><br>
-                  <small>In: {{ today_attendance.time_in.strftime('%I:%M %p') }} | Out: {{ today_attendance.time_out.strftime('%I:%M %p') }}</small>
+                {% endfor %}
+            </div>
+
+            <!-- Attendance History -->
+            <div class="card mb-4 border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3 d-flex align-items-center justify-content-between">
+                    <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-history text-primary me-2"></i>Attendance Specs</h6>
+                    <a href="{{ url_for('user.attendance_list') }}" class="btn btn-link btn-sm text-decoration-none x-small">View Full History</a>
                 </div>
-              {% endif %}
-            </form>
-          {% else %}
-            <div class="alert alert-warning text-center small mb-0">No employee profile linked to this account.</div>
-          {% endif %}
-        </div>
-      </div>
-
-      <div class="card mb-3">
-        <div class="card-body">
-          <h6 class="card-title mb-3">Leave Balances <span class="text-muted">(YTD)</span></h6>
-          <div class="row text-center">
-            <div class="col-4">
-              <div class="badge bg-primary mb-1" style="font-size:1.2rem;">Annual</div>
-              <div class="display-6 fw-bold">{{ leave_balance.annual }}</div>
+                <div class="card-body p-0 border-top">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 x-small">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4">Date</th>
+                                    <th>In</th>
+                                    <th>Out</th>
+                                    <th>Work Time</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if attendances %}
+                                    {% for a in attendances %}
+                                    <tr>
+                                        <td class="ps-4 fw-semibold text-dark">{{ a.date.strftime('%d %b, %Y') }}</td>
+                                        <td><i class="far fa-clock text-success me-1"></i>{{ a.time_in.strftime('%I:%M %p') if a.time_in else '-' }}</td>
+                                        <td><i class="far fa-clock text-danger me-1"></i>{{ a.time_out.strftime('%I:%M %p') if a.time_out else '-' }}</td>
+                                        <td>
+                                            {% if a.time_in and a.time_out %}
+                                                {% set duration = (a.time_out.hour * 60 + a.time_out.minute) - (a.time_in.hour * 60 + a.time_in.minute) %}
+                                                <span class="text-primary fw-medium">{{ (duration // 60) }}h {{ (duration % 60) }}m</span>
+                                            {% else %}-{% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if a.status=='present' else 'danger' }} bg-opacity-10 text-{{ 'success' if a.status=='present' else 'danger' }}">
+                                                {{ a.status|title }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr><td colspan="5" class="text-center py-5 text-secondary">No attendance records found.</td></tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-            <div class="col-4">
-              <div class="badge bg-success mb-1" style="font-size:1.2rem;">Sick</div>
-              <div class="display-6 fw-bold">{{ leave_balance.sick }}</div>
-            </div>
-            <div class="col-4">
-              <div class="badge bg-warning text-dark mb-1" style="font-size:1.2rem;">Casual</div>
-              <div class="display-6 fw-bold">{{ leave_balance.casual }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <div class="card mb-3">
-        <div class="card-body">
-          <h6 class="card-title mb-3">Quick Actions</h6>
-          <div class="d-grid gap-2">
-            <a href="#apply-leave" class="btn btn-primary"><i class="fas fa-calendar-plus me-2"></i>Apply Leave</a>
-            <a href="{{ url_for('user.attendance_list') }}" class="btn btn-outline-primary"><i class="fas fa-user-check me-2"></i>My Attendance</a>
-            <a href="{{ url_for('user.leaves_list') }}" class="btn btn-outline-warning"><i class="fas fa-calendar-alt me-2"></i>My Leaves</a>
-            <a href="{{ url_for('user.payrolls_list') }}" class="btn btn-outline-success"><i class="fas fa-money-bill-wave me-2"></i>Payslips</a>
-            <a href="{{ url_for('user.directory') }}" class="btn btn-outline-info"><i class="fas fa-address-book me-2"></i>Company Directory</a>
-          </div>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <!-- Apply Leave - Tighter -->
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white border-0 py-3">
+                            <h6 class="mb-0 fw-bold"><i class="fas fa-paper-plane text-primary me-2"></i>Apply for Leave</h6>
+                        </div>
+                        <div class="card-body border-top p-3">
+                            <form method="POST" action="{{ url_for('user.apply_leave') }}">
+                                <div class="mb-3">
+                                    <label class="form-label x-small fw-bold text-uppercase text-secondary">Leave Type</label>
+                                    <select name="leave_type" class="form-select form-select-sm border-0 bg-light" required>
+                                        <option value="">Select Type</option>
+                                        <option value="annual">Annual</option>
+                                        <option value="sick">Sick</option>
+                                        <option value="casual">Casual</option>
+                                    </select>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <label class="form-label x-small fw-bold text-uppercase text-secondary">Start</label>
+                                        <input type="date" name="start_date" class="form-control form-control-sm border-0 bg-light" required>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label x-small fw-bold text-uppercase text-secondary">End</label>
+                                        <input type="date" name="end_date" class="form-control form-control-sm border-0 bg-light" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <textarea name="reason" class="form-control form-control-sm border-0 bg-light" rows="2" placeholder="Reason (Optional)"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-sm w-100 rounded-pill shadow-sm">Submit Request</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <!-- Recent Leaves - Compact -->
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 fw-bold"><i class="fas fa-calendar-alt text-warning me-2"></i>Recent Leaves</h6>
+                            <a href="{{ url_for('user.leaves_list') }}" class="btn btn-link btn-sm text-decoration-none x-small">All</a>
+                        </div>
+                        <div class="card-body p-0 border-top">
+                            <div class="list-group list-group-flush x-small">
+                                {% if leaves %}
+                                    {% for l in leaves %}
+                                    <div class="list-group-item p-3 border-bottom">
+                                        <div class="d-flex align-items-center justify-content-between mb-1">
+                                            <span class="fw-bold text-dark">{{ l.leave_type|title }}</span>
+                                            <span class="badge bg-{{ 'warning' if l.status=='pending' else ('success' if l.status=='approved' else 'secondary') }} bg-opacity-10 text-{{ 'warning' if l.status=='pending' else ('success' if l.status=='approved' else 'secondary') }}">
+                                                {{ l.status|title }}
+                                            </span>
+                                        </div>
+                                        <div class="text-secondary small">
+                                            {{ l.start_date.strftime('%d %b') }} - {{ l.end_date.strftime('%d %b') }}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="p-4 text-center text-muted x-small">No requests found.</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Right column: main content -->
-    <div class="col-lg-8">
-      <div class="row g-3">
-        <div class="col-12">
-          <div class="card">
-            <div class="card-body">
-              <h6 class="card-title mb-3">Recent Attendance</h6>
-              <div class="table-responsive">
-                <table class="table table-bordered table-hover table-sm mb-0">
-                  <thead class="table-light">
-                    <tr>
-                      <th>Date</th>
-                      <th>In</th>
-                      <th>Out</th>
-                      <th>Duration</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% if attendances %}
-                      {% for a in attendances %}
-                      <tr>
-                        <td>{{ a.date.strftime('%d-%m-%Y') }}</td>
-                        <td>{{ a.time_in.strftime('%H:%M') if a.time_in else '-' }}</td>
-                        <td>{{ a.time_out.strftime('%H:%M') if a.time_out else '-' }}</td>
-                        <td>
-                          {% if a.time_in and a.time_out %}
-                            {% set duration = (a.time_out.hour * 60 + a.time_out.minute) - (a.time_in.hour * 60 + a.time_in.minute) %}
-                            {% if duration >= 0 %}{{ (duration // 60) }}h {{ (duration % 60) }}m{% else %}-{% endif %}
-                          {% else %}-{% endif %}
-                        </td>
-                        <td><span class="badge bg-{{ 'success' if a.status=='present' else 'danger' }}">{{ a.status|title }}</span></td>
-                      </tr>
-                      {% endfor %}
-                    {% else %}
-                      <tr><td colspan="5" class="text-center text-muted">No attendance records found.</td></tr>
+        <!-- Sidebar Widgets -->
+        <div class="col-lg-3">
+            <!-- Live Attendance -->
+            <div class="card mb-4 border-0 shadow-sm bg-dark text-white overflow-hidden">
+                <div class="card-body p-4 text-center">
+                    <p class="x-small fw-bold text-uppercase text-white-50 mb-3"><i class="fas fa-clock me-2"></i>Live Attendance</p>
+                    <h1 id="current-time" class="fw-bold mb-1 display-5">--:--:--</h1>
+                    <p id="current-date" class="x-small text-white-50 mb-4"></p>
+                    
+                    {% if employee %}
+                    <form action="{{ url_for('user.self_check') }}" method="POST">
+                        {% if not today_attendance or not today_attendance.time_in %}
+                            <input type="hidden" name="action" value="in">
+                            <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 shadow-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>Check In
+                            </button>
+                        {% elif not today_attendance.time_out %}
+                            <input type="hidden" name="action" value="out">
+                            <div class="badge bg-success bg-opacity-25 text-success p-2 mb-3 w-100 rounded-pill">
+                                <i class="fas fa-check me-1"></i> In at {{ today_attendance.time_in.strftime('%I:%M %p') }}
+                            </div>
+                            <button type="submit" class="btn btn-warning w-100 rounded-pill py-2 text-dark fw-bold">
+                                <i class="fas fa-sign-out-alt me-2"></i>Check Out
+                            </button>
+                        {% else %}
+                            <div class="badge bg-secondary bg-opacity-25 text-white p-3 w-100 rounded-pill x-small">
+                                <i class="fas fa-check-double me-1"></i> Shift Done
+                            </div>
+                        {% endif %}
+                    </form>
                     {% endif %}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-12">
-          <div class="card" id="apply-leave">
-            <div class="card-body">
-              <h6 class="card-title mb-3">Apply For Leave</h6>
-              <form method="POST" action="{{ url_for('user.apply_leave') }}">
-                <div class="row g-2 align-items-end">
-                  <div class="col-md-3">
-                    <label class="form-label">Leave Type</label>
-                    <select name="leave_type" class="form-select" required>
-                      <option value="">-- Select --</option>
-                      <option value="annual">Annual</option>
-                      <option value="sick">Sick</option>
-                      <option value="casual">Casual</option>
-                      <option value="maternity">Maternity</option>
-                    </select>
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">Start Date</label>
-                    <input type="date" name="start_date" class="form-control" required>
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">End Date</label>
-                    <input type="date" name="end_date" class="form-control" required>
-                  </div>
-                  <div class="col-md-3">
-                    <button class="btn btn-primary w-100"><i class="fas fa-paper-plane me-2"></i>Submit</button>
-                  </div>
-                  <div class="col-12 mt-2">
-                    <label class="form-label">Reason</label>
-                    <textarea name="reason" class="form-control" rows="2" placeholder="Optional reason"></textarea>
-                  </div>
                 </div>
-              </form>
             </div>
-          </div>
-        </div>
 
-        <div class="col-md-6">
-          <div class="card">
-            <div class="card-body">
-              <h6 class="card-title mb-3">Recent Leaves</h6>
-              <ul class="list-group list-group-flush">
-                {% if leaves %}
-                  {% for l in leaves %}
-                  <li class="list-group-item d-flex justify-content-between align-items-start">
-                    <div>
-                      <strong>{{ l.leave_type|title }}</strong>
-                      <div class="small text-muted">{{ l.start_date.strftime('%d-%m-%Y') }} - {{ l.end_date.strftime('%d-%m-%Y') }}</div>
-                      {% if l.reason %}<div class="small text-muted">{{ l.reason }}</div>{% endif %}
+            <!-- Leave Balance - Horizontal -->
+            <div class="card mb-4 border-0 shadow-sm">
+                <div class="card-body p-3">
+                    <p class="x-small fw-bold text-uppercase text-secondary mb-3">Leave Balance (YTD)</p>
+                    {% for type, bal in leave_balance.items() %}
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="x-small text-capitalize fw-medium">{{ type }}</span>
+                        <span class="badge bg-light text-dark border fw-bold">{{ bal }}</span>
                     </div>
-                    <div class="text-end">
-                      <span class="badge bg-{{ 'warning' if l.status=='pending' else ('success' if l.status=='approved' else 'secondary') }}">{{ l.status|title }}</span>
-                      {% if l.status == 'pending' and employee and l.employee_id == employee.id %}
-                      <form method="POST" action="{{ url_for('user.cancel_leave', id=l.id) }}" class="mt-2" onsubmit="return confirm('Cancel this leave request?');">
-                        <button class="btn btn-sm btn-outline-danger"><i class="fas fa-times"></i> Cancel</button>
-                      </form>
-                      {% endif %}
-                    </div>
-                  </li>
-                  {% endfor %}
-                {% else %}
-                  <li class="list-group-item text-center text-muted">No leave records.</li>
-                {% endif %}
-              </ul>
+                    {% endfor %}
+                </div>
             </div>
-          </div>
-        </div>
 
-        <div class="col-md-6">
-          <div class="card">
-            <div class="card-body">
-              <h6 class="card-title mb-3">Recent Payslips</h6>
-              <ul class="list-group list-group-flush">
-                {% if payrolls %}
-                  {% for p in payrolls %}
-                  <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div>
-                      <strong>{{ p.month }} {{ p.year }}</strong>
-                      <span class="text-success ms-2">₹{{ p.net_salary }}</span>
-                      <div class="small text-muted">{{ p.status|title if p.status else '' }}</div>
-                    <div class="text-end">
-                      <a href="{{ url_for('user.payslip', id=p.id) }}" class="btn btn-sm btn-outline-primary" target="_blank">
-                        <i class="fas fa-print"></i> View
-                      </a>
+            <!-- Quick Links - Icons Only Grid -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-3 text-center">
+                    <p class="x-small fw-bold text-uppercase text-secondary mb-3 text-start">Shortcuts</p>
+                    <div class="row g-2">
+                        {% set navs = [
+                            {'url': 'user.attendance_list', 'icon': 'fa-calendar-check', 'c': 'primary'},
+                            {'url': 'user.leaves_list', 'icon': 'fa-calendar-alt', 'c': 'warning'},
+                            {'url': 'user.payrolls_list', 'icon': 'fa-receipt', 'c': 'success'},
+                            {'url': 'user.directory', 'icon': 'fa-users', 'c': 'info'}
+                        ] %}
+                        {% for nav in navs %}
+                        <div class="col-3">
+                            <a href="{{ url_for(nav.url) }}" class="btn btn-light border-0 p-2 w-100 rounded-3 text-{{ nav.c }}">
+                                <i class="fas {{ nav.icon }}"></i>
+                            </a>
+                        </div>
+                        {% endfor %}
                     </div>
-                  </li>
-                  {% endfor %}
-                {% else %}
-                  <li class="list-group-item text-center text-muted">No payroll records.</li>
-                {% endif %}
-              </ul>
+                </div>
             </div>
-          </div>
         </div>
-
-      </div>
     </div>
-  </div>
 </div>
 {% endblock %}
 
@@ -319,9 +250,13 @@
   // Live clock for the attendance widget
   function updateTime() {
     const timeEl = document.getElementById('current-time');
+    const dateEl = document.getElementById('current-date');
     if(timeEl) {
       const now = new Date();
       timeEl.textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+      if(dateEl) {
+          dateEl.textContent = now.toLocaleDateString([], {weekday: 'long', month: 'short', day: 'numeric', year: 'numeric'});
+      }
     }
   }
   setInterval(updateTime, 1000);
