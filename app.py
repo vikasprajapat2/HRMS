@@ -12,10 +12,14 @@ from flask_sqlalchemy import SQLAlchemy
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
-handler = RotatingFileHandler('flask.log', maxBytes=10000, backupCount=1)
-handler.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
+try:
+    handler = RotatingFileHandler('flask.log', maxBytes=10000, backupCount=1)
+    handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+except Exception as e:
+    print(f"Warning: Could not initialize file logging: {e}")
+    handler = None
 
 # Load environment variables
 load_dotenv()
@@ -29,7 +33,8 @@ migrate = Migrate()
 # Create Flask app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here-change-in-production')
-app.logger.addHandler(handler)  # Add log handler to app
+if handler:
+    app.logger.addHandler(handler)  # Add log handler to app
 app.logger.setLevel(logging.DEBUG)  # Set log level
 
 # Database configuration: prefer DATABASE_URL (e.g. Supabase), then MySQL, fallback to SQLite
@@ -112,12 +117,6 @@ def hr_required(f):
         return f(*args, **kwargs)  
     return decorated_function
 
-# Using the app instance configured above. The factory `create_app()` is available
-# but the code below initializes and registers blueprints on `app` directly, so
-# avoid calling `create_app()` here to prevent import errors from an empty
-# `routes.__init__`.
-# app = create_app()
- 
 @app.route('/')
 def index():
     return render_template('welcome.html')
@@ -152,8 +151,11 @@ def internal_error(error):
     return render_template('errors/500.html'), 500
 
 # Ensure all tables exist
-with app.app_context():
-    db.create_all()
+try:
+    with app.app_context():
+        db.create_all()
+except Exception as e:
+    app.logger.error(f"Error creating database tables: {e}")
 
 if __name__ == '__main__':
     import sys

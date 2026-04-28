@@ -187,8 +187,10 @@
                                                             {{ '%.1f%%' | format(emp_stats['attendance_percentage']) }}
                                                         </span>
                                                     </div>
+                                                    {% set pct = emp_stats['attendance_percentage'] %}
+                                                    {% if pct >= 90 %}{% set bar_color = 'bg-success' %}{% elif pct >= 75 %}{% set bar_color = 'bg-warning' %}{% else %}{% set bar_color = 'bg-danger' %}{% endif %}
                                                     <div class="progress rounded-0" style="height: 6px; background-color: #e2e8f0;">
-                                                        <div class="progress-bar {% if emp_stats['attendance_percentage'] >= 90 %}bg-success{% elif emp_stats['attendance_percentage'] >= 75 %}bg-warning{% else %}bg-danger{% endif %}" role="progressbar" style="width: {{ emp_stats['attendance_percentage'] }}%;"></div>
+                                                        <div class="progress-bar {{ bar_color }}" role="progressbar" style="width: {{ pct }}%;"></div>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -274,12 +276,12 @@
                                                                     <div class="status-badge badge-solid-info">
                                                                         Holiday
                                                                     </div>
-                                                                    <div class="small text-muted mt-1" style="font-size: 0.7rem;">{{ att.description|truncate(20) }}</div>
+                                                                    <div class="small text-muted mt-1" style="font-size: 0.7rem;">{{ att.description|default('', true)|truncate(20) }}</div>
                                                                 {% elif att.status == 'leave' %}
                                                                     <div class="status-badge badge-solid-primary">
                                                                         On Leave
                                                                     </div>
-                                                                    <div class="small text-muted mt-1" style="font-size: 0.7rem;">{{ att.description|truncate(20) }}</div>
+                                                                    <div class="small text-muted mt-1" style="font-size: 0.7rem;">{{ att.description|default('', true)|truncate(20) }}</div>
                                                                 {% elif att.status == 'weekend' %}
                                                                     <div class="text-muted small" style="font-size: 0.7rem;">Weekend</div>
                                                                 {% else %}
