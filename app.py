@@ -151,14 +151,20 @@ def internal_error(error):
     return render_template('errors/500.html'), 500
 
 # Ensure all tables exist
-try:
-    with app.app_context():
-        db.create_all()
-except Exception as e:
-    app.logger.error(f"Error creating database tables: {e}")
+# Note: On Render, it's better to use 'flask db upgrade' or run this manually.
+# We'll disable it on import to prevent Gunicorn workers from hanging.
+if os.getenv('CREATE_DB', 'false').lower() == 'true':
+    try:
+        with app.app_context():
+            print("Creating database tables...")
+            db.create_all()
+            print("Database tables created successfully.")
+    except Exception as e:
+        print(f"Error creating database tables: {e}")
 
 if __name__ == '__main__':
     import sys
+    print("Application starting...")
     if len(sys.argv) > 1 and sys.argv[1] == '--dev':
         print("Starting in DEVELOPMENT mode...")
         app.run(debug=True, host='0.0.0.0', port=5000)
