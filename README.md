@@ -2,23 +2,41 @@
 
 This is a Python Flask conversion of the Laravel Employee Management System with HTML, CSS, and Bootstrap 5.
 
-## Recent Changes (v2.0 - 2026-04-29)
+## Recent Changes (2025-11-17)
 
-- **Premium UI Overhaul**: Modernized the Admin Dashboard and Monthly Attendance Report with a high-end glassmorphism design system.
-- **Enhanced Analytics**: Integrated interactive charts for salary trends, attendance status, and leave insights.
-- **Holiday Intelligence**: Fixed the attendance aggregation logic to correctly handle Holidays, Weekends, and Approved Leaves in monthly reports.
-- **Automated Attendance**: Implemented logic to automatically generate missing attendance records for the current month.
-- **Security & Fixes**: Corrected role-based access for HR Managers and refined database migration paths.
+- Removed the **Employee Portal Password** field from the Add Employee form (`templates/admin/employee/create.html`).
+- Portal accounts are no longer auto-created from the Add Employee UI; to create a portal user please use the Users/Admin panel or the `create_user_for_employee` flow if available.
+- If an account is created without an email, the system will use the format `<EmployeeID>@employee.local` as the default account email in existing code paths.
 
-## Screenshots (Modernized v2.0)
+If you want the previous behavior (creating portal accounts from the Add Employee form) restored, or want an explicit "Create portal account" checkbox added to the form, open an issue or request the change here.
 
-### Premium Admin Dashboard
-![Admin Dashboard](static/screenshots/dashboard_v2.png)
+## Features
 
-### Monthly Attendance Report
-![Monthly Report](static/screenshots/monthly_report_v2.png)
+- **User Authentication**: Multi-role authentication system (Superadmin, HR, Employee)
+- **Employee Management**: Create, edit, view, and manage employee profiles
+- **Department & Designation Management**: Organize employees by departments and designations
+- **Attendance System**: Track daily attendance with check-in/check-out functionality
+- **Leave Management**: Handle employee leave requests and approvals
+- **Payroll System**: Calculate and manage employee payroll
+- **Schedule Management**: Define working hours and schedules
+- **User Management**: Manage system users with role-based access control
 
-## Legacy Screenshots
+## Screenshots
+
+### Login Page
+![Login Page](static/screenshots/login_page.png)
+
+### Dashboard
+![Dashboard](static/screenshots/dashboard.png)
+
+### Employee List
+![Employee List](static/screenshots/employee_list.png)
+
+### Department List
+![Department List](static/screenshots/department_list.png)
+
+### Attendance Management
+![Attendance Management](static/screenshots/attendance_management.png)
 
 ## Technologies Used
 
