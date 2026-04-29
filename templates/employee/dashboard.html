@@ -1,83 +1,190 @@
 {% extends "base.html" %}
 
-{% block title %}My Dashboard - Employee Management System{% endblock %}
+{% block title %}My Dashboard - HRMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-container {
+        padding: 1.5rem 2rem;
+    }
+
+    /* Stat cards — clean white cards with left accent border */
+    .stat-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 1.25rem 1.5rem;
+        border-left: 4px solid #cbd5e1;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        transition: box-shadow 0.2s ease;
+    }
+    .stat-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .stat-card .stat-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+    .stat-card .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+        line-height: 1.2;
+    }
+    .stat-card .stat-label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    /* Accent colors */
+    .accent-indigo  { border-left-color: #6366f1; }
+    .accent-indigo .stat-icon  { background: #eef2ff; color: #4f46e5; }
+    .accent-teal    { border-left-color: #14b8a6; }
+    .accent-teal .stat-icon    { background: #f0fdfa; color: #0d9488; }
+    .accent-amber   { border-left-color: #f59e0b; }
+    .accent-amber .stat-icon   { background: #fffbeb; color: #d97706; }
+    .accent-sky     { border-left-color: #0ea5e9; }
+    .accent-sky .stat-icon     { background: #f0f9ff; color: #0284c7; }
+
+    /* Content cards */
+    .content-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        border: none;
+    }
+    .content-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.25rem;
+        border-bottom: 1px solid #f1f5f9;
+        padding-bottom: 0.75rem;
+    }
+    .content-card-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 0;
+    }
+
+    /* Quick Links */
+    .quick-link {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        color: #334155;
+        text-decoration: none;
+        transition: background 0.15s;
+        background: #f8fafc;
+        margin-bottom: 0.5rem;
+    }
+    .quick-link:hover {
+        background: #f1f5f9;
+        color: #1e293b;
+    }
+    .quick-link i {
+        margin-right: 0.75rem;
+        color: #64748b;
+    }
+
+    /* Table styles */
+    .table-clean thead th {
+        background: #f8fafc;
+        border: none;
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+        padding: 0.75rem 1rem;
+    }
+    .table-clean tbody td {
+        padding: 0.875rem 1rem;
+        font-size: 0.8125rem;
+        border-color: #f1f5f9;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-12">
-        <h2><i class="fas fa-user me-2"></i>My Dashboard</h2>
-        <p class="text-muted">Welcome back, {{ current_user.name }}!</p>
+<div class="dashboard-container">
+    <!-- Header -->
+    <div class="mb-4">
+        <h4 class="fw-bold text-dark mb-1">My Dashboard</h4>
+        <p class="text-muted small mb-0">Welcome back, <span class="fw-semibold text-primary">{{ current_user.name }}</span> · Portal Access Enabled</p>
     </div>
-</div>
 
-<div class="row g-4">
-    <div class="col-md-6 col-xl-3">
-        <div class="card bg-primary text-white h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
+    <!-- Stats Matrix -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6 col-xl-3">
+            <div class="stat-card accent-indigo">
+                <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="text-uppercase mb-1">Department</h6>
-                        <h5 class="mb-0">{{ employee.department.name if employee and employee.department else 'N/A' }}</h5>
+                        <div class="stat-label mb-1">Department</div>
+                        <div class="stat-value text-truncate" style="max-width: 150px;">{{ employee.department.name if employee and employee.department else 'N/A' }}</div>
                     </div>
-                    <i class="fas fa-building fa-3x opacity-50"></i>
+                    <div class="stat-icon"><i class="fas fa-building"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="stat-card accent-teal">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stat-label mb-1">Designation</div>
+                        <div class="stat-value text-truncate" style="max-width: 150px;">{{ employee.designation.name if employee and employee.designation else 'N/A' }}</div>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-briefcase"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="stat-card accent-amber">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stat-label mb-1">Pending Leaves</div>
+                        <div class="stat-value">{{ pending_leaves }}</div>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-calendar-times"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="stat-card accent-sky">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stat-label mb-1">Net Salary</div>
+                        <div class="stat-value">₹{{ '{:,.0f}'.format(latest_payroll.net_salary) if latest_payroll else '—' }}</div>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col-md-6 col-xl-3">
-        <div class="card bg-success text-white h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-uppercase mb-1">Designation</h6>
-                        <h5 class="mb-0">{{ employee.designation.name if employee and employee.designation else 'N/A' }}</h5>
-                    </div>
-                    <i class="fas fa-briefcase fa-3x opacity-50"></i>
+    <div class="row g-4">
+        <!-- Recent Attendance -->
+        <div class="col-lg-8">
+            <div class="content-card">
+                <div class="content-card-header">
+                    <h6 class="content-card-title"><i class="fas fa-calendar-check text-primary me-2"></i>Recent Attendance</h6>
+                    <a href="{{ url_for('employee.my_attendance') }}" class="text-primary small text-decoration-none">View All</a>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-6 col-xl-3">
-        <div class="card bg-warning text-white h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-uppercase mb-1">Pending Leaves</h6>
-                        <h2 class="mb-0">{{ pending_leaves }}</h2>
-                    </div>
-                    <i class="fas fa-calendar-times fa-3x opacity-50"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-6 col-xl-3">
-        <div class="card bg-info text-white h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-uppercase mb-1">Latest Net Salary</h6>
-                        <h2 class="mb-0">{{ latest_payroll.net_salary if latest_payroll else '—' }}</h2>
-                    </div>
-                    <i class="fas fa-money-bill-wave fa-3x opacity-50"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row mt-4">
-    <div class="col-lg-6">
-        <div class="card h-100">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Recent Attendance</h5>
-            </div>
-            <div class="card-body">
                 {% if recent_attendance %}
                 <div class="table-responsive">
-                    <table class="table table-striped mb-0">
+                    <table class="table table-clean mb-0">
                         <thead>
                             <tr>
                                 <th>Date</th>
@@ -89,8 +196,12 @@
                         <tbody>
                             {% for a in recent_attendance %}
                             <tr>
-                                <td>{{ a.date.strftime('%Y-%m-%d') }}</td>
-                                <td>{{ a.status or '—' }}</td>
+                                <td class="fw-semibold">{{ a.date.strftime('%d %b, %Y') }}</td>
+                                <td>
+                                    <span class="badge {% if a.status == 'present' %}bg-success-subtle text-success{% elif a.status == 'absent' %}bg-danger-subtle text-danger{% else %}bg-secondary-subtle text-secondary{% endif %} rounded-pill px-2">
+                                        {{ a.status|title }}
+                                    </span>
+                                </td>
                                 <td>{{ a.time_in.strftime('%H:%M') if a.time_in else '—' }}</td>
                                 <td>{{ a.time_out.strftime('%H:%M') if a.time_out else '—' }}</td>
                             </tr>
@@ -99,42 +210,73 @@
                     </table>
                 </div>
                 {% else %}
-                <p class="text-muted mb-0">No attendance records found.</p>
+                <div class="text-center py-4">
+                    <img src="https://img.icons8.com/clouds/100/null/calendar.png" class="mb-2 opacity-50" style="width: 60px;">
+                    <p class="text-muted small mb-0">No attendance records found.</p>
+                </div>
                 {% endif %}
             </div>
         </div>
-    </div>
 
-    <div class="col-lg-6">
-        <div class="card h-100">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-id-card me-2"></i>Profile</h5>
-            </div>
-            <div class="card-body">
+        <!-- Sidebar Actions & Profile -->
+        <div class="col-lg-4">
+            <!-- Profile Card -->
+            <div class="content-card mb-4">
+                <div class="content-card-header">
+                    <h6 class="content-card-title"><i class="fas fa-id-card text-primary me-2"></i>My Profile</h6>
+                </div>
                 {% if employee %}
-                <div class="row mb-2">
-                    <div class="col-5 text-muted">Name</div>
-                    <div class="col-7">{{ employee.firstname }} {{ employee.lastname }}</div>
+                <div class="d-flex align-items-center mb-4">
+                    <div class="me-3">
+                        {% if employee.image %}
+                        <img src="{{ url_for('static', filename='uploads/employees/' ~ employee.image) }}" class="rounded-circle border" style="width: 50px; height: 50px; object-fit: cover;">
+                        {% else %}
+                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-bold" style="width: 50px; height: 50px;">
+                            {{ employee.firstname[0] }}{{ employee.lastname[0] }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <div class="fw-bold text-dark">{{ employee.firstname }} {{ employee.lastname }}</div>
+                        <div class="text-muted extra-small">{{ employee.unique_id }}</div>
+                    </div>
                 </div>
-                <div class="row mb-2">
-                    <div class="col-5 text-muted">Email</div>
-                    <div class="col-7">{{ employee.email or current_user.email }}</div>
-                </div>
-                <div class="row mb-2">
-                    <div class="col-5 text-muted">Phone</div>
-                    <div class="col-7">{{ employee.phone or '—' }}</div>
-                </div>
-                <div class="row mb-2">
-                    <div class="col-5 text-muted">Schedule</div>
-                    <div class="col-7">{{ employee.schedule.name if employee.schedule else '—' }}</div>
+                <div class="small">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Email</span>
+                        <span class="text-dark fw-medium text-truncate ms-3">{{ employee.email or current_user.email }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Phone</span>
+                        <span class="text-dark fw-medium">{{ employee.phone or '—' }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Schedule</span>
+                        <span class="text-dark fw-medium">{{ employee.schedule.name if employee.schedule else '—' }}</span>
+                    </div>
                 </div>
                 {% else %}
-                <p class="text-muted mb-0">No employee profile is linked to your user (email: {{ current_user.email }}).</p>
+                <p class="text-muted small mb-0">Profile not linked.</p>
                 {% endif %}
+            </div>
+
+            <!-- Quick Links -->
+            <div class="content-card">
+                <h6 class="content-card-title mb-3">Quick Links</h6>
+                <a href="{{ url_for('employee.apply_leave') }}" class="quick-link">
+                    <i class="fas fa-paper-plane fa-fw"></i>
+                    <span class="small fw-semibold">Apply for Leave</span>
+                </a>
+                <a href="{{ url_for('employee.my_payroll') }}" class="quick-link">
+                    <i class="fas fa-file-invoice-dollar fa-fw"></i>
+                    <span class="small fw-semibold">View Payslips</span>
+                </a>
+                <a href="{{ url_for('employee.change_password') }}" class="quick-link">
+                    <i class="fas fa-key fa-fw"></i>
+                    <span class="small fw-semibold">Security Settings</span>
+                </a>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
-
-

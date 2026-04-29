@@ -1,199 +1,330 @@
 {% extends "base.html" %}
 
-{% block title %}Employee Details - Employee Management{% endblock %}
+{% block title %}Employee Profile - HRMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-container {
+        padding: 1.5rem 2rem;
+    }
+
+    /* Profile Header Card */
+    .profile-header-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        border: none;
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+    .profile-avatar-wrapper {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        margin-bottom: 1rem;
+    }
+    .profile-avatar {
+        width: 100%;
+        height: 100%;
+        border-radius: 20px;
+        object-fit: cover;
+        border: 4px solid #f8fafc;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    .profile-avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        border-radius: 20px;
+        background: #eef2ff;
+        color: #4f46e5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        font-weight: 700;
+        border: 4px solid #f8fafc;
+    }
+
+    /* Info Cards */
+    .info-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        border: none;
+        height: 100%;
+    }
+    .info-card-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .info-card-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 0;
+    }
+    .info-card-body {
+        padding: 1.5rem;
+    }
+
+    /* Info rows */
+    .info-row {
+        display: flex;
+        margin-bottom: 1rem;
+    }
+    .info-row:last-child {
+        margin-bottom: 0;
+    }
+    .info-label {
+        width: 140px;
+        font-size: 0.8125rem;
+        color: #64748b;
+        flex-shrink: 0;
+    }
+    .info-value {
+        font-size: 0.875rem;
+        color: #1e293b;
+        font-weight: 500;
+    }
+
+    /* Documents table */
+    .table-docs thead th {
+        background: #f8fafc;
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+        border-top: none;
+    }
+    .table-docs tbody td {
+        padding: 0.75rem 1rem;
+        font-size: 0.8125rem;
+        vertical-align: middle;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="fas fa-user me-2"></i>Employee Details</h2>
-    <div>
-        {% if current_user.is_authenticated and current_user.role and current_user.role.name in ['superadmin', 'hr'] %}
-        <a href="{{ url_for('employee.create_user_for_employee', id=employee.id) }}" class="btn btn-info">
-            <i class="fas fa-user-plus me-2"></i>Create/Edit User Account
-        </a>
-        {% endif %}
-        <a href="{{ url_for('employee.edit', id=employee.id) }}" class="btn btn-warning">
-            <i class="fas fa-edit me-2"></i>Edit
-        </a>
-        {% if current_user.is_authenticated and current_user.role and current_user.role.name == 'superadmin' %}
-        <form method="POST" action="{{ url_for('admin.delete_employee', id=employee.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this employee? This action cannot be undone.');">
-            <button type="submit" class="btn btn-danger">
-                <i class="fas fa-trash me-2"></i>Delete
-            </button>
-        </form>
-        {% endif %}
-        <a href="{{ url_for('employee.index') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Back
-        </a>
+<div class="profile-container">
+    <!-- Header with Actions -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold text-dark mb-1">Employee Profile</h4>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 small">
+                    <li class="breadcrumb-item"><a href="{{ url_for('employee.index') }}" class="text-decoration-none">Directory</a></li>
+                    <li class="breadcrumb-item active">{{ employee.firstname }} {{ employee.lastname }}</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="d-flex gap-2">
+            {% if current_user.role.name in ['superadmin', 'hr'] %}
+            <a href="{{ url_for('employee.create_user_for_employee', id=employee.id) }}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                <i class="fas fa-user-shield me-1"></i> Account Access
+            </a>
+            {% endif %}
+            <a href="{{ url_for('employee.edit', id=employee.id) }}" class="btn btn-primary btn-sm rounded-pill px-3">
+                <i class="fas fa-edit me-1"></i> Edit Record
+            </a>
+            <a href="{{ url_for('employee.index') }}" class="btn btn-light btn-sm rounded-pill px-3 border">
+                <i class="fas fa-arrow-left me-1"></i> Back
+            </a>
+        </div>
     </div>
-</div>
 
-<div class="row">
-    <div class="col-md-4">
-        <div class="card mb-4">
-            <div class="card-body text-center">
-                <div class="mb-3">
+    <!-- Profile Overview Card -->
+    <div class="profile-header-card">
+        <div class="row align-items-center">
+            <div class="col-md-auto">
+                <div class="profile-avatar-wrapper">
                     {% if employee.image %}
-                    <img src="{{ url_for('static', filename='uploads/employees/' ~ employee.image) }}" alt="{{ employee.firstname }}" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 3px solid #007bff;">
+                    <img src="{{ url_for('static', filename='uploads/employees/' ~ employee.image) }}" class="profile-avatar">
                     {% else %}
-                    <div style="width: 150px; height: 150px; margin: 0 auto; border-radius: 50%; background-color: #007bff; display: flex; align-items: center; justify-content: center; color: white; font-size: 60px; font-weight: bold;">{{ employee.firstname[0]|upper if employee.firstname else 'E' }}</div>
+                    <div class="profile-avatar-placeholder">
+                        {{ employee.firstname[0] }}{{ employee.lastname[0] }}
+                    </div>
                     {% endif %}
                 </div>
-                <h4>{{ employee.firstname }} {{ employee.lastname }}</h4>
-                <p class="text-muted">{{ employee.unique_id or 'No ID' }}</p>
-                <span class="badge bg-{{ 'success' if employee.status == 'active' else 'danger' }}">
-                    {{ employee.status|title }}
-                </span>
+            </div>
+            <div class="col-md">
+                <div class="d-flex align-items-center gap-3 mb-1">
+                    <h3 class="fw-bold text-dark mb-0">{{ employee.firstname }} {{ employee.lastname }}</h3>
+                    <span class="badge {% if employee.status == 'active' %}bg-success-subtle text-success{% else %}bg-danger-subtle text-danger{% endif %} rounded-pill">
+                        {{ employee.status|title }}
+                    </span>
+                </div>
+                <div class="text-muted small mb-3">
+                    <span class="me-3"><i class="fas fa-fingerprint me-1"></i> {{ employee.unique_id or 'No ID Assigned' }}</span>
+                    <span class="me-3"><i class="fas fa-building me-1"></i> {{ employee.department.name if employee.department else 'No Department' }}</span>
+                    <span><i class="fas fa-briefcase me-1"></i> {{ employee.designation.name if employee.designation else 'No Designation' }}</span>
+                </div>
+                <div class="d-flex gap-2">
+                    {% if employee.email %}
+                    <a href="mailto:{{ employee.email }}" class="btn btn-light btn-sm rounded-pill border text-muted">
+                        <i class="fas fa-envelope me-1"></i> Email
+                    </a>
+                    {% endif %}
+                    {% if employee.phone %}
+                    <a href="tel:{{ employee.phone }}" class="btn btn-light btn-sm rounded-pill border text-muted">
+                        <i class="fas fa-phone me-1"></i> Call
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-auto text-md-end mt-4 mt-md-0">
+                {% if current_user.role.name == 'superadmin' %}
+                <form method="POST" action="{{ url_for('admin.delete_employee', id=employee.id) }}" onsubmit="return confirm('Archive this record?');">
+                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                        <i class="fas fa-trash me-1"></i> Archive Record
+                    </button>
+                </form>
+                {% endif %}
             </div>
         </div>
     </div>
 
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Personal Information</h5>
+    <div class="row g-4">
+        <!-- Details Column -->
+        <div class="col-lg-7">
+            <!-- Personal Info -->
+            <div class="info-card mb-4">
+                <div class="info-card-header">
+                    <h6 class="info-card-title"><i class="fas fa-user-circle text-primary me-2"></i>Personal Details</h6>
+                </div>
+                <div class="info-card-body">
+                    <div class="info-row">
+                        <div class="info-label">Full Name</div>
+                        <div class="info-value">{{ employee.firstname }} {{ employee.lastname }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Contact Email</div>
+                        <div class="info-value">{{ employee.email or '—' }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Phone Number</div>
+                        <div class="info-value">{{ employee.phone or '—' }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Date of Birth</div>
+                        <div class="info-value">{{ employee.dob.strftime('%d %b, %Y') if employee.dob else '—' }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Gender / Marital</div>
+                        <div class="info-value">{{ employee.gender|title or '—' }} · {{ employee.marital|title or '—' }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Home Address</div>
+                        <div class="info-value">{{ employee.address or '—' }}</div>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="row mb-3">
-                    <div class="col-md-4"><strong>Email:</strong></div>
-                    <div class="col-md-8">{{ employee.email or 'N/A' }}</div>
+
+            <!-- Employment Info -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <h6 class="info-card-title"><i class="fas fa-briefcase text-primary me-2"></i>Employment Details</h6>
                 </div>
-                <div class="row mb-3">
-                    <div class="col-md-4"><strong>Phone:</strong></div>
-                    <div class="col-md-8">{{ employee.phone or 'N/A' }}</div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-md-4"><strong>Date of Birth:</strong></div>
-                    <div class="col-md-8">{{ employee.dob.strftime('%Y-%m-%d') if employee.dob else 'N/A' }}</div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-md-4"><strong>Gender:</strong></div>
-                    <div class="col-md-8">{{ employee.gender|title if employee.gender else 'N/A' }}</div>
-                </div>
-                <!-- Religion field removed per request -->
-                <div class="row mb-3">
-                    <div class="col-md-4"><strong>Marital Status:</strong></div>
-                    <div class="col-md-8">{{ employee.marital|title if employee.marital else 'N/A' }}</div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-md-4"><strong>Address:</strong></div>
-                    <div class="col-md-8">{{ employee.address or 'N/A' }}</div>
+                <div class="info-card-body">
+                    <div class="info-row">
+                        <div class="info-label">Department</div>
+                        <div class="info-value">{{ employee.department.name if employee.department else '—' }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Designation</div>
+                        <div class="info-value">{{ employee.designation.name if employee.designation else '—' }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Working Schedule</div>
+                        <div class="info-value">{{ employee.schedule.name if employee.schedule else '—' }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Joining Date</div>
+                        <div class="info-value">{{ employee.created_at.strftime('%d %b, %Y') if employee.created_at else '—' }}</div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="card mt-3">
-            <div class="card-header">
-                <h5 class="mb-0">Employment Information</h5>
-            </div>
-            <div class="card-body">
-                <div class="row mb-3">
-                    <div class="col-md-4"><strong>Department:</strong></div>
-                    <div class="col-md-8">{{ employee.department.name if employee.department else 'N/A' }}</div>
+        <!-- Documents Column -->
+        <div class="col-lg-5">
+            <div class="info-card">
+                <div class="info-card-header">
+                    <h6 class="info-card-title"><i class="fas fa-file-contract text-primary me-2"></i>Official Documents</h6>
+                    {% if current_user.role.name in ['superadmin', 'hr'] %}
+                    <button class="btn btn-link btn-sm text-primary p-0 text-decoration-none" type="button" data-bs-toggle="collapse" data-bs-target="#uploadDocForm">
+                        <i class="fas fa-plus-circle me-1"></i> Add New
+                    </button>
+                    {% endif %}
                 </div>
-                <div class="row mb-3">
-                    <div class="col-md-4"><strong>Designation:</strong></div>
-                    <div class="col-md-8">{{ employee.designation.name if employee.designation else 'N/A' }}</div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-md-4"><strong>Schedule:</strong></div>
-                    <div class="col-md-8">{{ employee.schedule.name if employee.schedule else 'N/A' }}</div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-md-4"><strong>Joined Date:</strong></div>
-                    <div class="col-md-8">{{ employee.created_at.strftime('%Y-%m-%d') if employee.created_at else 'N/A' }}</div>
-                </div>
-            </div>
-        </div>
-        <div class="card mt-3">
-            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="fas fa-file-contract me-2"></i>Official Documents</h5>
-                {% if current_user.role.name in ['superadmin', 'hr'] %}
-                <button class="btn btn-sm btn-light" type="button" data-bs-toggle="collapse" data-bs-target="#uploadDocForm" aria-expanded="false" aria-controls="uploadDocForm">
-                    <i class="fas fa-upload me-1"></i> Upload
-                </button>
-                {% endif %}
-            </div>
-            <div class="card-body">
-                {% if current_user.role.name in ['superadmin', 'hr'] %}
-                <div class="collapse mb-4" id="uploadDocForm">
-                    <div class="card card-body bg-light border-primary">
+                <div class="info-card-body p-0">
+                    {% if current_user.role.name in ['superadmin', 'hr'] %}
+                    <div class="collapse p-3 bg-light border-bottom" id="uploadDocForm">
                         <form action="{{ url_for('document.upload', employee_id=employee.id) }}" method="POST" enctype="multipart/form-data">
-                            <div class="row g-3">
-                                <div class="col-md-4">
-                                    <label class="form-label">Document Title</label>
-                                    <input type="text" name="title" class="form-control form-control-sm" placeholder="e.g. 2026 Offer Letter" required>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Document Type</label>
+                            <div class="mb-2">
+                                <input type="text" name="title" class="form-control form-control-sm" placeholder="Document Title" required>
+                            </div>
+                            <div class="row g-2 mb-2">
+                                <div class="col-6">
                                     <select name="doc_type" class="form-select form-select-sm" required>
                                         <option value="offer_letter">Offer Letter</option>
-                                        <option value="contract">Employment Contract</option>
-                                        <option value="salary_slip">Manual Salary Slip</option>
-                                        <option value="policy">Policy Acknowledgment</option>
-                                        <option value="aadhar_card">Aadhar Card</option>
-                                        <option value="pan_card">PAN Card</option>
-                                        <option value="other">Other Official Document</option>
+                                        <option value="contract">Contract</option>
+                                        <option value="id_proof">ID Proof</option>
+                                        <option value="other">Other</option>
                                     </select>
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Select File</label>
-                                    <input type="file" name="file" class="form-control form-control-sm" accept=".pdf,.doc,.docx,.jpg,.png" required>
-                                </div>
-                                <div class="col-12 mt-3">
-                                    <button type="submit" class="btn btn-sm btn-primary w-100">Save Document</button>
+                                <div class="col-6">
+                                    <input type="file" name="file" class="form-control form-control-sm" required>
                                 </div>
                             </div>
+                            <button type="submit" class="btn btn-primary btn-sm w-100">Upload Document</button>
                         </form>
                     </div>
-                </div>
-                {% endif %}
-                
-                <div class="table-responsive">
-                    <table class="table table-hover table-sm align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Title</th>
-                                <th>Type</th>
-                                <th>Uploaded On</th>
-                                <th class="text-end">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for doc in employee.documents|sort(attribute='uploaded_at', reverse=True) %}
-                            <tr>
-                                <td class="fw-bold">{{ doc.title }}</td>
-                                <td>
-                                    {% if doc.doc_type == 'offer_letter' %}
-                                    <span class="badge bg-primary">Offer Letter</span>
-                                    {% elif doc.doc_type == 'contract' %}
-                                    <span class="badge bg-success">Contract</span>
-                                    {% elif doc.doc_type == 'salary_slip' %}
-                                    <span class="badge bg-info text-dark">Salary Slip</span>
-                                    {% else %}
-                                    <span class="badge bg-secondary">{{ doc.doc_type|title }}</span>
-                                    {% endif %}
-                                </td>
-                                <td><small class="text-muted">{{ doc.uploaded_at.strftime('%Y-%m-%d') }}</small></td>
-                                <td class="text-end">
-                                    <a href="{{ url_for('document.download', doc_id=doc.id) }}" class="btn btn-sm btn-outline-primary" title="Download">
-                                        <i class="fas fa-download"></i>
-                                    </a>
-                                    {% if current_user.role.name in ['superadmin', 'hr'] %}
-                                    <form action="{{ url_for('document.delete', doc_id=doc.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this official document permanently?');">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% else %}
-                            <tr>
-                                <td colspan="4" class="text-center py-4 text-muted fst-italic">No official documents have been uploaded for this employee.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    {% endif %}
+
+                    <div class="table-responsive">
+                        <table class="table table-docs mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Type</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for doc in employee.documents|sort(attribute='uploaded_at', reverse=True) %}
+                                <tr>
+                                    <td class="fw-semibold text-dark">{{ doc.title }}</td>
+                                    <td>
+                                        <span class="badge bg-secondary-subtle text-secondary rounded-pill extra-small px-2">
+                                            {{ doc.doc_type|title }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{{ url_for('document.download', doc_id=doc.id) }}" class="btn btn-link btn-sm text-primary p-0 me-2">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                        {% if current_user.role.name in ['superadmin', 'hr'] %}
+                                        <form action="{{ url_for('document.delete', doc_id=doc.id) }}" method="POST" class="d-inline">
+                                            <button type="submit" class="btn btn-link btn-sm text-danger p-0" onclick="return confirm('Delete document?');">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center py-4 text-muted small">No documents uploaded.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

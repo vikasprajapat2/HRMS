@@ -41,6 +41,11 @@ A comprehensive, modern HR Management System built with **Python Flask** and **B
 
 ![Leave Management](static/screenshots/leaves_v2.png)
 
+### 🛡️ HR Dashboard
+> Dedicated management interface for HR staff with key metrics and control center.
+
+![HR Dashboard](static/screenshots/hr_dashboard.png)
+
 ### 🏛️ Department Management
 > Organize your workforce by departments with full CRUD operations.
 
@@ -53,7 +58,7 @@ A comprehensive, modern HR Management System built with **Python Flask** and **B
 ### Core Modules
 | Module | Description |
 |--------|-------------|
-| **Dashboard** | Glassmorphism admin dashboard with analytics charts and quick actions |
+| **Dashboard** | Professional admin dashboard with analytical charts and quick actions |
 | **Employees** | Full CRUD with auto-generated IDs (`YYDEPTSERIAL` format) |
 | **Attendance** | Check-in/out board, manual records, auto-generation engine |
 | **Leaves** | Request/approve workflow with calendar integration |
