@@ -1,60 +1,61 @@
 {% extends 'base.html' %}
-{% block title %}Company Directory{% endblock %}
+{% block title %}Company Directory - EMS{% endblock %}
 {% block content %}
-<div class="container-fluid mt-4">
-  <div class="row mb-4 align-items-center">
-    <div class="col-md-6">
-      <h2><i class="fas fa-address-book me-2 text-info"></i>Company Directory</h2>
-      <p class="text-muted">Connect with your colleagues.</p>
-    </div>
-    <div class="col-md-6 text-end">
-        <a href="{{ url_for('user.dashboard') }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
-        </a>
-    </div>
-  </div>
-
-  <div class="row g-4">
-    {% for emp in employees %}
-    <div class="col-sm-6 col-md-4 col-xl-3">
-      <div class="card h-100 shadow-sm border-0 hover-lift">
-        <div class="card-body text-center">
-          {% if emp.image %}
-            <img src="{{ url_for('static', filename='uploads/employees/' ~ emp.image) }}" class="rounded-circle mb-3 shadow-sm" style="width:100px;height:100px;object-fit:cover;">
-          {% else %}
-            <div class="rounded-circle bg-light text-primary d-flex align-items-center justify-content-center mb-3 mx-auto shadow-sm" style="width:100px;height:100px;font-size:32px">
-              {{ emp.firstname[0]|upper }}{{ emp.lastname[0]|upper }}
-            </div>
-          {% endif %}
-          <h5 class="card-title fw-bold mb-1">{{ emp.firstname }} {{ emp.lastname }}</h5>
-          <p class="text-primary small mb-2 fw-semibold">{{ emp.designation.name if emp.designation else 'Employee' }}</p>
-          <div class="badge bg-secondary mb-3">{{ emp.department.name if emp.department else 'General' }}</div>
-          
-          <ul class="list-unstyled text-start small text-muted mb-0">
-            <li class="mb-2"><i class="fas fa-envelope me-2 text-info"></i><a href="mailto:{{ emp.email }}" class="text-decoration-none text-muted">{{ emp.email }}</a></li>
-            {% if emp.phone %}
-            <li><i class="fas fa-phone me-2 text-success"></i><a href="tel:{{ emp.phone }}" class="text-decoration-none text-muted">{{ emp.phone }}</a></li>
-            {% endif %}
-          </ul>
+<div class="container-fluid animate-fade-in">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-6">
+            <h2 class="fw-bold text-dark mb-1"><i class="fas fa-users text-info me-2"></i>Company Directory</h2>
+            <p class="text-secondary mb-0">Connect with your colleagues across the organization.</p>
         </div>
-      </div>
+        <div class="col-md-6 text-md-end mt-3 mt-md-0">
+            <a href="{{ url_for('user.dashboard') }}" class="btn btn-white border shadow-sm">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
     </div>
-    {% else %}
-    <div class="col-12 text-center text-muted py-5">
-        <i class="fas fa-users-slash fa-3x mb-3 opacity-25"></i>
-        <h5>No active employees found.</h5>
-    </div>
-    {% endfor %}
-  </div>
-</div>
 
-<style>
-.hover-lift {
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
-.hover-lift:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
-}
-</style>
+    <div class="row g-4">
+        {% if employees %}
+            {% for emp in employees %}
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <div class="card border-0 shadow-sm h-100 overflow-hidden">
+                    <div class="p-4 text-center">
+                        <div class="mb-3 d-flex justify-content-center">
+                            <div class="rounded-circle bg-info bg-opacity-10 text-info d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width:80px;height:80px;font-size:24px;">
+                                {{ emp.firstname[0]|upper if emp.firstname else 'E' }}{{ emp.lastname[0]|upper if emp.lastname else '' }}
+                            </div>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-1">{{ emp.firstname }} {{ emp.lastname }}</h5>
+                        <p class="text-info x-small fw-bold text-uppercase mb-3">{{ emp.designation.name if emp.designation else 'Employee' }}</p>
+                        
+                        <div class="d-flex flex-wrap justify-content-center gap-1 mb-4">
+                            <span class="badge bg-light text-secondary border rounded-pill">{{ emp.department.name if emp.department else 'General' }}</span>
+                        </div>
+
+                        <div class="text-start border-top pt-3">
+                            <div class="mb-2 d-flex align-items-center">
+                                <i class="fas fa-envelope text-muted me-3 fa-fw small"></i>
+                                <a href="mailto:{{ emp.email }}" class="text-decoration-none text-secondary small text-truncate d-block">{{ emp.email }}</a>
+                            </div>
+                            <div class="mb-0 d-flex align-items-center">
+                                <i class="fas fa-phone text-muted me-3 fa-fw small"></i>
+                                <span class="text-secondary small">{{ emp.phone or '-' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="card border-0 shadow-sm py-5 text-center">
+                    <div class="text-muted">
+                        <i class="fas fa-user-friends fa-3x mb-3 opacity-25"></i>
+                        <p>No employees found in the directory.</p>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}

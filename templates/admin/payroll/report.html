@@ -63,11 +63,11 @@
                     <tr>
                         <td>{{ payroll.employee.firstname }} {{ payroll.employee.lastname }}</td>
                         <td>{{ payroll.month }} {{ payroll.year }}</td>
-                        <td>${{ payroll.basic_salary }}</td>
-                        <td class="text-success">+${{ payroll.allowances }}</td>
-                        <td class="text-success">+${{ payroll.overtime_amount }}</td>
-                        <td class="text-danger">-${{ payroll.deductions }}</td>
-                        <td class="fw-bold">${{ payroll.net_salary }}</td>
+                        <td>₹{{ payroll.basic_salary }}</td>
+                        <td class="text-success">+₹{{ payroll.allowances }}</td>
+                        <td class="text-success">+₹{{ payroll.overtime_amount }}</td>
+                        <td class="text-danger">-₹{{ payroll.deductions }}</td>
+                        <td class="fw-bold">₹{{ payroll.net_salary }}</td>
                         <td>
                             {% if payroll.status == 'paid' %}
                             <span class="badge bg-success">Paid</span>

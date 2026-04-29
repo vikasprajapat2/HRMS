@@ -140,8 +140,17 @@ def edit(id):
     user = User.query.get_or_404(id)
     
     if request.method == 'POST':
-
+        user.name = request.form.get('name')
+        user.email = request.form.get('email')
+        user.phone = request.form.get('phone')
+        user.role_id = request.form.get('role_id')
+        user.status = request.form.get('status')
         
+        password = request.form.get('password')
+        if password:
+            user.password = bcrypt.generate_password_hash(password).decode('utf-8')
+            
+        db.session.commit()
         flash('User updated successfully!', 'success')
         return redirect(url_for('user.index'))
     
@@ -154,7 +163,15 @@ def edit(id):
 def delete(id):
     user = User.query.get_or_404(id)
     
-
+    # Prevent superadmin from deleting themselves
+    if current_user.id == user.id:
+        flash('You cannot delete your own account!', 'danger')
+        return redirect(url_for('user.index'))
+    
+    # Prevent deletion of other superadmin accounts
+    if user.role.name == 'superadmin':
+        flash('Cannot delete other superadmin accounts!', 'danger')
+        return redirect(url_for('user.index'))
     
     db.session.delete(user)
     db.session.commit()
@@ -346,27 +363,27 @@ def apply_leave():
             Leave.start_date <= end_date,
             Leave.end_date >= start_date
         ).first()
+        if existing_leave:
+            flash('You already have a leave request during this period.', 'danger')
+            return redirect(url_for('user.dashboard'))
 
-
-
-
-        from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
-        from flask_login import login_required, current_user
-        from database import db
-        from models import User, Role, Employee, Attendance, Leave, Payroll, AuditLog, Notification
-        from flask_bcrypt import Bcrypt
-        import json
-        from functools import wraps
-        from database import db
-        from datetime import datetime
-        import os
-        from werkzeug.utils import secure_filename
-        from flask import current_app
+        leave = Leave(
+            employee_id=employee.id,
+            leave_type=request.form.get('leave_type'),
+            start_date=start_date,
+            end_date=end_date,
+            reason=request.form.get('reason'),
+            status='pending'
+        )
+        db.session.add(leave)
+        db.session.commit()
+        flash('Leave applied successfully.', 'success')
+        return redirect(url_for('user.dashboard'))
+        
+    return redirect(url_for('user.dashboard'))
 
 @bp.route('/profile')
 @login_required
-
-        # Place this route after bp is defined
 def profile():
     user = current_user
     try:
@@ -534,3 +551,10 @@ def cancel_leave(id):
     db.session.commit()
     flash('Leave cancelled successfully.', 'success')
     return redirect(url_for('user.dashboard'))
+@bp.route('/report')
+@login_required
+@superadmin_required
+def report():
+    """System User Report (superadmin only)."""
+    users = User.query.all()
+    return render_template('admin/user/report.html', users=users)

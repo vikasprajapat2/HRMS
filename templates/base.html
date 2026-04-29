@@ -36,7 +36,7 @@
             </div>
             <div class="list-group list-group-flush mt-3">
                 <a href="{{ url_for(dashboard_endpoint) }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == dashboard_endpoint else '' }}">
-                    <i class="fas fa-grid-2 me-2"></i>Dashboard
+                    <i class="fas fa-th-large me-2"></i>Dashboard
                 </a>
                 {% if role_name in ['superadmin', 'hr'] %}
                 <a href="{{ url_for('employee.index') }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == 'employee.index' else '' }}">

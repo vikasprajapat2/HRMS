@@ -1,76 +1,76 @@
 {% extends 'base.html' %}
+{% block title %}Edit Profile - EMS{% endblock %}
 {% block content %}
-<div class="container mt-4">
-  <div class="row">
-    <div class="col-md-8">
-      <div class="card p-3">
-        <h5>Edit Profile</h5>
-        <form method="POST" enctype="multipart/form-data">
-          <div class="mb-3">
-            <label class="form-label">Name</label>
-            <input type="text" name="name" class="form-control" value="{{ user.name }}" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Phone</label>
-            <input type="text" name="phone" class="form-control" value="{{ user.phone or '' }}">
-          </div>
-
-          {% if employee %}
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label class="form-label">First Name</label>
-              <input type="text" name="firstname" class="form-control" value="{{ employee.firstname }}">
-            </div>
-            <div class="col-md-6 mb-3">
-              <label class="form-label">Last Name</label>
-              <input type="text" name="lastname" class="form-control" value="{{ employee.lastname }}">
-            </div>
-          </div>
-          {% endif %}
-
-          <div class="mb-4">
-            <h6 class="text-primary border-bottom pb-2 mb-3">Profile Identity</h6>
-            <div class="mb-3">
-              <label class="form-label">Profile Photo</label>
-              <input type="file" name="image" class="form-control" accept="image/*">
-            </div>
-          </div>
-
-          {% if employee %}
-          <div class="mb-4">
-            <h6 class="text-primary border-bottom pb-2 mb-3">Employee Documents</h6>
-            
-            <div class="mb-3">
-              <label class="form-label">Aadhar Card</label>
-              <input type="file" name="aadhar_file" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
-              {% if employee.aadhar_file %}
-                <small class="text-success mt-1 d-block">
-                  <i class="fas fa-check-circle me-1"></i> Uploaded: 
-                  <a href="{{ url_for('static', filename='uploads/documents/' ~ employee.aadhar_file) }}" target="_blank">View Aadhar</a>
-                </small>
-              {% endif %}
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Resume / CV</label>
-              <input type="file" name="resume_file" class="form-control" accept=".pdf,.doc,.docx">
-              {% if employee.resume_file %}
-                <small class="text-success mt-1 d-block">
-                  <i class="fas fa-check-circle me-1"></i> Uploaded: 
-                  <a href="{{ url_for('static', filename='uploads/documents/' ~ employee.resume_file) }}" target="_blank">View Resume</a>
-                </small>
-              {% endif %}
-            </div>
-          </div>
-          {% endif %}
-
-          <div class="d-flex gap-2">
-            <button class="btn btn-primary">Save</button>
-            <a href="{{ url_for('user.profile') }}" class="btn btn-secondary">Cancel</a>
-          </div>
-        </form>
-      </div>
+<div class="container-fluid animate-fade-in">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-6">
+            <h2 class="fw-bold text-dark mb-1"><i class="fas fa-user-edit text-primary me-2"></i>Edit Profile</h2>
+            <p class="text-secondary mb-0">Update your personal and contact details.</p>
+        </div>
+        <div class="col-md-6 text-md-end mt-3 mt-md-0">
+            <a href="{{ url_for('user.profile') }}" class="btn btn-white border shadow-sm">
+                <i class="fas fa-arrow-left me-2"></i>Back to Profile
+            </a>
+        </div>
     </div>
-  </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label text-muted x-small fw-bold text-uppercase">Full Name</label>
+                                <input type="text" name="name" class="form-control form-control-lg bg-light border-0" value="{{ user.name }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted x-small fw-bold text-uppercase">Email Address</label>
+                                <input type="email" name="email" class="form-control form-control-lg bg-light border-0" value="{{ user.email }}" required readonly title="Email cannot be changed">
+                                <small class="text-muted">Contact HR to change your official email.</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted x-small fw-bold text-uppercase">Phone Number</label>
+                                <input type="text" name="phone" class="form-control form-control-lg bg-light border-0" value="{{ user.phone or '' }}" placeholder="Enter phone number">
+                            </div>
+                            
+                            {% if employee %}
+                            <div class="col-md-6">
+                                <label class="form-label text-muted x-small fw-bold text-uppercase">Address</label>
+                                <input type="text" name="address" class="form-control form-control-lg bg-light border-0" value="{{ employee.address or '' }}" placeholder="Enter current address">
+                            </div>
+                            <div class="col-12 border-top pt-4 mt-5">
+                                <h6 class="fw-bold mb-4">Official Documentation</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted x-small fw-bold text-uppercase">Resume (PDF)</label>
+                                        <input type="file" name="resume" class="form-control bg-light border-0">
+                                        {% if employee.resume_file %}
+                                        <div class="mt-2 small text-success"><i class="fas fa-check-circle me-1"></i>Current: {{ employee.resume_file }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-muted x-small fw-bold text-uppercase">Aadhar Card (Image/PDF)</label>
+                                        <input type="file" name="aadhar" class="form-control bg-light border-0">
+                                        {% if employee.aadhar_file %}
+                                        <div class="mt-2 small text-success"><i class="fas fa-check-circle me-1"></i>Current: {{ employee.aadhar_file }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="col-12 border-top pt-4 mt-5 d-flex gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm">
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                </button>
+                                <a href="{{ url_for('user.profile') }}" class="btn btn-lg btn-link text-secondary text-decoration-none">Cancel</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

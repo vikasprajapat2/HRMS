@@ -98,7 +98,7 @@
                                 <img src="{{ url_for('static', filename='uploads/employees/' ~ emp.image) }}" class="emp-avatar me-3 shadow-sm" style="object-fit: cover;">
                                 {% else %}
                                 <div class="emp-avatar me-3 shadow-sm" style="background-color: #475569;">
-                                    {{ emp.firstname[0] }}{{ emp.lastname[0] }}
+                                    {{ emp.firstname[0]|upper if emp.firstname else 'E' }}{{ emp.lastname[0]|upper if emp.lastname else '' }}
                                 </div>
                                 {% endif %}
                                 <div>

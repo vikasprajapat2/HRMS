@@ -1,40 +1,129 @@
 {% extends 'base.html' %}
+{% block title %}My Profile - EMS{% endblock %}
 {% block content %}
-<div class="container mt-4">
-  <div class="row">
-    <div class="col-md-4">
-      <div class="card p-3 text-center">
-        {% if employee and employee.image %}
-          <img src="{{ url_for('static', filename='uploads/employees/' ~ employee.image) }}" class="rounded-circle" width="140" height="140" alt="{{ employee.firstname }}">
-        {% else %}
-          <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" style="width:140px;height:140px;font-size:42px">{{ (employee.firstname[0] if employee else user.name[0])|upper }}</div>
-        {% endif %}
-        <h4 class="mt-3">{{ user.name }}</h4>
-        <p class="text-muted">{{ user.email }}</p>
-        <a href="{{ url_for('user.edit_profile') }}" class="btn btn-outline-primary btn-sm">Edit Profile</a>
-        <a href="{{ url_for('user.change_password') }}" class="btn btn-outline-secondary btn-sm">Change Password</a>
-      </div>
-      {% if employee %}
-      <div class="card mt-3 p-3">
-        <h6>Employee Info</h6>
-        <p><strong>ID:</strong> {{ employee.unique_id or ('EMP-' ~ employee.id) }}</p>
-        <p><strong>Department:</strong> {{ employee.department.name if employee.department else '-' }}</p>
-        <p><strong>Designation:</strong> {{ employee.designation.name if employee.designation else '-' }}</p>
-      </div>
-      {% endif %}
+<div class="container-fluid animate-fade-in">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-6">
+            <h2 class="fw-bold text-dark mb-1"><i class="fas fa-user-circle text-primary me-2"></i>My Profile</h2>
+            <p class="text-secondary mb-0">Manage your personal information and account settings.</p>
+        </div>
+        <div class="col-md-6 text-md-end mt-3 mt-md-0">
+            <div class="d-flex gap-2 justify-content-md-end">
+                <a href="{{ url_for('user.edit_profile') }}" class="btn btn-primary rounded-pill shadow-sm">
+                    <i class="fas fa-edit me-2"></i>Edit Profile
+                </a>
+                <a href="{{ url_for('user.change_password') }}" class="btn btn-outline-secondary rounded-pill">
+                    <i class="fas fa-key me-2"></i>Change Password
+                </a>
+            </div>
+        </div>
     </div>
 
-    <div class="col-md-8">
-      <div class="card p-3">
-        <h5>Profile Details</h5>
-        <ul class="list-group list-group-flush">
-          <li class="list-group-item"><strong>Name:</strong> {{ user.name }}</li>
-          <li class="list-group-item"><strong>Email:</strong> {{ user.email }}</li>
-          <li class="list-group-item"><strong>Phone:</strong> {{ user.phone or '-' }}</li>
-          <li class="list-group-item"><strong>Role:</strong> {{ user.role.name if user.role else '-' }}</li>
-        </ul>
-      </div>
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm text-center p-4">
+                <div class="mb-4 d-flex justify-content-center">
+                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center shadow-sm" style="width:140px;height:140px;font-size:48px; border: 4px solid var(--white);">
+                        {{ (employee.firstname[0] if employee and employee.firstname else (user.name[0] if user.name else '?'))|upper }}
+                    </div>
+                </div>
+                <h4 class="fw-bold text-dark mb-1">{{ user.name }}</h4>
+                <p class="text-primary fw-medium mb-3">{{ employee.designation.name if employee and employee.designation else user.role.name|title }}</p>
+                <div class="badge bg-{{ 'success' if user.status == 'active' else 'danger' }} bg-opacity-10 text-{{ 'success' if user.status == 'active' else 'danger' }} rounded-pill px-3 py-2">
+                    <i class="fas fa-{{ 'check-circle' if user.status == 'active' else 'times-circle' }} me-1"></i>{{ user.status|upper }}
+                </div>
+                
+                <hr class="my-4 opacity-50">
+                
+                <div class="text-start">
+                    <div class="mb-3 d-flex align-items-center">
+                        <div class="bg-light rounded-circle p-2 me-3"><i class="fas fa-envelope text-primary fa-fw"></i></div>
+                        <div>
+                            <small class="text-muted d-block text-uppercase fw-bold x-small">Email Address</small>
+                            <span class="text-dark fw-medium">{{ user.email }}</span>
+                        </div>
+                    </div>
+                    <div class="mb-3 d-flex align-items-center">
+                        <div class="bg-light rounded-circle p-2 me-3"><i class="fas fa-phone text-primary fa-fw"></i></div>
+                        <div>
+                            <small class="text-muted d-block text-uppercase fw-bold x-small">Phone Number</small>
+                            <span class="text-dark fw-medium">{{ user.phone or 'Not provided' }}</span>
+                        </div>
+                    </div>
+                    {% if employee %}
+                    <div class="mb-0 d-flex align-items-center">
+                        <div class="bg-light rounded-circle p-2 me-3"><i class="fas fa-id-badge text-primary fa-fw"></i></div>
+                        <div>
+                            <small class="text-muted d-block text-uppercase fw-bold x-small">Employee ID</small>
+                            <span class="text-dark fw-medium">{{ employee.unique_id }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0 py-3">
+                    <h6 class="mb-0 fw-bold"><i class="fas fa-info-circle text-primary me-2"></i>Work Details</h6>
+                </div>
+                <div class="card-body border-top p-4">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="text-muted x-small fw-bold text-uppercase d-block mb-1">Department</label>
+                            <p class="text-dark fw-medium mb-0">{{ employee.department.name if employee and employee.department else '-' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted x-small fw-bold text-uppercase d-block mb-1">Designation</label>
+                            <p class="text-dark fw-medium mb-0">{{ employee.designation.name if employee and employee.designation else '-' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted x-small fw-bold text-uppercase d-block mb-1">Schedule</label>
+                            <p class="text-dark fw-medium mb-0">{{ employee.schedule.name if employee and employee.schedule else '-' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted x-small fw-bold text-uppercase d-block mb-1">Joined Date</label>
+                            <p class="text-dark fw-medium mb-0">{{ employee.created_at.strftime('%d %b, %Y') if employee and employee.created_at else '-' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h6 class="mb-0 fw-bold"><i class="fas fa-link text-primary me-2"></i>Quick Actions</h6>
+                </div>
+                <div class="card-body border-top p-4">
+                    <div class="row g-3">
+                        <div class="col-6 col-md-3 text-center">
+                            <a href="{{ url_for('user.attendance_list') }}" class="d-block p-3 bg-light rounded-3 text-decoration-none transition">
+                                <i class="fas fa-calendar-check text-primary fa-2x mb-2"></i>
+                                <small class="d-block text-dark fw-bold">Attendance</small>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-3 text-center">
+                            <a href="{{ url_for('user.leaves_list') }}" class="d-block p-3 bg-light rounded-3 text-decoration-none transition">
+                                <i class="fas fa-calendar-alt text-warning fa-2x mb-2"></i>
+                                <small class="d-block text-dark fw-bold">Leaves</small>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-3 text-center">
+                            <a href="{{ url_for('user.payrolls_list') }}" class="d-block p-3 bg-light rounded-3 text-decoration-none transition">
+                                <i class="fas fa-file-invoice-dollar text-success fa-2x mb-2"></i>
+                                <small class="d-block text-dark fw-bold">Payroll</small>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-3 text-center">
+                            <a href="{{ url_for('user.directory') }}" class="d-block p-3 bg-light rounded-3 text-decoration-none transition">
+                                <i class="fas fa-users text-info fa-2x mb-2"></i>
+                                <small class="d-block text-dark fw-bold">Directory</small>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 {% endblock %}

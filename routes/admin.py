@@ -108,6 +108,17 @@ def superadmin_dashboard():
                          role='superadmin',
                          analytics=analytics)
 
+@bp.route('/dashboard')
+@login_required
+def admin_dashboard():
+    if current_user.role.name == 'superadmin':
+        return redirect(url_for('admin.superadmin_dashboard'))
+    elif current_user.role.name == 'hr':
+        return redirect(url_for('admin.hr_dashboard'))
+    else:
+        flash('Access denied', 'danger')
+        return redirect(url_for('auth.login'))
+
 @bp.route('/hr-manager')
 @login_required
 def hr_dashboard():
@@ -156,30 +167,7 @@ def delete_employee(id):
     return redirect(url_for('employee.index'))
 
 
-@bp.route('/user/<int:id>/delete', methods=['POST'])
-@login_required
-def delete_user(id):
-    """Delete a user (superadmin only)."""
-    if current_user.role.name != 'superadmin':
-        flash('Access denied', 'danger')
-        return redirect(url_for('auth.login'))
-    
-    user = User.query.get_or_404(id)
-    
-    # Prevent superadmin from deleting themselves
-    if current_user.id == user.id:
-        flash('You cannot delete your own account!', 'danger')
-        return redirect(url_for('user.index'))
-    
-    # Prevent deletion of superadmin accounts
-    if user.role.name == 'superadmin':
-        flash('Cannot delete superadmin accounts!', 'danger')
-        return redirect(url_for('user.index'))
-    
-    db.session.delete(user)
-    db.session.commit()
-    flash(f'User {user.name} deleted successfully!', 'success')
-    return redirect(url_for('user.index'))
+
 
 @bp.route('/audit-logs')
 @login_required

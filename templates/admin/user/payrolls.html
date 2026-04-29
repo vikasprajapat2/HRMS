@@ -1,40 +1,74 @@
 {% extends 'base.html' %}
+{% block title %}My Payroll - EMS{% endblock %}
 {% block content %}
-<div class="container mt-4">
-  <h4>My Payslips</h4>
-  <div class="card mt-3">
-    <div class="card-body">
-      {% if payrolls %}
-      <div class="table-responsive">
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th>Month</th>
-              <th>Year</th>
-              <th>Net Salary</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for p in payrolls %}
-              <tr>
-                <td>{{ p.month }}</td>
-                <td>{{ p.year }}</td>
-                <td>{{ p.net_salary }}</td>
-                <td>{{ p.status }}</td>
-                <td>
-                  <!-- Download button removed -->
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-      {% else %}
-      <div class="alert alert-info">No payroll records found.</div>
-      {% endif %}
+<div class="container-fluid animate-fade-in">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-6">
+            <h2 class="fw-bold text-dark mb-1"><i class="fas fa-file-invoice-dollar text-success me-2"></i>My Payroll</h2>
+            <p class="text-secondary mb-0">View and download your monthly payslips.</p>
+        </div>
+        <div class="col-md-6 text-md-end mt-3 mt-md-0">
+            <a href="{{ url_for('user.dashboard') }}" class="btn btn-white border shadow-sm">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
     </div>
-  </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Period</th>
+                            <th>Net Salary</th>
+                            <th>Status</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if payrolls %}
+                            {% for p in payrolls %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold text-dark">{{ p.month }} {{ p.year }}</div>
+                                    <small class="text-muted">Generated on {{ p.created_at.strftime('%d %b, %Y') }}</small>
+                                </td>
+                                <td>
+                                    <div class="text-primary fw-bold">₹{{ p.net_salary }}</div>
+                                </td>
+                                <td>
+                                    {% if p.status == 'paid' %}
+                                        <span class="badge bg-success bg-opacity-10 text-success">
+                                            <i class="fas fa-check-circle me-1"></i>Paid
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-warning bg-opacity-10 text-warning">
+                                            <i class="fas fa-clock me-1"></i>{{ p.status|title }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a href="{{ url_for('user.payslip', payroll_id=p.id) }}" class="btn btn-sm btn-primary rounded-pill px-3">
+                                        <i class="fas fa-eye me-1"></i>View Payslip
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5">
+                                    <div class="text-muted">
+                                        <i class="fas fa-receipt fa-3x mb-3 opacity-25"></i>
+                                        <p>No payroll records found.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

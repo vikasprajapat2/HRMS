@@ -3,194 +3,317 @@
 
 {% block extra_css %}
 <style>
+    :root {
+        --primary-color: #4f46e5;
+        --success-color: #10b981;
+        --danger-color: #ef4444;
+        --warning-color: #f59e0b;
+        --info-color: #3b82f6;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+
+    body {
+        background-color: #f1f5f9;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
     .kpi-card {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        overflow: hidden;
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        border: none;
+        box-shadow: var(--card-shadow);
+        transition: transform 0.2s ease;
     }
     .kpi-card:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        transform: translateY(-5px);
     }
+    .kpi-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .report-card {
+        background: white;
+        border-radius: 20px;
+        border: none;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+    }
+
     .calendar-day {
-        min-height: 120px;
+        min-height: 110px;
         border: 1px solid #e2e8f0;
-        transition: background-color 0.2s;
+        transition: all 0.2s;
+        background: white;
     }
     .calendar-day:hover {
         background-color: #f8fafc;
+        z-index: 1;
+        box-shadow: inset 0 0 0 1px var(--primary-color);
     }
     .calendar-header {
-        background-color: #f1f5f9;
-        font-weight: 600;
-        color: #334155;
-        font-size: 0.85rem;
-    }
-    .status-badge {
-        font-size: 0.75rem;
-        padding: 0.4em 0.6em;
-        border-radius: 4px;
-        font-weight: 500;
-    }
-    .table-modern th {
-        font-size: 0.8rem;
-        color: #475569;
-        border-bottom: 2px solid #e2e8f0;
         background-color: #f8fafc;
+        font-weight: 700;
+        color: var(--text-main);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-size: 0.75rem;
+        border-bottom: 2px solid #e2e8f0;
     }
-    .badge-soft-success { background-color: #dcfce7; color: #166534; }
-    .badge-soft-danger { background-color: #fee2e2; color: #991b1b; }
-    .badge-soft-warning { background-color: #fef3c7; color: #92400e; }
-    .badge-soft-secondary { background-color: #f1f5f9; color: #475569; }
+
+    .status-badge {
+        font-size: 0.7rem;
+        padding: 0.35em 0.6em;
+        border-radius: 6px;
+        font-weight: 600;
+        display: inline-block;
+        width: 100%;
+        text-align: center;
+    }
+
+    .table-modern th {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        background-color: #f8fafc;
+        padding: 1rem;
+    }
+    .table-modern td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+
+    .badge-soft-success { background-color: #ecfdf5; color: #065f46; border: 1px solid #10b98133; }
+    .badge-soft-danger { background-color: #fef2f2; color: #991b1b; border: 1px solid #ef444433; }
+    .badge-soft-warning { background-color: #fffbeb; color: #92400e; border: 1px solid #f59e0b33; }
+    .badge-soft-info { background-color: #eff6ff; color: #1e40af; border: 1px solid #3b82f633; }
+    .badge-soft-secondary { background-color: #f8fafc; color: #475569; border: 1px solid #e2e8f0; }
     
-    .badge-solid-success { background-color: #15803d; color: #ffffff; }
-    .badge-solid-danger { background-color: #b91c1c; color: #ffffff; }
-    .badge-solid-warning { background-color: #d97706; color: #ffffff; }
-    .badge-solid-primary { background-color: #1d4ed8; color: #ffffff; }
-    .badge-solid-info { background-color: #0369a1; color: #ffffff; }
-    .badge-solid-secondary { background-color: #475569; color: #ffffff; }
+    .badge-solid-success { background-color: var(--success-color); color: white; }
+    .badge-solid-danger { background-color: var(--danger-color); color: white; }
+    .badge-solid-warning { background-color: var(--warning-color); color: white; }
+    .badge-solid-primary { background-color: var(--primary-color); color: white; }
+    .badge-solid-info { background-color: var(--info-color); color: white; }
+
+    .nav-tabs .nav-link {
+        border: none;
+        color: var(--text-muted);
+        font-weight: 600;
+        padding: 1rem 1.5rem;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s;
+    }
+    .nav-tabs .nav-link.active {
+        color: var(--primary-color);
+        background: transparent;
+        border-bottom-color: var(--primary-color);
+    }
+    .nav-tabs .nav-link:hover:not(.active) {
+        border-bottom-color: #e2e8f0;
+    }
+
+    .progress {
+        background-color: #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h2 class="fw-bold text-dark mb-1"><i class="fas fa-chart-line text-primary me-2"></i>Monthly Insights</h2>
-        <p class="text-muted mb-0 fs-5">{{ month_name }} {{ year }} Attendance Overview</p>
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 fw-bold text-dark mb-1">Monthly Analytics</h1>
+            <p class="text-muted mb-0">{{ month_name }} {{ year }} Overview</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button onclick="window.print()" class="btn btn-white bg-white shadow-sm fw-bold border">
+                <i class="fas fa-print me-2"></i> Print Report
+            </button>
+            <a href="{{ url_for('attendance.index') }}" class="btn btn-primary shadow-sm fw-bold">
+                <i class="fas fa-home me-2"></i> Dashboard
+            </a>
+        </div>
     </div>
-    <a href="{{ url_for('attendance.index') }}" class="btn btn-light shadow-sm fw-bold">
-        <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
-    </a>
-</div>
 
-<!-- Filters -->
-<div class="card mb-4 shadow-sm border-0">
-    <div class="card-body p-4 bg-white border rounded">
-        <form method="get" action="{{ url_for('attendance.monthly_report') }}" class="row align-items-end g-3">
-            <input type="hidden" name="active_tab" id="active_tab" value="{{ request.args.get('active_tab', 'summary') }}">
-            <div class="col-md-3">
-                <label for="month" class="form-label fw-bold text-secondary small">Month</label>
-                <select name="month" id="month" class="form-select">
-                    {% for m in range(1, 13) %}
-                    <option value="{{ m }}" {% if month == m %}selected{% endif %}>
-                        {{ datetime(year, m, 1).strftime('%B') }}
-                    </option>
-                    {% endfor %}
-                </select>
+    <!-- KPI Summary Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="kpi-card h-100">
+                <div class="kpi-icon bg-primary bg-opacity-10 text-primary">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h6 class="text-muted small fw-bold text-uppercase mb-1">Total Employees</h6>
+                <h3 class="fw-bold mb-0">{{ summary.active_employees }}</h3>
             </div>
-            <div class="col-md-3">
-                <label for="year" class="form-label fw-bold text-secondary small">Year</label>
-                <select name="year" id="year" class="form-select">
-                    {% for y in range(year-2, year+1) %}
-                    <option value="{{ y }}" {% if year == y %}selected{% endif %}>{{ y }}</option>
-                    {% endfor %}
-                </select>
+        </div>
+        <div class="col-md-3">
+            <div class="kpi-card h-100">
+                <div class="kpi-icon bg-success bg-opacity-10 text-success">
+                    <i class="fas fa-percentage"></i>
+                </div>
+                <h6 class="text-muted small fw-bold text-uppercase mb-1">Avg Attendance</h6>
+                <h3 class="fw-bold mb-0">{{ "%.1f"|format(summary.avg_attendance) }}%</h3>
             </div>
-            <div class="col-md-4">
-                <label for="employee_id" class="form-label fw-bold text-secondary small">Employee</label>
-                <select name="employee_id" id="employee_id" class="form-select">
-                    <option value="">-- All Employees --</option>
-                    {% for emp in employees %}
-                    <option value="{{ emp.id }}" {% if selected_employee|string == emp.id|string %}selected{% endif %}>
-                        {{ emp.firstname }} {{ emp.lastname }}
-                    </option>
-                    {% endfor %}
-                </select>
+        </div>
+        <div class="col-md-3">
+            <div class="kpi-card h-100">
+                <div class="kpi-icon bg-warning bg-opacity-10 text-warning">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h6 class="text-muted small fw-bold text-uppercase mb-1">Total Late Arrivals</h6>
+                <h3 class="fw-bold mb-0">{{ summary.total_late }}</h3>
             </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-primary w-100 fw-bold">
-                    <i class="fas fa-filter me-2"></i> Update
-                </button>
+        </div>
+        <div class="col-md-3">
+            <div class="kpi-card h-100">
+                <div class="kpi-icon bg-danger bg-opacity-10 text-danger">
+                    <i class="fas fa-user-times"></i>
+                </div>
+                <h6 class="text-muted small fw-bold text-uppercase mb-1">Total Absences</h6>
+                <h3 class="fw-bold mb-0">{{ summary.total_absent }}</h3>
             </div>
-        </form>
+        </div>
     </div>
-</div>
 
+    <!-- Filters -->
+    <div class="report-card mb-4">
+        <div class="card-body p-4">
+            <form method="get" action="{{ url_for('attendance.monthly_report') }}" class="row align-items-end g-3">
+                <input type="hidden" name="active_tab" id="active_tab" value="{{ request.args.get('active_tab', 'summary') }}">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold text-muted small">Month</label>
+                    <select name="month" class="form-select border-0 bg-light rounded-3">
+                        {% for m in range(1, 13) %}
+                        <option value="{{ m }}" {% if month == m %}selected{% endif %}>
+                            {{ datetime(year, m, 1).strftime('%B') }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold text-muted small">Year</label>
+                    <select name="year" class="form-select border-0 bg-light rounded-3">
+                        {% for y in range(year-2, year+2) %}
+                        <option value="{{ y }}" {% if year == y %}selected{% endif %}>{{ y }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold text-muted small">Filter by Employee</label>
+                    <select name="employee_id" class="form-select border-0 bg-light rounded-3">
+                        <option value="">All Employees</option>
+                        {% for emp in employees %}
+                        <option value="{{ emp.id }}" {% if selected_employee|string == emp.id|string %}selected{% endif %}>
+                            {{ emp.firstname }} {{ emp.lastname }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100 fw-bold py-2 shadow-sm rounded-3">
+                        <i class="fas fa-sync-alt me-2"></i> Update Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-<div class="row">
-    <div class="col-12">
-        <!-- Tab Navigation -->
-        <ul class="nav nav-tabs mb-4 border-bottom" id="reportTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link {% if not request.args.get('active_tab') or request.args.get('active_tab') == 'summary' %}active{% endif %} fw-bold px-4 py-3" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab" aria-controls="summary" aria-selected="true" style="color: #334155;" onclick="document.getElementById('active_tab').value='summary'">
-                    <i class="fas fa-table me-2 text-primary"></i> Performance Summary
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link {% if request.args.get('active_tab') == 'calendar' %}active{% endif %} fw-bold px-4 py-3" id="calendar-tab" data-bs-toggle="tab" data-bs-target="#calendar" type="button" role="tab" aria-controls="calendar" aria-selected="false" style="color: #334155;" onclick="document.getElementById('active_tab').value='calendar'">
-                    <i class="fas fa-calendar-alt me-2 text-primary"></i> Timesheet Calendar
-                </button>
-            </li>
-        </ul>
+    <!-- Tabs Content -->
+    <div class="row">
+        <div class="col-12">
+            <ul class="nav nav-tabs mb-4" id="reportTabs" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link {% if not request.args.get('active_tab') or request.args.get('active_tab') == 'summary' %}active{% endif %}" data-bs-toggle="tab" data-bs-target="#summary" type="button" onclick="document.getElementById('active_tab').value='summary'">
+                        <i class="fas fa-list-ul me-2"></i> Performance Table
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link {% if request.args.get('active_tab') == 'calendar' %}active{% endif %}" data-bs-toggle="tab" data-bs-target="#calendar" type="button" onclick="document.getElementById('active_tab').value='calendar'">
+                        <i class="fas fa-calendar-alt me-2"></i> Visual Calendar
+                    </button>
+                </li>
+            </ul>
 
-        <!-- Tab Content -->
-        <div class="tab-content" id="reportTabsContent">
-            
-            <!-- Summary Tab -->
-            <div class="tab-pane fade {% if not request.args.get('active_tab') or request.args.get('active_tab') == 'summary' %}show active{% endif %}" id="summary" role="tabpanel" aria-labelledby="summary-tab">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-white border-bottom pt-3 pb-2">
-                        <h5 class="fw-bold text-dark mb-0">Performance Summary</h5>
-                    </div>
-                    <div class="card-body p-0">
+            <div class="tab-content">
+                <!-- Performance Table -->
+                <div class="tab-pane fade {% if not request.args.get('active_tab') or request.args.get('active_tab') == 'summary' %}show active{% endif %}" id="summary">
+                    <div class="report-card">
                         <div class="table-responsive">
-                            <table class="table table-hover table-modern align-middle text-center mb-0">
+                            <table class="table table-hover table-modern align-middle mb-0">
                                 <thead>
                                     <tr>
-                                        <th class="text-start ps-4">Employee</th>
-                                        <th>Present</th>
-                                        <th>Absent</th>
-                                        <th>Late</th>
-                                        <th>Early Out</th>
-                                        <th>Total Hours</th>
-                                        <th class="pe-4" style="width: 200px;">Attendance Rate</th>
+                                        <th>Employee</th>
+                                        <th class="text-center">Present</th>
+                                        <th class="text-center">Absent</th>
+                                        <th class="text-center">Late</th>
+                                        <th class="text-center">Leave</th>
+                                        <th class="text-center">Holiday</th>
+                                        <th class="text-center">Hours</th>
+                                        <th style="width: 15%">Success Rate</th>
                                     </tr>
                                 </thead>
-                                <tbody class="border-top-0">
+                                <tbody>
                                     {% for emp in employees %}
                                         {% if not selected_employee or selected_employee|string == emp.id|string %}
                                             {% set emp_stats = stats[emp.id] %}
                                             <tr>
-                                                <td class="text-start ps-4 py-3">
+                                                <td>
                                                     <div class="d-flex align-items-center">
-                                                        {% if emp.image %}
-                                                        <img src="{{ url_for('static', filename='uploads/employees/' ~ emp.image) }}" class="rounded-circle me-3 border" width="35" height="35" style="object-fit: cover;">
-                                                        {% else %}
-                                                        <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-3" style="width:35px;height:35px;font-size:0.9rem;">
-                                                            {{ emp.firstname[0] }}{{ emp.lastname[0] }}
+                                                        <div class="avatar-sm me-3">
+                                                            {% if emp.image %}
+                                                            <img src="{{ url_for('static', filename='uploads/employees/' ~ emp.image) }}" class="rounded-circle border" width="40" height="40" style="object-fit: cover;">
+                                                            {% else %}
+                                                            <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-bold" style="width:40px;height:40px;font-size:0.8rem;">
+                                                                {{ (emp.firstname[0] if emp.firstname else 'E')|upper }}{{ (emp.lastname[0] if emp.lastname else '')|upper }}
+                                                            </div>
+                                                            {% endif %}
                                                         </div>
-                                                        {% endif %}
                                                         <div>
                                                             <div class="fw-bold text-dark">{{ emp.firstname }} {{ emp.lastname }}</div>
                                                             <div class="small text-muted">{{ emp.designation.name if emp.designation else 'Staff' }}</div>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td>
-                                                    <span class="badge badge-soft-success py-2 px-3 border border-success border-opacity-25">{{ emp_stats['present'] }}</span>
+                                                <td class="text-center">
+                                                    <span class="badge badge-soft-success px-2 py-1">{{ emp_stats['present'] }}</span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge badge-soft-danger px-2 py-1">{{ emp_stats['absent'] }}</span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge badge-soft-warning px-2 py-1">{{ emp_stats['late'] }}</span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge badge-soft-info px-2 py-1">{{ emp_stats['leave'] }}</span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge badge-soft-secondary px-2 py-1">{{ emp_stats['holiday'] }}</span>
+                                                </td>
+                                                <td class="text-center fw-bold text-dark">
+                                                    {{ (emp_stats['working_hours'].total_seconds() / 3600)|int }}h {{ ((emp_stats['working_hours'].total_seconds() % 3600) / 60)|int }}m
                                                 </td>
                                                 <td>
-                                                    <span class="badge badge-soft-danger py-2 px-3 border border-danger border-opacity-25">{{ emp_stats['absent'] }}</span>
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge-soft-warning py-2 px-3 border border-warning border-opacity-25">{{ emp_stats['late'] }}</span>
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge-soft-secondary py-2 px-3 border border-secondary border-opacity-25">{{ emp_stats['early_out'] }}</span>
-                                                </td>
-                                                <td class="fw-bold text-dark">
-                                                    {{ '%d' | format(emp_stats['working_hours'].total_seconds() // 3600) }}<span class="text-muted fw-normal">h</span> {{ '%02d' | format((emp_stats['working_hours'].total_seconds() % 3600) // 60) }}<span class="text-muted fw-normal">m</span>
-                                                </td>
-                                                <td class="pe-4">
-                                                    <div class="d-flex align-items-center justify-content-between mb-1">
-                                                        <span class="fw-bold text-dark small">
-                                                            {{ '%.1f%%' | format(emp_stats['attendance_percentage']) }}
-                                                        </span>
-                                                    </div>
-                                                    {% set pct = emp_stats['attendance_percentage'] %}
-                                                    {% if pct >= 90 %}{% set bar_color = 'bg-success' %}{% elif pct >= 75 %}{% set bar_color = 'bg-warning' %}{% else %}{% set bar_color = 'bg-danger' %}{% endif %}
-                                                    <div class="progress rounded-0" style="height: 6px; background-color: #e2e8f0;">
-                                                        <div class="progress-bar {{ bar_color }}" role="progressbar" style="width: {{ pct }}%;"></div>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <div class="progress flex-grow-1" style="height: 6px;">
+                                                            {% set pct = emp_stats['attendance_percentage']|float %}
+                                                            <div class="progress-bar {% if pct >= 90 %}bg-success{% elif pct >= 75 %}bg-warning{% else %}bg-danger{% endif %}" style="width: {{ pct }}%"></div>
+                                                        </div>
+                                                        <span class="small fw-bold">{{ "%.1f"|format(pct) }}%</span>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -201,116 +324,88 @@
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Calendar Tab -->
-            <div class="tab-pane fade {% if request.args.get('active_tab') == 'calendar' %}show active{% endif %}" id="calendar" role="tabpanel" aria-labelledby="calendar-tab">
-                <div class="accordion" id="calendarAccordion">
-                    {% for emp in employees %}
-                        {% if not selected_employee or selected_employee|string == emp.id|string %}
-                        <div class="accordion-item mb-3 border-0 shadow-sm rounded overflow-hidden">
-                            <h2 class="accordion-header" id="heading{{ emp.id }}">
-                                <button class="accordion-button {% if selected_employee|string != emp.id|string %}collapsed{% endif %} bg-white border-bottom" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ emp.id }}" aria-expanded="{% if selected_employee|string == emp.id|string %}true{% else %}false{% endif %}" aria-controls="collapse{{ emp.id }}">
-                                    <div class="d-flex align-items-center">
-                                        <div class="rounded bg-secondary text-white d-flex align-items-center justify-content-center me-3" style="width:40px;height:40px;font-weight:600;">
-                                            {{ emp.firstname[0] }}{{ emp.lastname[0] }}
+                <!-- Visual Calendar -->
+                <div class="tab-pane fade {% if request.args.get('active_tab') == 'calendar' %}show active{% endif %}" id="calendar">
+                    <div class="accordion border-0" id="calendarAccordion">
+                        {% for emp in employees %}
+                            {% if not selected_employee or selected_employee|string == emp.id|string %}
+                            <div class="accordion-item mb-3 border rounded-4 overflow-hidden shadow-sm">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button {% if selected_employee|string != emp.id|string %}collapsed{% endif %} bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ emp.id }}">
+                                        <div class="d-flex align-items-center">
+                                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3 fw-bold" style="width:36px;height:36px;">
+                                                {{ (emp.firstname[0] if emp.firstname else 'E')|upper }}
+                                            </div>
+                                            <div>
+                                                <span class="fw-bold text-dark">{{ emp.firstname }} {{ emp.lastname }}</span>
+                                                <span class="ms-2 badge bg-light text-muted fw-normal">ID: {{ emp.unique_id }}</span>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h6 class="mb-0 fw-bold text-dark">{{ emp.firstname }} {{ emp.lastname }}</h6>
-                                            <small class="text-muted">ID: {{ emp.unique_id }}</small>
-                                        </div>
-                                    </div>
-                                </button>
-                            </h2>
-                            <div id="collapse{{ emp.id }}" class="accordion-collapse collapse {% if selected_employee|string == emp.id|string %}show{% endif %}" aria-labelledby="heading{{ emp.id }}" data-bs-parent="#calendarAccordion">
-                                <div class="accordion-body p-0 bg-light">
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered mb-0">
-                                            <thead class="calendar-header text-center">
-                                                <tr>
-                                                    <th class="py-2" style="width: 14.28%">Mon</th>
-                                                    <th class="py-2" style="width: 14.28%">Tue</th>
-                                                    <th class="py-2" style="width: 14.28%">Wed</th>
-                                                    <th class="py-2" style="width: 14.28%">Thu</th>
-                                                    <th class="py-2" style="width: 14.28%">Fri</th>
-                                                    <th class="py-2 text-danger" style="width: 14.28%">Sat</th>
-                                                    <th class="py-2 text-danger" style="width: 14.28%">Sun</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {% for week in cal_grid %}
-                                                <tr>
-                                                    {% for day in week %}
-                                                    <td class="p-2 calendar-day {% if day == 0 %}bg-light opacity-50{% endif %}">
-                                                        {% if day != 0 %}
-                                                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                                                <span class="fw-bold text-secondary">{{ day }}</span>
-                                                            </div>
-                                                            {% set emp_atts = att_by_emp_day.get(emp.id, {}) %}
-                                                            {% set att = emp_atts.get(day) %}
-                                                            {% if att %}
-                                                                {% if att.status == 'present' %}
-                                                                    <div class="status-badge badge-solid-success mb-2">
-                                                                        Present
-                                                                    </div>
-                                                                    {% if att.time_in %}
-                                                                        <div class="small text-muted fw-bold mb-1" style="font-size: 0.7rem;">
-                                                                            IN: {{ att.time_in.strftime('%H:%M') }}
+                                    </button>
+                                </h2>
+                                <div id="collapse{{ emp.id }}" class="accordion-collapse collapse {% if selected_employee|string == emp.id|string %}show{% endif %}" data-bs-parent="#calendarAccordion">
+                                    <div class="accordion-body p-0">
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered mb-0 border-light">
+                                                <thead class="calendar-header">
+                                                    <tr class="text-center">
+                                                        <th class="py-3">Mon</th>
+                                                        <th class="py-3">Tue</th>
+                                                        <th class="py-3">Wed</th>
+                                                        <th class="py-3">Thu</th>
+                                                        <th class="py-3">Fri</th>
+                                                        <th class="py-3 text-danger">Sat</th>
+                                                        <th class="py-3 text-danger">Sun</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for week in cal_grid %}
+                                                    <tr>
+                                                        {% for day in week %}
+                                                        <td class="calendar-day {% if day == 0 %}bg-light opacity-25{% endif %}">
+                                                            {% if day != 0 %}
+                                                                <div class="small fw-bold text-muted mb-2">{{ day }}</div>
+                                                                {% set att = att_by_emp_day.get(emp.id, {}).get(day) %}
+                                                                {% if att %}
+                                                                    {% if att.status == 'present' %}
+                                                                        <div class="status-badge badge-solid-success mb-1">Present</div>
+                                                                        <div class="text-center" style="font-size: 0.6rem;">
+                                                                            <span class="text-muted">{{ att.time_in.strftime('%H:%M') if att.time_in }}</span>
+                                                                            <span class="text-muted mx-1">-</span>
+                                                                            <span class="text-muted">{{ att.time_out.strftime('%H:%M') if att.time_out else '--:--' }}</span>
                                                                         </div>
-                                                                        <div class="small text-muted fw-bold" style="font-size: 0.7rem;">
-                                                                            OUT: {{ att.time_out.strftime('%H:%M') if att.time_out else '--:--' }}
-                                                                        </div>
-                                                                    {% endif %}
-                                                                    {% if att.employee.schedule and att.time_in %}
-                                                                        {% if att.time_in > att.employee.schedule.time_in %}
-                                                                            <div class="status-badge badge-soft-warning mt-1" style="font-size: 0.65rem;">
-                                                                                Late Arrival
-                                                                            </div>
+                                                                        {% if att.employee.schedule and att.time_in and att.time_in > att.employee.schedule.time_in %}
+                                                                            <div class="status-badge badge-soft-warning mt-1" style="font-size: 0.55rem;">Late</div>
                                                                         {% endif %}
+                                                                    {% elif att.status == 'absent' %}
+                                                                        <div class="status-badge badge-solid-danger">Absent</div>
+                                                                    {% elif att.status == 'holiday' %}
+                                                                        <div class="status-badge badge-solid-info">Holiday</div>
+                                                                        <div class="small text-center text-muted" style="font-size: 0.6rem;">{{ att.description|truncate(12) }}</div>
+                                                                    {% elif att.status == 'leave' %}
+                                                                        <div class="status-badge badge-solid-primary">Leave</div>
+                                                                        <div class="small text-center text-muted" style="font-size: 0.6rem;">{{ att.description|truncate(12) }}</div>
+                                                                    {% elif att.status == 'weekend' %}
+                                                                        <div class="text-center text-muted small py-2" style="font-size: 0.65rem;">Weekend</div>
                                                                     {% endif %}
-                                                                {% elif att.status == 'absent' %}
-                                                                    <div class="status-badge badge-solid-danger">
-                                                                        Absent
-                                                                    </div>
-                                                                {% elif att.status == 'holiday' %}
-                                                                    <div class="status-badge badge-solid-info">
-                                                                        Holiday
-                                                                    </div>
-                                                                    <div class="small text-muted mt-1" style="font-size: 0.7rem;">{{ att.description|default('', true)|truncate(20) }}</div>
-                                                                {% elif att.status == 'leave' %}
-                                                                    <div class="status-badge badge-solid-primary">
-                                                                        On Leave
-                                                                    </div>
-                                                                    <div class="small text-muted mt-1" style="font-size: 0.7rem;">{{ att.description|default('', true)|truncate(20) }}</div>
-                                                                {% elif att.status == 'weekend' %}
-                                                                    <div class="text-muted small" style="font-size: 0.7rem;">Weekend</div>
-                                                                {% else %}
-                                                                    <div class="status-badge badge-solid-secondary">
-                                                                        {{ att.status|title }}
-                                                                    </div>
                                                                 {% endif %}
                                                             {% endif %}
-                                                        {% endif %}
-                                                    </td>
+                                                        </td>
+                                                        {% endfor %}
+                                                    </tr>
                                                     {% endfor %}
-                                                </tr>
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        {% endif %}
-                    {% else %}
-                        <div class="alert alert-light border text-center p-4">
-                            <i class="fas fa-info-circle fa-2x text-muted mb-2"></i>
-                            <p class="mb-0 text-muted">No attendance data to display for the selected filters.</p>
-                        </div>
-                    {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
-
         </div>
     </div>
 </div>

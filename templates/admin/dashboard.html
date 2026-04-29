@@ -1,222 +1,283 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - Employee Management System{% endblock %}
+{% block title %}Admin Insight Dashboard - HRMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.9);
+        --glass-border: rgba(255, 255, 255, 0.2);
+        --primary-gradient: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        --info-gradient: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+        --purple-gradient: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    }
+
+    body {
+        background-color: #f3f4f6;
+    }
+
+    .dashboard-container {
+        padding: 2rem;
+    }
+
+    .welcome-card {
+        background: white;
+        border-radius: 24px;
+        padding: 2.5rem;
+        border: none;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .welcome-card::after {
+        content: '';
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 200px;
+        height: 200px;
+        background: var(--primary-gradient);
+        opacity: 0.05;
+        border-radius: 50%;
+    }
+
+    .stat-card-premium {
+        border: none;
+        border-radius: 20px;
+        padding: 1.5rem;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    .stat-card-premium:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .stat-card-premium .icon-box {
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .action-card {
+        background: white;
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    .action-item {
+        border: none !important;
+        border-radius: 12px !important;
+        margin-bottom: 0.75rem;
+        transition: all 0.2s;
+        padding: 1.25rem !important;
+        background: #f9fafb;
+    }
+    .action-item:hover {
+        background: #f3f4f6;
+        transform: scale(1.02);
+    }
+
+    .chart-container {
+        background: white;
+        border-radius: 24px;
+        padding: 2rem;
+        border: none;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .animate-up {
+        animation: slideUp 0.6s ease-out forwards;
+        opacity: 0;
+    }
+    @keyframes slideUp {
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-12">
-        <h2><i class="fas fa-tachometer-alt me-2"></i>Dashboard</h2>
-        <p class="text-muted">Welcome back, {{ current_user.name }}!</p>
+<div class="dashboard-container">
+    <!-- Welcome Section -->
+    <div class="welcome-card animate-up">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill fw-bold mb-3">
+                    <i class="fas fa-sparkles me-2"></i>System Status: Online
+                </span>
+                <h1 class="display-5 fw-bold text-dark mb-2">Hello, {{ current_user.name }}!</h1>
+                <p class="text-muted fs-5 mb-0">Here's your organization's performance pulse for today, <span class="text-primary fw-bold">{{ datetime.now().strftime('%d %B, %Y') }}</span>.</p>
+            </div>
+            <div class="col-lg-4 text-lg-end d-none d-lg-block">
+                <img src="https://img.icons8.com/clouds/200/business-report.png" alt="Dashboard" style="width: 150px;">
+            </div>
+        </div>
     </div>
-</div>
 
-<div class="row g-4">
-    {% if total_employees is defined %}
-    <div class="col-md-6 col-xl-3">
-        <div class="card bg-primary text-white h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-uppercase mb-1">Total Employees</h6>
-                        <h2 class="mb-0">{{ total_employees }}</h2>
-                    </div>
-                    <i class="fas fa-users fa-3x opacity-50"></i>
-                </div>
+    <!-- Stats Matrix -->
+    <div class="row g-4 mb-5">
+        {% if total_employees is defined %}
+        <div class="col-md-6 col-xl-4 col-xxl-2 animate-up" style="animation-delay: 0.1s">
+            <div class="stat-card-premium" style="background: var(--primary-gradient);">
+                <div class="icon-box"><i class="fas fa-users"></i></div>
+                <div class="small fw-bold text-white text-opacity-75 text-uppercase letter-spacing-1">Employees</div>
+                <h2 class="fw-bold mb-0">{{ total_employees }}</h2>
             </div>
         </div>
-    </div>
-    {% endif %}
-    
-    {% if total_departments is defined %}
-    <div class="col-md-6 col-xl-3">
-        <div class="card bg-success text-white h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-uppercase mb-1">Departments</h6>
-                        <h2 class="mb-0">{{ total_departments }}</h2>
-                    </div>
-                    <i class="fas fa-building fa-3x opacity-50"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-    
-    {% if today_attendance is defined %}
-    <div class="col-md-6 col-xl-3">
-        <div class="card bg-warning text-white h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-uppercase mb-1">Today's Attendance</h6>
-                        <h2 class="mb-0">{{ today_attendance }}</h2>
-                    </div>
-                    <i class="fas fa-calendar-check fa-3x opacity-50"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-    
-    {% if pending_leaves is defined %}
-    <div class="col-md-6 col-xl-3">
-        <div class="card bg-danger text-white h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-uppercase mb-1">Pending Leaves</h6>
-                        <h2 class="mb-0">{{ pending_leaves }}</h2>
-                    </div>
-                    <i class="fas fa-calendar-times fa-3x opacity-50"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-    
-    {% if total_users is defined %}
-    <div class="col-md-6 col-xl-3">
-        <div class="card bg-info text-white h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-uppercase mb-1">Total Users</h6>
-                        <h2 class="mb-0">{{ total_users }}</h2>
-                    </div>
-                    <i class="fas fa-user-shield fa-3x opacity-50"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-    
-    {% if current_month_payrolls is defined %}
-    <div class="col-md-6 col-xl-3">
-        <div class="card bg-secondary text-white h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-uppercase mb-1">This Month's Payroll</h6>
-                        <h2 class="mb-0">{{ current_month_payrolls }}</h2>
-                    </div>
-                    <i class="fas fa-money-bill-wave fa-3x opacity-50"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-</div>
+        {% endif %}
 
-<div class="row mt-4">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Quick Actions</h5>
-            </div>
-            <div class="card-body">
-                <div class="row g-3">
-                    {% if role in ['superadmin', 'admin', 'hr'] %}
-                    <div class="col-md-3">
-                        <a href="{{ url_for('employee.create') }}" class="btn btn-outline-primary w-100">
-                            <i class="fas fa-user-plus d-block mb-2" style="font-size: 2rem;"></i>
-                            Add Employee
-                        </a>
-                    </div>
-                    {% endif %}
-                    
-                    {% if role in ['superadmin', 'admin', 'moderator'] %}
-                    <div class="col-md-3">
-                        <a href="{{ url_for('attendance.index') }}" class="btn btn-outline-success w-100">
-                            <i class="fas fa-calendar-check d-block mb-2" style="font-size: 2rem;"></i>
-                            Mark Attendance
-                        </a>
-                    </div>
-                    {% endif %}
-                    
-                    {% if role in ['superadmin', 'admin', 'hr'] %}
-                    <div class="col-md-3">
-                        <a href="{{ url_for('leave.index') }}" class="btn btn-outline-warning w-100">
-                            <i class="fas fa-calendar-times d-block mb-2" style="font-size: 2rem;"></i>
-                            Manage Leaves
-                        </a>
-                    </div>
-                    {% endif %}
-                    
-                    {% if role in ['superadmin', 'admin', 'payroll'] %}
-                    <div class="col-md-3">
-                        <a href="{{ url_for('payroll.create') }}" class="btn btn-outline-info w-100">
-                            <i class="fas fa-money-bill-wave d-block mb-2" style="font-size: 2rem;"></i>
-                            Process Payroll
-                        </a>
-                    </div>
-                    {% endif %}
-                    
-                    {% if role == 'superadmin' %}
-                    <div class="col-md-3">
-                        <a href="{{ url_for('user.create_from_employee') }}" class="btn btn-outline-danger w-100">
-                            <i class="fas fa-user-tie d-block mb-2" style="font-size: 2rem;"></i>
-                            Create/Edit User
-                        </a>
-                    </div>
-                    {% endif %}
-                </div>
+        {% if total_departments is defined %}
+        <div class="col-md-6 col-xl-4 col-xxl-2 animate-up" style="animation-delay: 0.2s">
+            <div class="stat-card-premium" style="background: var(--success-gradient);">
+                <div class="icon-box"><i class="fas fa-sitemap"></i></div>
+                <div class="small fw-bold text-white text-opacity-75 text-uppercase letter-spacing-1">Departments</div>
+                <h2 class="fw-bold mb-0">{{ total_departments }}</h2>
             </div>
         </div>
-    </div>
-</div>
+        {% endif %}
 
-<!-- Analytics Section -->
-{% if analytics is defined %}
-<div class="row mt-4 mb-5">
-    <div class="col-12">
-        <h4 class="mb-3"><i class="fas fa-chart-pie me-2"></i>Analytics</h4>
-    </div>
-    
-    <!-- Attendance Pie Chart -->
-    <div class="col-md-4 mb-4">
-        <div class="card h-100 shadow-sm border-0">
-            <div class="card-header bg-white border-bottom-0 pt-3">
-                <h6 class="mb-0 fw-bold text-muted text-uppercase">Monthly Attendance %</h6>
-            </div>
-            <div class="card-body">
-                <div style="position: relative; height:250px;">
-                    <canvas id="attendanceChart"></canvas>
-                </div>
+        {% if today_attendance is defined %}
+        <div class="col-md-6 col-xl-4 col-xxl-2 animate-up" style="animation-delay: 0.3s">
+            <div class="stat-card-premium" style="background: var(--warning-gradient);">
+                <div class="icon-box"><i class="fas fa-fingerprint"></i></div>
+                <div class="small fw-bold text-white text-opacity-75 text-uppercase letter-spacing-1">Attendance</div>
+                <h2 class="fw-bold mb-0">{{ today_attendance }}</h2>
             </div>
         </div>
-    </div>
-    
-    <!-- Leave Trends Line Chart -->
-    <div class="col-md-4 mb-4">
-        <div class="card h-100 shadow-sm border-0">
-            <div class="card-header bg-white border-bottom-0 pt-3">
-                <h6 class="mb-0 fw-bold text-muted text-uppercase">Leave Trends (6 Mo)</h6>
-            </div>
-            <div class="card-body">
-                <div style="position: relative; height:250px;">
-                    <canvas id="leaveChart"></canvas>
-                </div>
+        {% endif %}
+
+        {% if pending_leaves is defined %}
+        <div class="col-md-6 col-xl-4 col-xxl-2 animate-up" style="animation-delay: 0.4s">
+            <div class="stat-card-premium" style="background: var(--danger-gradient);">
+                <div class="icon-box"><i class="fas fa-envelope-open-text"></i></div>
+                <div class="small fw-bold text-white text-opacity-75 text-uppercase letter-spacing-1">Pending Leaves</div>
+                <h2 class="fw-bold mb-0">{{ pending_leaves }}</h2>
             </div>
         </div>
-    </div>
-    
-    <!-- Salary Cost Bar Chart -->
-    <div class="col-md-4 mb-4">
-        <div class="card h-100 shadow-sm border-0">
-            <div class="card-header bg-white border-bottom-0 pt-3">
-                <h6 class="mb-0 fw-bold text-muted text-uppercase">Salary Cost (6 Mo)</h6>
+        {% endif %}
+
+        {% if total_users is defined %}
+        <div class="col-md-6 col-xl-4 col-xxl-2 animate-up" style="animation-delay: 0.5s">
+            <div class="stat-card-premium" style="background: var(--info-gradient);">
+                <div class="icon-box"><i class="fas fa-shield-alt"></i></div>
+                <div class="small fw-bold text-white text-opacity-75 text-uppercase letter-spacing-1">Active Users</div>
+                <h2 class="fw-bold mb-0">{{ total_users }}</h2>
             </div>
-            <div class="card-body">
-                <div style="position: relative; height:250px;">
+        </div>
+        {% endif %}
+
+        {% if current_month_payrolls is defined %}
+        <div class="col-md-6 col-xl-4 col-xxl-2 animate-up" style="animation-delay: 0.6s">
+            <div class="stat-card-premium" style="background: var(--purple-gradient);">
+                <div class="icon-box"><i class="fas fa-vault"></i></div>
+                <div class="small fw-bold text-white text-opacity-75 text-uppercase letter-spacing-1">Payroll Batches</div>
+                <h2 class="fw-bold mb-0">{{ current_month_payrolls }}</h2>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="row g-4">
+        <!-- Main Content (Analytics) -->
+        <div class="col-lg-8 animate-up" style="animation-delay: 0.7s">
+            {% if analytics is defined %}
+            <div class="chart-container mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold text-dark mb-0">Financial Performance</h5>
+                    <span class="badge bg-light text-dark border">Currency: INR (₹)</span>
+                </div>
+                <div style="height: 350px;">
                     <canvas id="salaryChart"></canvas>
                 </div>
             </div>
+
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <h6 class="fw-bold mb-4">Workforce Status</h6>
+                        <div style="height: 250px;">
+                            <canvas id="attendanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <h6 class="fw-bold mb-4">Leave Insights</h6>
+                        <div style="height: 250px;">
+                            <canvas id="leaveChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar (Quick Actions) -->
+        <div class="col-lg-4 animate-up" style="animation-delay: 0.8s">
+            <div class="action-card p-4">
+                <h5 class="fw-bold text-dark mb-4"><i class="fas fa-layer-group text-primary me-2"></i>Control Center</h5>
+                <div class="list-group list-group-flush">
+                    {% if role in ['superadmin', 'admin', 'hr'] %}
+                    <a href="{{ url_for('employee.create') }}" class="list-group-item action-item d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded p-2 me-3"><i class="fas fa-user-plus"></i></div>
+                        <div><div class="fw-bold small">Staff Onboarding</div><div class="text-muted extra-small">Add new employees</div></div>
+                    </a>
+                    {% endif %}
+
+                    {% if role in ['superadmin', 'admin', 'hr'] %}
+                    <a href="{{ url_for('attendance.index') }}" class="list-group-item action-item d-flex align-items-center">
+                        <div class="bg-success bg-opacity-10 text-success rounded p-2 me-3"><i class="fas fa-calendar-check"></i></div>
+                        <div><div class="fw-bold small">Attendance Log</div><div class="text-muted extra-small">Mark manual presence</div></div>
+                    </a>
+                    {% endif %}
+
+                    {% if role in ['superadmin', 'admin', 'hr'] %}
+                    <a href="{{ url_for('leave.index') }}" class="list-group-item action-item d-flex align-items-center">
+                        <div class="bg-warning bg-opacity-10 text-warning rounded p-2 me-3"><i class="fas fa-envelope-open"></i></div>
+                        <div><div class="fw-bold small">Leave Inbox</div><div class="text-muted extra-small">Review pending requests</div></div>
+                    </a>
+                    {% endif %}
+
+                    {% if role in ['superadmin', 'admin', 'hr', 'payroll'] %}
+                    <a href="{{ url_for('payroll.create') }}" class="list-group-item action-item d-flex align-items-center">
+                        <div class="bg-info bg-opacity-10 text-info rounded p-2 me-3"><i class="fas fa-receipt"></i></div>
+                        <div><div class="fw-bold small">Payroll Engine</div><div class="text-muted extra-small">Process monthly payouts</div></div>
+                    </a>
+                    {% endif %}
+
+                    {% if role == 'superadmin' %}
+                    <a href="{{ url_for('user.index') }}" class="list-group-item action-item d-flex align-items-center">
+                        <div class="bg-danger bg-opacity-10 text-danger rounded p-2 me-3"><i class="fas fa-users-cog"></i></div>
+                        <div><div class="fw-bold small">System Access</div><div class="text-muted extra-small">Manage admin accounts</div></div>
+                    </a>
+                    {% endif %}
+                </div>
+
+                {% if role == 'superadmin' %}
+                <div class="mt-4 pt-4 border-top">
+                    <a href="{{ url_for('admin.audit_logs') }}" class="btn btn-dark w-100 rounded-pill fw-bold">
+                        <i class="fas fa-history me-2"></i> View Audit Trail
+                    </a>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>
-{% endif %}
-
 {% endblock %}
 
 {% block extra_js %}
@@ -224,75 +285,89 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Shared Chart Options
     const commonOptions = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-            legend: { position: 'bottom' }
+            legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, font: { family: 'Inter' } } }
         }
     };
 
-    // 1. Attendance Chart (Pie)
+    // 1. Attendance Chart
     const attData = {{ analytics.attendance | safe }};
-    const ctxAtt = document.getElementById('attendanceChart').getContext('2d');
-    new Chart(ctxAtt, {
+    new Chart(document.getElementById('attendanceChart').getContext('2d'), {
         type: 'doughnut',
         data: {
             labels: attData.labels,
             datasets: [{
                 data: attData.data,
-                backgroundColor: ['#198754', '#dc3545', '#ffc107', '#0dcaf0', '#6c757d'],
-                borderWidth: 0
+                backgroundColor: ['#10b981', '#ef4444', '#f59e0b', '#3b82f6', '#64748b'],
+                borderWidth: 0,
+                hoverOffset: 15
             }]
         },
-        options: commonOptions
+        options: {
+            ...commonOptions,
+            cutout: '75%',
+            plugins: { ...commonOptions.plugins, tooltip: { cornerRadius: 8 } }
+        }
     });
 
-    // 2. Leave Chart (Line)
+    // 2. Leave Chart
     const leaveData = {{ analytics.leaves | safe }};
-    const ctxLeave = document.getElementById('leaveChart').getContext('2d');
-    new Chart(ctxLeave, {
+    new Chart(document.getElementById('leaveChart').getContext('2d'), {
         type: 'line',
         data: {
             labels: leaveData.labels,
             datasets: [{
-                label: 'Approved Leaves',
+                label: 'Leaves',
                 data: leaveData.data,
-                borderColor: '#0d6efd',
-                backgroundColor: 'rgba(13, 110, 253, 0.1)',
-                borderWidth: 2,
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                borderWidth: 4,
                 fill: true,
-                tension: 0.3,
-                pointBackgroundColor: '#0d6efd'
+                tension: 0.4,
+                pointRadius: 6,
+                pointBackgroundColor: '#ffffff',
+                pointBorderColor: '#6366f1',
+                pointBorderWidth: 2
             }]
         },
         options: {
             ...commonOptions,
             scales: {
-                y: { beginAtZero: true, ticks: { precision: 0 } }
+                y: { beginAtZero: true, grid: { color: '#f3f4f6' }, ticks: { precision: 0 } },
+                x: { grid: { display: false } }
             }
         }
     });
 
-    // 3. Salary Chart (Bar)
+    // 3. Salary Chart
     const salaryData = {{ analytics.salary | safe }};
-    const ctxSalary = document.getElementById('salaryChart').getContext('2d');
-    new Chart(ctxSalary, {
+    new Chart(document.getElementById('salaryChart').getContext('2d'), {
         type: 'bar',
         data: {
             labels: salaryData.labels,
             datasets: [{
-                label: 'Total Payout (₹)',
+                label: 'Salary Expenditure (₹)',
                 data: salaryData.data,
-                backgroundColor: '#6f42c1',
-                borderRadius: 4
+                backgroundColor: '#4f46e5',
+                hoverBackgroundColor: '#4338ca',
+                borderRadius: 12,
+                barThickness: 40
             }]
         },
         options: {
             ...commonOptions,
             scales: {
-                y: { beginAtZero: true }
+                y: { 
+                    beginAtZero: true, 
+                    grid: { color: '#f3f4f6' },
+                    ticks: {
+                        callback: function(value) { return '₹' + value.toLocaleString(); }
+                    }
+                },
+                x: { grid: { display: false } }
             }
         }
     });

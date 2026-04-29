@@ -334,13 +334,18 @@ def monthly_report():
     start_date = datetime(year, month, 1).date()
     end_date = datetime(year, month, last_day).date()
     
+    # Get all employees for filter dropdown
+    employees = Employee.query.order_by(Employee.firstname).all()
+
+    # Ensure attendance records exist for all employees for the entire month
+    for emp in employees:
+        if not employee_id or str(emp.id) == str(employee_id):
+            emp.generate_attendance(start_date, end_date)
+    
     # Base query
     query = Attendance.query.filter(Attendance.date.between(start_date, end_date))
     if employee_id:
         query = query.filter(Attendance.employee_id == employee_id)
-    
-    # Get all employees for filter dropdown
-    employees = Employee.query.order_by(Employee.firstname).all()
     
     # Fetch attendance records
     attendances = query.order_by(Attendance.employee_id, Attendance.date).all()
@@ -351,6 +356,8 @@ def monthly_report():
         'absent': 0,
         'late': 0,
         'early_out': 0,
+        'leave': 0,
+        'holiday': 0,
         'working_hours': timedelta(),
         'attendance_percentage': 0
     })
@@ -358,7 +365,6 @@ def monthly_report():
     # Eagerly initialize all employees to prevent Jinja UndefinedErrors
     for emp in employees:
         _ = stats[emp.id]
-
     
     for attendance in attendances:
         emp_stats = stats[attendance.employee_id]
@@ -379,20 +385,25 @@ def monthly_report():
                     if schedule.is_flexible:
                         # For flexible shifts, check if they met working hours instead of late time
                         if working_hours.total_seconds() / 3600 < float(schedule.working_hours):
-                            emp_stats['early_out'] += 1 # Technically under-hours
+                            emp_stats['early_out'] += 1
                     else:
                         allowed_time = (datetime.combine(attendance.date, schedule.time_in) + timedelta(minutes=schedule.grace_period_minutes)).time()
                         if attendance.time_in > allowed_time:
                             emp_stats['late'] += 1
                         if attendance.time_out < datetime.combine(attendance.date, schedule.time_out).time():
                             emp_stats['early_out'] += 1
-        else:
+        elif attendance.status == 'absent':
             emp_stats['absent'] += 1
+        elif attendance.status == 'leave':
+            emp_stats['leave'] += 1
+        elif attendance.status == 'holiday':
+            emp_stats['holiday'] += 1
         
-        # Calculate attendance percentage
-        total_days = emp_stats['present'] + emp_stats['absent']
-        if total_days > 0:
-            emp_stats['attendance_percentage'] = (emp_stats['present'] / total_days) * 100
+        # Calculate attendance percentage (Present / (Present + Absent))
+        # Usually leaves and holidays don't count against attendance rate
+        total_relevant_days = emp_stats['present'] + emp_stats['absent']
+        if total_relevant_days > 0:
+            emp_stats['attendance_percentage'] = (emp_stats['present'] / total_relevant_days) * 100
             
     import calendar
     cal_grid = calendar.monthcalendar(year, month)
@@ -402,6 +413,21 @@ def monthly_report():
     for att in attendances:
         att_by_emp_day[att.employee_id][att.date.day] = att
     
+    # Summary stats for KPI cards
+    summary = {
+        'avg_attendance': 0,
+        'total_late': 0,
+        'total_absent': 0,
+        'active_employees': len(employees)
+    }
+    
+    relevant_pcts = [s['attendance_percentage'] for s in stats.values() if s['present'] + s['absent'] > 0]
+    if relevant_pcts:
+        summary['avg_attendance'] = sum(relevant_pcts) / len(relevant_pcts)
+    
+    summary['total_late'] = sum(s['late'] for s in stats.values())
+    summary['total_absent'] = sum(s['absent'] for s in stats.values())
+
     return render_template('admin/attendance/monthly_report.html',
                          attendances=attendances,
                          att_by_emp_day=att_by_emp_day,
@@ -412,6 +438,7 @@ def monthly_report():
                          month=month,
                          selected_employee=employee_id,
                          month_name=datetime(year, month, 1).strftime('%B'),
+                         summary=summary,
                          datetime=datetime)
 
 @bp.route('/report')

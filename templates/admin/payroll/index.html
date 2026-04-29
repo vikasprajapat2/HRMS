@@ -70,8 +70,8 @@
                         <td>{{ payroll.id }}</td>
                         <td>{{ payroll.employee.firstname }} {{ payroll.employee.lastname }}</td>
                         <td>{{ payroll.month }} {{ payroll.year }}</td>
-                        <td>${{ payroll.basic_salary }}</td>
-                        <td class="fw-bold">${{ payroll.net_salary }}</td>
+                        <td>₹{{ payroll.basic_salary }}</td>
+                        <td class="fw-bold">₹{{ payroll.net_salary }}</td>
                         <td>
                             {% if payroll.status == 'paid' %}
                             <span class="badge bg-success">Paid</span>

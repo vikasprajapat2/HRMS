@@ -1,5 +1,6 @@
 # Virtual Environment
 venv/
+.venv/
 env/
 
 # Python Cache
@@ -52,4 +53,5 @@ db.session.sql
 dist/
 build/
 *.egg-info/
+
 

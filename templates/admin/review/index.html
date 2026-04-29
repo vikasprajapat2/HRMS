@@ -31,7 +31,7 @@
                                 {% if review.employee.image %}
                                 <img src="{{ url_for('static', filename='uploads/employees/' ~ review.employee.image) }}" class="rounded-circle me-2" width="30" height="30" style="object-fit: cover;">
                                 {% else %}
-                                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2" style="width:30px;height:30px;font-size:14px">{{ review.employee.firstname[0] }}</div>
+                                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2" style="width:30px;height:30px;font-size:14px">{{ review.employee.firstname[0]|upper if review.employee.firstname else 'E' }}</div>
                                 {% endif %}
                                 <div>
                                     <div class="fw-bold">{{ review.employee.firstname }} {{ review.employee.lastname }}</div>
