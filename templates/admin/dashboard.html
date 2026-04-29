@@ -1,223 +1,241 @@
 {% extends "base.html" %}
 
-{% block title %}Admin Insight Dashboard - HRMS{% endblock %}
+{% block title %}Dashboard - HRMS{% endblock %}
 
 {% block extra_css %}
 <style>
-    :root {
-        --glass-bg: rgba(255, 255, 255, 0.9);
-        --glass-border: rgba(255, 255, 255, 0.2);
-        --primary-gradient: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-        --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-        --info-gradient: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-        --purple-gradient: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-    }
-
-    body {
-        background-color: #f3f4f6;
-    }
-
     .dashboard-container {
-        padding: 2rem;
+        padding: 1.5rem 2rem;
     }
 
-    .welcome-card {
-        background: white;
-        border-radius: 24px;
-        padding: 2.5rem;
-        border: none;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        margin-bottom: 2rem;
-        position: relative;
-        overflow: hidden;
+    /* Stat cards — clean white cards with left accent border */
+    .stat-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 1.25rem 1.5rem;
+        border-left: 4px solid #cbd5e1;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        transition: box-shadow 0.2s ease;
     }
-    .welcome-card::after {
-        content: '';
-        position: absolute;
-        top: -50px;
-        right: -50px;
-        width: 200px;
-        height: 200px;
-        background: var(--primary-gradient);
-        opacity: 0.05;
-        border-radius: 50%;
+    .stat-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
-
-    .stat-card-premium {
-        border: none;
-        border-radius: 20px;
-        padding: 1.5rem;
-        color: white;
-        position: relative;
-        overflow: hidden;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-    .stat-card-premium:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    }
-    .stat-card-premium .icon-box {
-        width: 50px;
-        height: 50px;
-        background: rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(10px);
-        border-radius: 12px;
+    .stat-card .stat-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.25rem;
-        margin-bottom: 1.25rem;
+        font-size: 1.1rem;
+    }
+    .stat-card .stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #1e293b;
+        line-height: 1;
+    }
+    .stat-card .stat-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
     }
 
+    /* Accent colors — muted, professional tones */
+    .accent-indigo  { border-left-color: #6366f1; }
+    .accent-indigo .stat-icon  { background: #eef2ff; color: #4f46e5; }
+    .accent-teal    { border-left-color: #14b8a6; }
+    .accent-teal .stat-icon    { background: #f0fdfa; color: #0d9488; }
+    .accent-amber   { border-left-color: #f59e0b; }
+    .accent-amber .stat-icon   { background: #fffbeb; color: #d97706; }
+    .accent-rose    { border-left-color: #f43f5e; }
+    .accent-rose .stat-icon    { background: #fff1f2; color: #e11d48; }
+    .accent-sky     { border-left-color: #0ea5e9; }
+    .accent-sky .stat-icon     { background: #f0f9ff; color: #0284c7; }
+    .accent-violet  { border-left-color: #8b5cf6; }
+    .accent-violet .stat-icon  { background: #f5f3ff; color: #7c3aed; }
+
+    /* Chart wrapper */
+    .chart-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .chart-card h6 {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    /* Action sidebar */
     .action-card {
-        background: white;
-        border-radius: 20px;
-        border: none;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
     }
-    .action-item {
-        border: none !important;
-        border-radius: 12px !important;
-        margin-bottom: 0.75rem;
-        transition: all 0.2s;
-        padding: 1.25rem !important;
-        background: #f9fafb;
+    .action-link {
+        display: flex;
+        align-items: center;
+        padding: 0.875rem 1rem;
+        border-radius: 8px;
+        color: #334155;
+        text-decoration: none;
+        transition: background 0.15s;
+        margin-bottom: 0.25rem;
     }
-    .action-item:hover {
-        background: #f3f4f6;
-        transform: scale(1.02);
+    .action-link:hover {
+        background: #f8fafc;
+        color: #1e293b;
     }
-
-    .chart-container {
-        background: white;
-        border-radius: 24px;
-        padding: 2rem;
-        border: none;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    .action-link .action-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+        margin-right: 0.75rem;
+        flex-shrink: 0;
     }
-
-    .animate-up {
-        animation: slideUp 0.6s ease-out forwards;
-        opacity: 0;
+    .action-link .action-title {
+        font-size: 0.8125rem;
+        font-weight: 600;
     }
-    @keyframes slideUp {
-        from { transform: translateY(20px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
+    .action-link .action-desc {
+        font-size: 0.6875rem;
+        color: #94a3b8;
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="dashboard-container">
-    <!-- Welcome Section -->
-    <div class="welcome-card animate-up">
-        <div class="row align-items-center">
-            <div class="col-lg-8">
-                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill fw-bold mb-3">
-                    <i class="fas fa-sparkles me-2"></i>System Status: Online
-                </span>
-                <h1 class="display-5 fw-bold text-dark mb-2">Hello, {{ current_user.name }}!</h1>
-                <p class="text-muted fs-5 mb-0">Here's your organization's performance pulse for today, <span class="text-primary fw-bold">{{ datetime.now().strftime('%d %B, %Y') }}</span>.</p>
-            </div>
-            <div class="col-lg-4 text-lg-end d-none d-lg-block">
-                <img src="https://img.icons8.com/clouds/200/business-report.png" alt="Dashboard" style="width: 150px;">
-            </div>
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold text-dark mb-1">Dashboard</h4>
+            <p class="text-muted small mb-0">Welcome back, <span class="fw-semibold">{{ current_user.name }}</span> · {{ datetime.now().strftime('%A, %d %B %Y') }}</p>
         </div>
     </div>
 
-    <!-- Stats Matrix -->
-    <div class="row g-4 mb-5">
+    <!-- Stats Row -->
+    <div class="row g-3 mb-4">
         {% if total_employees is defined %}
-        <div class="col-md-6 col-xl-4 col-xxl-2 animate-up" style="animation-delay: 0.1s">
-            <div class="stat-card-premium" style="background: var(--primary-gradient);">
-                <div class="icon-box"><i class="fas fa-users"></i></div>
-                <div class="small fw-bold text-white text-opacity-75 text-uppercase letter-spacing-1">Employees</div>
-                <h2 class="fw-bold mb-0">{{ total_employees }}</h2>
+        <div class="col-sm-6 col-xl-4 col-xxl-2">
+            <div class="stat-card accent-indigo">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stat-label mb-1">Employees</div>
+                        <div class="stat-value">{{ total_employees }}</div>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                </div>
             </div>
         </div>
         {% endif %}
 
         {% if total_departments is defined %}
-        <div class="col-md-6 col-xl-4 col-xxl-2 animate-up" style="animation-delay: 0.2s">
-            <div class="stat-card-premium" style="background: var(--success-gradient);">
-                <div class="icon-box"><i class="fas fa-sitemap"></i></div>
-                <div class="small fw-bold text-white text-opacity-75 text-uppercase letter-spacing-1">Departments</div>
-                <h2 class="fw-bold mb-0">{{ total_departments }}</h2>
+        <div class="col-sm-6 col-xl-4 col-xxl-2">
+            <div class="stat-card accent-teal">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stat-label mb-1">Departments</div>
+                        <div class="stat-value">{{ total_departments }}</div>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-sitemap"></i></div>
+                </div>
             </div>
         </div>
         {% endif %}
 
         {% if today_attendance is defined %}
-        <div class="col-md-6 col-xl-4 col-xxl-2 animate-up" style="animation-delay: 0.3s">
-            <div class="stat-card-premium" style="background: var(--warning-gradient);">
-                <div class="icon-box"><i class="fas fa-fingerprint"></i></div>
-                <div class="small fw-bold text-white text-opacity-75 text-uppercase letter-spacing-1">Attendance</div>
-                <h2 class="fw-bold mb-0">{{ today_attendance }}</h2>
+        <div class="col-sm-6 col-xl-4 col-xxl-2">
+            <div class="stat-card accent-amber">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stat-label mb-1">Today Present</div>
+                        <div class="stat-value">{{ today_attendance }}</div>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-user-check"></i></div>
+                </div>
             </div>
         </div>
         {% endif %}
 
         {% if pending_leaves is defined %}
-        <div class="col-md-6 col-xl-4 col-xxl-2 animate-up" style="animation-delay: 0.4s">
-            <div class="stat-card-premium" style="background: var(--danger-gradient);">
-                <div class="icon-box"><i class="fas fa-envelope-open-text"></i></div>
-                <div class="small fw-bold text-white text-opacity-75 text-uppercase letter-spacing-1">Pending Leaves</div>
-                <h2 class="fw-bold mb-0">{{ pending_leaves }}</h2>
+        <div class="col-sm-6 col-xl-4 col-xxl-2">
+            <div class="stat-card accent-rose">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stat-label mb-1">Pending Leaves</div>
+                        <div class="stat-value">{{ pending_leaves }}</div>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-envelope-open-text"></i></div>
+                </div>
             </div>
         </div>
         {% endif %}
 
         {% if total_users is defined %}
-        <div class="col-md-6 col-xl-4 col-xxl-2 animate-up" style="animation-delay: 0.5s">
-            <div class="stat-card-premium" style="background: var(--info-gradient);">
-                <div class="icon-box"><i class="fas fa-shield-alt"></i></div>
-                <div class="small fw-bold text-white text-opacity-75 text-uppercase letter-spacing-1">Active Users</div>
-                <h2 class="fw-bold mb-0">{{ total_users }}</h2>
+        <div class="col-sm-6 col-xl-4 col-xxl-2">
+            <div class="stat-card accent-sky">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stat-label mb-1">System Users</div>
+                        <div class="stat-value">{{ total_users }}</div>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-shield-alt"></i></div>
+                </div>
             </div>
         </div>
         {% endif %}
 
         {% if current_month_payrolls is defined %}
-        <div class="col-md-6 col-xl-4 col-xxl-2 animate-up" style="animation-delay: 0.6s">
-            <div class="stat-card-premium" style="background: var(--purple-gradient);">
-                <div class="icon-box"><i class="fas fa-vault"></i></div>
-                <div class="small fw-bold text-white text-opacity-75 text-uppercase letter-spacing-1">Payroll Batches</div>
-                <h2 class="fw-bold mb-0">{{ current_month_payrolls }}</h2>
+        <div class="col-sm-6 col-xl-4 col-xxl-2">
+            <div class="stat-card accent-violet">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stat-label mb-1">Payroll Runs</div>
+                        <div class="stat-value">{{ current_month_payrolls }}</div>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div>
+                </div>
             </div>
         </div>
         {% endif %}
     </div>
 
-    <div class="row g-4">
-        <!-- Main Content (Analytics) -->
-        <div class="col-lg-8 animate-up" style="animation-delay: 0.7s">
+    <div class="row g-3">
+        <!-- Charts Column -->
+        <div class="col-lg-8">
             {% if analytics is defined %}
-            <div class="chart-container mb-4">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h5 class="fw-bold text-dark mb-0">Financial Performance</h5>
-                    <span class="badge bg-light text-dark border">Currency: INR (₹)</span>
+            <div class="chart-card mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0">Salary Expenditure</h6>
+                    <span class="badge bg-light text-muted border small">Last 6 Months</span>
                 </div>
-                <div style="height: 350px;">
+                <div style="height: 300px;">
                     <canvas id="salaryChart"></canvas>
                 </div>
             </div>
 
-            <div class="row g-4">
+            <div class="row g-3">
                 <div class="col-md-6">
-                    <div class="chart-container">
-                        <h6 class="fw-bold mb-4">Workforce Status</h6>
-                        <div style="height: 250px;">
+                    <div class="chart-card">
+                        <h6 class="mb-3">Attendance Overview</h6>
+                        <div style="height: 220px;">
                             <canvas id="attendanceChart"></canvas>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="chart-container">
-                        <h6 class="fw-bold mb-4">Leave Insights</h6>
-                        <div style="height: 250px;">
+                    <div class="chart-card">
+                        <h6 class="mb-3">Leave Trends</h6>
+                        <div style="height: 220px;">
                             <canvas id="leaveChart"></canvas>
                         </div>
                     </div>
@@ -226,51 +244,47 @@
             {% endif %}
         </div>
 
-        <!-- Sidebar (Quick Actions) -->
-        <div class="col-lg-4 animate-up" style="animation-delay: 0.8s">
-            <div class="action-card p-4">
-                <h5 class="fw-bold text-dark mb-4"><i class="fas fa-layer-group text-primary me-2"></i>Control Center</h5>
-                <div class="list-group list-group-flush">
-                    {% if role in ['superadmin', 'admin', 'hr'] %}
-                    <a href="{{ url_for('employee.create') }}" class="list-group-item action-item d-flex align-items-center">
-                        <div class="bg-primary bg-opacity-10 text-primary rounded p-2 me-3"><i class="fas fa-user-plus"></i></div>
-                        <div><div class="fw-bold small">Staff Onboarding</div><div class="text-muted extra-small">Add new employees</div></div>
-                    </a>
-                    {% endif %}
+        <!-- Quick Actions -->
+        <div class="col-lg-4">
+            <div class="action-card p-3">
+                <h6 class="fw-bold text-dark px-2 pt-1 mb-3">Quick Actions</h6>
 
-                    {% if role in ['superadmin', 'admin', 'hr'] %}
-                    <a href="{{ url_for('attendance.index') }}" class="list-group-item action-item d-flex align-items-center">
-                        <div class="bg-success bg-opacity-10 text-success rounded p-2 me-3"><i class="fas fa-calendar-check"></i></div>
-                        <div><div class="fw-bold small">Attendance Log</div><div class="text-muted extra-small">Mark manual presence</div></div>
-                    </a>
-                    {% endif %}
+                {% if role in ['superadmin', 'admin', 'hr'] %}
+                <a href="{{ url_for('employee.create') }}" class="action-link">
+                    <div class="action-icon" style="background:#eef2ff;color:#4f46e5;"><i class="fas fa-user-plus"></i></div>
+                    <div><div class="action-title">Add Employee</div><div class="action-desc">Onboard new staff</div></div>
+                </a>
+                {% endif %}
 
-                    {% if role in ['superadmin', 'admin', 'hr'] %}
-                    <a href="{{ url_for('leave.index') }}" class="list-group-item action-item d-flex align-items-center">
-                        <div class="bg-warning bg-opacity-10 text-warning rounded p-2 me-3"><i class="fas fa-envelope-open"></i></div>
-                        <div><div class="fw-bold small">Leave Inbox</div><div class="text-muted extra-small">Review pending requests</div></div>
-                    </a>
-                    {% endif %}
+                {% if role in ['superadmin', 'admin', 'hr'] %}
+                <a href="{{ url_for('attendance.index') }}" class="action-link">
+                    <div class="action-icon" style="background:#f0fdfa;color:#0d9488;"><i class="fas fa-calendar-check"></i></div>
+                    <div><div class="action-title">Mark Attendance</div><div class="action-desc">Daily records</div></div>
+                </a>
+                {% endif %}
 
-                    {% if role in ['superadmin', 'admin', 'hr', 'payroll'] %}
-                    <a href="{{ url_for('payroll.create') }}" class="list-group-item action-item d-flex align-items-center">
-                        <div class="bg-info bg-opacity-10 text-info rounded p-2 me-3"><i class="fas fa-receipt"></i></div>
-                        <div><div class="fw-bold small">Payroll Engine</div><div class="text-muted extra-small">Process monthly payouts</div></div>
-                    </a>
-                    {% endif %}
+                {% if role in ['superadmin', 'admin', 'hr'] %}
+                <a href="{{ url_for('leave.index') }}" class="action-link">
+                    <div class="action-icon" style="background:#fffbeb;color:#d97706;"><i class="fas fa-envelope-open"></i></div>
+                    <div><div class="action-title">Leave Requests</div><div class="action-desc">Review & approve</div></div>
+                </a>
+                {% endif %}
 
-                    {% if role == 'superadmin' %}
-                    <a href="{{ url_for('user.index') }}" class="list-group-item action-item d-flex align-items-center">
-                        <div class="bg-danger bg-opacity-10 text-danger rounded p-2 me-3"><i class="fas fa-users-cog"></i></div>
-                        <div><div class="fw-bold small">System Access</div><div class="text-muted extra-small">Manage admin accounts</div></div>
-                    </a>
-                    {% endif %}
-                </div>
+                {% if role in ['superadmin', 'admin', 'hr', 'payroll'] %}
+                <a href="{{ url_for('payroll.create') }}" class="action-link">
+                    <div class="action-icon" style="background:#f0f9ff;color:#0284c7;"><i class="fas fa-receipt"></i></div>
+                    <div><div class="action-title">Process Payroll</div><div class="action-desc">Monthly salaries</div></div>
+                </a>
+                {% endif %}
 
                 {% if role == 'superadmin' %}
-                <div class="mt-4 pt-4 border-top">
-                    <a href="{{ url_for('admin.audit_logs') }}" class="btn btn-dark w-100 rounded-pill fw-bold">
-                        <i class="fas fa-history me-2"></i> View Audit Trail
+                <a href="{{ url_for('user.index') }}" class="action-link">
+                    <div class="action-icon" style="background:#fff1f2;color:#e11d48;"><i class="fas fa-users-cog"></i></div>
+                    <div><div class="action-title">Manage Users</div><div class="action-desc">System access control</div></div>
+                </a>
+                <div class="px-2 mt-3">
+                    <a href="{{ url_for('admin.audit_logs') }}" class="btn btn-outline-secondary btn-sm w-100 rounded-pill">
+                        <i class="fas fa-history me-1"></i> Audit Trail
                     </a>
                 </div>
                 {% endif %}
@@ -285,15 +299,17 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const gridColor = '#f1f5f9';
+    const fontFamily = 'Inter';
     const commonOptions = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-            legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, font: { family: 'Inter' } } }
+            legend: { position: 'bottom', labels: { usePointStyle: true, padding: 16, font: { family: fontFamily, size: 11 } } }
         }
     };
 
-    // 1. Attendance Chart
+    // Attendance Doughnut
     const attData = {{ analytics.attendance | safe }};
     new Chart(document.getElementById('attendanceChart').getContext('2d'), {
         type: 'doughnut',
@@ -301,34 +317,33 @@ document.addEventListener('DOMContentLoaded', function() {
             labels: attData.labels,
             datasets: [{
                 data: attData.data,
-                backgroundColor: ['#10b981', '#ef4444', '#f59e0b', '#3b82f6', '#64748b'],
+                backgroundColor: ['#6366f1', '#f43f5e', '#f59e0b', '#0ea5e9', '#94a3b8'],
                 borderWidth: 0,
-                hoverOffset: 15
+                hoverOffset: 6
             }]
         },
         options: {
             ...commonOptions,
-            cutout: '75%',
-            plugins: { ...commonOptions.plugins, tooltip: { cornerRadius: 8 } }
+            cutout: '72%'
         }
     });
 
-    // 2. Leave Chart
+    // Leave Line
     const leaveData = {{ analytics.leaves | safe }};
     new Chart(document.getElementById('leaveChart').getContext('2d'), {
         type: 'line',
         data: {
             labels: leaveData.labels,
             datasets: [{
-                label: 'Leaves',
+                label: 'Approved Leaves',
                 data: leaveData.data,
                 borderColor: '#6366f1',
-                backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                borderWidth: 4,
+                backgroundColor: 'rgba(99,102,241,0.06)',
+                borderWidth: 2,
                 fill: true,
-                tension: 0.4,
-                pointRadius: 6,
-                pointBackgroundColor: '#ffffff',
+                tension: 0.35,
+                pointRadius: 4,
+                pointBackgroundColor: '#fff',
                 pointBorderColor: '#6366f1',
                 pointBorderWidth: 2
             }]
@@ -336,38 +351,36 @@ document.addEventListener('DOMContentLoaded', function() {
         options: {
             ...commonOptions,
             scales: {
-                y: { beginAtZero: true, grid: { color: '#f3f4f6' }, ticks: { precision: 0 } },
-                x: { grid: { display: false } }
+                y: { beginAtZero: true, grid: { color: gridColor }, ticks: { precision: 0, font: { size: 11 } } },
+                x: { grid: { display: false }, ticks: { font: { size: 11 } } }
             }
         }
     });
 
-    // 3. Salary Chart
+    // Salary Bar
     const salaryData = {{ analytics.salary | safe }};
     new Chart(document.getElementById('salaryChart').getContext('2d'), {
         type: 'bar',
         data: {
             labels: salaryData.labels,
             datasets: [{
-                label: 'Salary Expenditure (₹)',
+                label: 'Expenditure (₹)',
                 data: salaryData.data,
-                backgroundColor: '#4f46e5',
-                hoverBackgroundColor: '#4338ca',
-                borderRadius: 12,
-                barThickness: 40
+                backgroundColor: '#6366f1',
+                hoverBackgroundColor: '#4f46e5',
+                borderRadius: 6,
+                barThickness: 32
             }]
         },
         options: {
             ...commonOptions,
             scales: {
-                y: { 
-                    beginAtZero: true, 
-                    grid: { color: '#f3f4f6' },
-                    ticks: {
-                        callback: function(value) { return '₹' + value.toLocaleString(); }
-                    }
+                y: {
+                    beginAtZero: true,
+                    grid: { color: gridColor },
+                    ticks: { callback: v => '₹' + v.toLocaleString(), font: { size: 11 } }
                 },
-                x: { grid: { display: false } }
+                x: { grid: { display: false }, ticks: { font: { size: 11 } } }
             }
         }
     });
