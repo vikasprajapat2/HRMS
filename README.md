@@ -1,335 +1,90 @@
-# Employee Management System - Python Flask Edition
+# 🏢 Advanced Human Resource Management System (HRMS)
 
-This is a Python Flask conversion of the Laravel Employee Management System with HTML, CSS, and Bootstrap 5.
-
-## Recent Changes (v2.0 - 2026-04-29)
-
-- **Premium UI Overhaul**: Modernized the Admin Dashboard and Monthly Attendance Report with a high-end glassmorphism design system.
-- **Enhanced Analytics**: Integrated interactive charts for salary trends, attendance status, and leave insights.
-- **Holiday Intelligence**: Fixed the attendance aggregation logic to correctly handle Holidays, Weekends, and Approved Leaves in monthly reports.
-- **Automated Attendance**: Implemented logic to automatically generate missing attendance records for the current month.
-- **Security & Fixes**: Corrected role-based access for HR Managers and refined database migration paths.
-
-## Screenshots (Modernized v2.0)
-
-### Premium Admin Dashboard
-![Admin Dashboard](static/screenshots/dashboard_v2.png)
-
-### Monthly Attendance Report
-![Monthly Report](static/screenshots/monthly_report_v2.png)
-
-## Legacy Screenshots
-
-## Technologies Used
-
-- **Python 3.8+**
-- **Flask**: Web framework
-- **SQLAlchemy**: ORM for database management
-- **MySQL**: Database
-- **Bootstrap 5**: Frontend CSS framework
-- **Jinja2**: Template engine
-- **Flask-Login**: User session management
-- **Flask-Bcrypt**: Password hashing
-
-## Prerequisites
-
-- Python 3.8 or higher
-- MySQL 5.7 or higher
-- pip (Python package installer)
-
-## Installation
-
-### 1. Clone or navigate to the project directory
-
-```bash
-cd D:\employee-management-python
-```
-
-### 2. Create a virtual environment (recommended)
-
-```bash
-python -m venv venv
-```
-
-### 3. Activate the virtual environment
-
-**Windows:**
-```bash
-venv\Scripts\activate
-```
-
-**Linux/Mac:**
-```bash
-source venv/bin/activate
-```
-
-### 4. Install required packages
-
-```bash
-pip install -r requirements.txt
-```
-
-### 5. Create MySQL database
-
-Create a new MySQL database:
-
-```sql
-CREATE DATABASE employee_management;
-```
-
-### 6. Configure database connection
-
-Edit `app.py` and update the database connection string:
-
-```python
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://username:password@localhost/employee_management'
-```
-
-Replace `username` and `password` with your MySQL credentials.
-
-### 7. Initialize the database
-
-Run the application once to create all tables:
-
-```bash
-python app.py
-```
-
-The database tables will be created automatically on first run.
-
-### 8. Create initial admin user (Optional)
-
-You can create an initial admin user by running a Python script or by registering through the application.
-
-### 9. Run the application
-
-```bash
-python app.py
-```
-
-The application will be available at `http://localhost:5000`
-
-## Login Credentials
-
-### 1. Default Superadmin Account
-The system automatically creates this account when you run `init_db.py`:
-- **Email**: `admin@example.com`
-- **Password**: `admin123`
-- **Role**: Superadmin
-- **Access**: Full system access including user management, employee management, departments, designations, attendance, leaves, payroll, schedules, and system settings
-
-### 2. Test Development Account
-This account is referenced in development/debugging scripts:
-- **Email**: `vikas@gmail.com`
-- **Password**: `admin123`
-- **Role**: Superadmin (or as configured)
-- **Note**: This account may need to be created manually or via the registration page
-
-### 3. Employee Portal Login
-Employees use their Employee ID instead of email to log in:
-- **Username Format**: Employee ID (e.g., `EMP001`, `EMP002`, etc.)
-- **Password**: Set by admin when creating/updating the employee account
-- **Access**: Limited to employee self-service portal
-- **Features**: View personal info, check attendance, request leaves, view payroll
-
-**Example Employee Logins:**
-- Username: `EMP001` | Password: `(set by admin)`
-- Username: `EMP002` | Password: `(set by admin)`
-- Username: `EMP003` | Password: `(set by admin)`
-
-### 4. Sample Accounts for Each Role (For Testing)
-You can create these accounts for testing different role permissions:
-
-#### HR Manager Account
-- **Email**: `hr@example.com`
-- **Password**: `hr123`
-- **Role**: HR
-- **Access**: Employee management, leave approvals, attendance viewing, payroll processing
-
-### 5. Available User Roles & Permissions
-
-| Role | Description | Key Permissions |
-|------|-------------|-----------------|
-| **Superadmin** | Highest level access | All system features, user management, system configuration |
-| **HR** | Human Resources Manager | Employee CRUD, leave management, attendance viewing, payroll |
-| **Employee** | Regular Employee | Self-service portal, view own data, request leaves |
-
-### 6. Sample Departments
-Created by `init_db.py`:
-- IT
-- HR
-- Finance
-- Sales
-
-### 7. Sample Designations
-Created by `init_db.py`:
-- Manager
-- Senior Developer
-- Junior Developer
-- HR Executive
-- Accountant
-
-### 8. Sample Schedules
-Created by `init_db.py`:
-- **Day Shift**: 9:00 AM - 5:00 PM
-- **Night Shift**: 10:00 PM - 6:00 AM
-
-### How to Create Test Accounts
-
-#### Option 1: Via Registration Page
-1. Navigate to `http://localhost:5000/register`
-2. Fill in the registration form
-3. Select the desired role
-4. Submit to create account
-
-#### Option 2: Via User Management (Requires Admin Access)
-1. Log in as admin/superadmin
-2. Navigate to Users section
-3. Click "Add New User"
-4. Fill in details and assign role
-
-#### Option 3: Run Database Initialization Script
-```bash
-python init_db.py
-```
-This will create:
-- Default superadmin account (`admin@example.com`)
-- Sample departments
-- Sample designations
-- Sample schedules
-
-#### Option 4: Create Employee with Portal Access
-1. Log in as admin/superadmin
-2. Navigate to Employees → Add Employee
-3. Fill in employee details including Employee ID
-4. Set portal password to enable login
-5. Employee can now log in using their Employee ID
-
-### Database Reset & Setup
-
-To reset the database and create default data:
-```bash
-# Activate virtual environment first
-venv\Scripts\activate
-
-# Run initialization script
-python init_db.py
-```
-
-This will create all tables, roles, default superadmin, and sample data.
-
-## Project Structure
-# Employee Management System - Python (Flask)
-
-This repository contains a Flask-based Employee Management System with attendance, leave, payroll, and schedule management.
-
-## Quick overview
-
-- Attendance: check-in/check-out, manual records, monthly reports
-- Auto-generation: attendance records can be auto-generated per date (weekends, government/company holidays, approved leaves)
-- Holiday management: add/edit/delete holidays which the auto-generator will honor
-- Leave management: request/approve leaves which are considered in attendance generation
-
-## Technologies
-
-- Python 3.8+
-- Flask, Flask-Login, Flask-Bcrypt
-- SQLAlchemy
-- Flask-Migrate (optional, recommended)
-- Jinja2 + Bootstrap for the UI
-
-## Setup (short)
-
-1. Clone or open the project folder.
-2. Create and activate a virtual environment:
-
-```powershell
-python -m venv venv
-venv\Scripts\activate
-```
-
-3. Install dependencies:
-
-```powershell
-pip install -r requirements.txt
-```
-
-4. Configure the database in `app.py` (MySQL or fallback to SQLite).
-
-5. (Optional) Initialize migrations using Flask-Migrate:
-
-```powershell
-# ensure FLASK_APP is set or run via python -m flask
-$env:FLASK_APP = 'app.py'
-flask db init    # only if migrations folder doesn't already exist
-flask db migrate -m "Initial"
-flask db upgrade
-```
-
-If you don't use Flask-Migrate, running the app once will create tables with SQLAlchemy's `create_all()` behavior (if present). Note: migrations are recommended for production.
-
-6. Run the app:
-
-```powershell
-python app.py
-```
-
-Open http://127.0.0.1:5000 in your browser.
-
-## Key features and how to use them
-
-- Attendance
-    - Attendance board: `/attendance/board` — check-in / check-out quickly.
-    - Manual add/edit: `/attendance/create` and edit links on index.
-    - Monthly report: `/attendance/monthly-report` — choose month, year, and employee.
-
-- Holidays
-    - Manage holidays: `/attendance/holidays` — add government/company holidays.
-    - When a holiday is added/edited/deleted, the system regenerates attendance records for that date so the status (holiday/weekend/absent/leave) is correct.
-
-- Auto-generate attendance
-    - The application auto-generates date-wise attendance for active employees when viewing a date or via the `Employee.generate_attendance(start_date, end_date)` method.
-    - Rules applied:
-        - If a holiday exists for the date → status = `holiday` (description = holiday name)
-        - If weekend (Sat/Sun) → status = `weekend`
-        - If approved leave covers the date → status = `leave` (description contains leave type)
-        - Otherwise default → status = `absent` until a check-in is recorded
-
-## Database models (high-level)
-
-- `Employee` — employee profile, schedule id, relationships to attendances and leaves
-- `Attendance` — date, time_in, time_out, status, description
-- `Holiday` — name, date, type (government/company), is_paid
-- `Leave` — type, start/end dates, status (pending/approved/rejected)
-
-## Useful routes (summary)
-
-- Auth: `/login`, `/register`, `/logout`
-- Employees: `/employee/`, `/employee/create`
-- Attendance: `/attendance/`, `/attendance/board`, `/attendance/create`, `/attendance/monthly-report`, `/attendance/holidays`
-- Leaves: `/leaves/`, `/leaves/create`
-
-## Notes and troubleshooting
-
-- If you add holidays programmatically, regenerate attendance for affected dates by calling `employee.generate_attendance(date, date)` for each active employee.
-- Flask-Migrate is recommended. If you see missing `migrations/env.py` or alembic errors, initialize migrations with `flask db init` (only once) and then `flask db migrate` + `flask db upgrade`.
-- If you prefer not to use migrations, ensure SQLAlchemy is configured to create tables on startup (not recommended for production).
-
-## Contribution
-
-Contributions are welcome. Please open an issue or send a pull request with clear details.
-
-## License
-
-MIT
+A powerful, modernized HRMS built with **Python Flask** and **Bootstrap 5**. This system provides a comprehensive suite of tools for managing employees, attendance, leaves, and payroll with a premium user experience.
 
 ---
 
-If you'd like, I can also:
+## 🌟 Key Features
 
-- Add a short developer HOWTO with common commands
-- Add sample data fixtures (employees, schedules, holidays)
-- Add unit tests for the attendance generator
+### 📊 Modernized Dashboard
+- **Admin Insight Dashboard**: A high-fidelity overview of organization performance.
+- **Real-time Analytics**: Interactive charts for Salary trends, Attendance status, and Leave insights.
+- **Quick Actions**: Centralized control center for frequent administrative tasks.
 
-Let me know which of the above you'd like next.
-- `GET/POST /payroll/create` - Create payroll
+### 📅 Smart Attendance System
+- **Automated Generation**: Intelligent engine that auto-populates attendance for weekends, holidays, and approved leaves.
+- **Holiday Intelligence**: Integrated holiday management that automatically reconciles attendance statuses.
+- **Monthly Reporting**: Detailed performance reports with KPI summaries and visual calendars.
+
+### 💼 Employee & Office Management
+- **Full Employee Lifecycle**: From onboarding to payroll processing.
+- **Organizational Structure**: Manage Departments, Designations, and Working Schedules.
+- **Audit Logs**: Full traceability of manual system modifications.
+
+---
+
+## 📸 Feature Gallery
+
+| Login & Authentication | Admin Dashboard |
+|:---:|:---:|
+| ![Login](static/screenshots/login.png) | ![Dashboard](static/screenshots/dashboard_v2.png) |
+
+| Employee Management | Attendance Dashboard |
+|:---:|:---:|
+| ![Employees](static/screenshots/employees.png) | ![Attendance](static/screenshots/attendance_management.png) |
+
+| Monthly Reporting (v2) | Leave Management |
+|:---:|:---:|
+| ![Monthly Report](static/screenshots/monthly_report_v2.png) | ![Leaves](static/screenshots/leaves.png) |
+
+| Department Organization | Designation Management |
+|:---:|:---:|
+| ![Departments](static/screenshots/departments.png) | ![Designations](static/screenshots/designations.png) |
+
+---
+
+## 🚀 Quick Start
+
+### 1. Environment Setup
+```powershell
+# Create and activate virtual environment
+python -m venv .venv
+.venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### 2. Configuration
+Create a `.env` file in the root directory:
+```env
+SECRET_KEY=your_secret_key
+DATABASE_URL=sqlite:///instance/employee_management.db
+```
+
+### 3. Database Initialization
+```powershell
+$env:FLASK_APP = 'app.py'
+flask db upgrade
+python scripts/seed_2026_holidays.py  # Populate 2026 calendar
+```
+
+### 4. Launch
+```powershell
+python app.py
+```
+Access the system at `http://127.0.0.1:5000`
+
+---
+
+## 🛠️ Tech Stack
+- **Backend**: Flask (Python)
+- **Database**: SQLAlchemy (MySQL / SQLite)
+- **Frontend**: Bootstrap 5, Chart.js, FontAwesome 6
+- **Auth**: Flask-Login, Bcrypt
+- **Migrations**: Flask-Migrate (Alembic)
+
+---
+
+## 📝 License
+This project is licensed under the MIT License.
