@@ -42,9 +42,14 @@ A comprehensive, modern HR Management System built with **Python Flask** and **B
 ![Leave Management](static/screenshots/leaves_v2.png)
 
 ### 🛡️ HR Dashboard
-> Dedicated management interface for HR staff with key metrics and control center.
+> Dedicated premium management interface for HR staff with a "Welcome Back" banner, attendance trends, and automated leave insights.
 
 ![HR Dashboard](static/screenshots/hr_dashboard.png)
+
+### 👥 Employee Board View
+> Modern card-based visual directory of all staff members with real-time search, department filtering, and quick-action profile icons.
+
+![Employee Board](static/screenshots/employee_board.png)
 
 ### 🏛️ Department Management
 > Organize your workforce by departments with full CRUD operations.
@@ -58,16 +63,18 @@ A comprehensive, modern HR Management System built with **Python Flask** and **B
 ### Core Modules
 | Module | Description |
 |--------|-------------|
-| **Dashboard** | Professional admin dashboard with analytical charts and quick actions |
-| **Employees** | Full CRUD with auto-generated IDs (`YYDEPTSERIAL` format) |
-| **Attendance** | Check-in/out board, manual records, auto-generation engine |
-| **Leaves** | Request/approve workflow with calendar integration |
-| **Payroll** | Monthly salary calculation with allowances and deductions |
+| **Dashboard** | Professional high-fidelity dashboard with analytical gauges and interactive widgets |
+| **Recruitment** | Applicant tracking system with status-based pipeline management |
+| **Projects & Tasks** | Monitor ongoing projects with progress bars and task completion tracking |
+| **Employees** | Full CRUD with Board/List view toggles and auto-generated structured IDs |
+| **Attendance** | Check-in/out board with radial attendance gauges and monthly avg tracking |
+| **Leaves** | Request/approve workflow with automated attendance reconciliation |
+| **Payroll** | Monthly salary calculation with allowances, deductions, and audit trail |
+| **Performance** | Employee review system with rating and feedback management |
 | **Departments** | Organizational unit management |
 | **Designations** | Job title and role management |
 | **Schedules** | Working hours configuration (Day/Night shifts) |
 | **Documents** | Employee document storage and management |
-| **Performance Reviews** | Employee performance tracking |
 
 ### System Features
 | Feature | Description |
@@ -143,6 +150,7 @@ Open **http://127.0.0.1:5000** in your browser.
 | Role | Username | Password | Access |
 |------|----------|----------|--------|
 | **Superadmin** | `admin@example.com` | `admin123` | Full system access |
+| **HR Manager** | `hr@example.com` | `hr123` | HR & Personnel management |
 | **Employee** | Employee ID (e.g. `2601001`) | Set by admin | Self-service portal |
 
 > Run `python init_db.py` to create the default superadmin account and sample data.
