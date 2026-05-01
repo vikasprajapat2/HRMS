@@ -9,55 +9,6 @@ A comprehensive, modern HR Management System built with **Python Flask** and **B
 
 ---
 
-## 📸 Screenshots
-
-### 🔐 Login Page
-> Secure authentication with Employee ID or Email login, "Remember Me" support, and registration flow.
-
-![Login Page](static/screenshots/login_v2.png)
-
-### 📊 Admin Dashboard
-> Premium glassmorphism dashboard with real-time KPI cards, interactive Chart.js analytics (Salary Trends, Attendance Status, Leave Insights), and a quick-action Control Center.
-
-![Dashboard](static/screenshots/dashboard_v2.png)
-
-### 👥 Employee Management
-> Full employee lifecycle management — add, edit, view, and delete employee profiles with unique auto-generated Employee IDs.
-
-![Employee Management](static/screenshots/employees_v2.png)
-
-### 📅 Attendance Tracking
-> Daily attendance board with check-in/check-out, manual entry, and smart auto-generation for weekends, holidays, and approved leaves.
-
-![Attendance](static/screenshots/attendance_v2.png)
-
-### 📈 Monthly Attendance Report
-> Detailed monthly report with KPI summary cards, performance tables, and visual calendar views per employee.
-
-![Monthly Report](static/screenshots/monthly_report_v2.png)
-
-### 🏖️ Leave Management
-> Handle leave requests with approval workflows. Approved leaves auto-reflect in attendance records.
-
-![Leave Management](static/screenshots/leaves_v2.png)
-
-### 🛡️ HR Dashboard
-> Dedicated premium management interface for HR staff with a "Welcome Back" banner, attendance trends, and automated leave insights.
-
-![HR Dashboard](static/screenshots/hr_dashboard.png)
-
-### 👥 Employee Board View
-> Modern card-based visual directory of all staff members with real-time search, department filtering, and quick-action profile icons.
-
-![Employee Board](static/screenshots/employee_board.png)
-
-### 🏛️ Department Management
-> Organize your workforce by departments with full CRUD operations.
-
-![Departments](static/screenshots/departments_v2.png)
-
----
-
 ## ✨ Features
 
 ### Core Modules
