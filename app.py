@@ -175,12 +175,12 @@ if __name__ == '__main__':
     else:
         print("Starting in PRODUCTION mode using Waitress WSGI server...")
         print("---------------------------------------------------------")
-        print("🚀 HRMS Server is LIVE!")
-        print("👉 Click here to open: http://localhost:5000")
+        print("HRMS Server is LIVE!")
+        print("Click here to open: http://localhost:5000")
         print("---------------------------------------------------------")
         try:
-            from waitress import serve
-            serve(app, host='0.0.0.0', port=5000)
+            # Forced debug mode for development
+            app.run(host='0.0.0.0', port=5000, debug=True)
         except ImportError:
             print("Warning: Waitress is not installed. Run 'pip install waitress' for a true production server.")
             print("Falling back to basic Flask server (debug=False)...")

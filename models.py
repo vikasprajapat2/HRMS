@@ -333,3 +333,40 @@ class PerformanceReview(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     reviewer = db.relationship('User', backref='conducted_reviews', foreign_keys=[reviewer_id], lazy=True)
+
+class Project(db.Model):
+    __tablename__ = 'projects'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150), nullable=False)
+    description = db.Column(db.Text)
+    status = db.Column(db.String(50), default='ongoing') # ongoing, completed, on_hold
+    priority = db.Column(db.String(20), default='medium') # high, medium, low
+    deadline = db.Column(db.Date)
+    progress = db.Column(db.Integer, default=0) # 0 to 100
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    tasks = db.relationship('Task', backref='project', lazy=True, cascade='all, delete-orphan')
+
+class Task(db.Model):
+    __tablename__ = 'tasks'
+    id = db.Column(db.Integer, primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
+    title = db.Column(db.String(150), nullable=False)
+    assigned_to = db.Column(db.Integer, db.ForeignKey('employees.id'))
+    status = db.Column(db.String(50), default='pending') # pending, in_progress, completed
+    priority = db.Column(db.String(20), default='medium')
+    deadline = db.Column(db.Date)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    assignee = db.relationship('Employee', backref='tasks', lazy=True)
+
+class Applicant(db.Model):
+    __tablename__ = 'applicants'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), nullable=False)
+    phone = db.Column(db.String(20))
+    position = db.Column(db.String(100))
+    status = db.Column(db.String(50), default='new') # new, interviewing, hired, rejected
+    resume_path = db.Column(db.String(255))
+    applied_at = db.Column(db.DateTime, default=datetime.utcnow)

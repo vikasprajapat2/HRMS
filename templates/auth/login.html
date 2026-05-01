@@ -3,92 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Employee Management System</title>
+    <title>Login - SmartHR</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-color: #f7f7f7;
+            font-family: 'Inter', sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
         }
-        .login-card {
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        .account-box {
+            background-color: #fff;
+            border: 1px solid #e3e3e3;
+            border-radius: 4px;
+            box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.2);
+            margin: 0 auto;
+            width: 480px;
+            padding: 30px;
+        }
+        .account-logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .account-logo i {
+            font-size: 50px;
+            color: #ff9b44;
+        }
+        .account-logo span {
+            display: block;
+            font-size: 24px;
+            font-weight: 700;
+            color: #ff9b44;
+            margin-top: 10px;
+        }
+        .account-title {
+            font-size: 26px;
+            font-weight: 500;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+        .account-subtitle {
+            color: #888;
+            font-size: 18px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .form-label {
+            font-weight: 500;
+            color: #1f1f1f;
+        }
+        .form-control {
+            border: 1px solid #e3e3e3;
+            border-radius: 4px;
+            padding: 10px 15px;
+        }
+        .btn-primary {
+            background-color: #ff9b44;
+            border-color: #ff9b44;
+            font-weight: 600;
+            padding: 10px;
+            font-size: 18px;
+        }
+        .btn-primary:hover {
+            background-color: #fc8d28;
+            border-color: #fc8d28;
+        }
+        .forgot-password {
+            float: right;
+            color: #1f1f1f;
+            font-size: 14px;
+        }
+        .account-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 15px;
+        }
+        .account-footer a {
+            color: #ff9b44;
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        
-        <div class="row justify-content-center">
-            <div class="col-md-5">
-                <div class="card login-card">
-                    <div class="card-body p-5">
-                        <div class="text-center mb-4">
-                            <i class="fas fa-user-circle fa-4x text-primary"></i>
-                            <h3 class="mt-3">Employee Login</h3>
-                            <p class="text-muted">Enter your credentials to access your account</p>
-                        </div>
-                        
-                        <form method="POST" action="{{ url_for('auth.login') }}">
-                            <div class="mb-3">
-                                <label for="email" class="form-label">
-                                    <i class="fas fa-id-badge me-2"></i>Employee ID (or Email for admins)
-                                </label>
-                                <input type="text" class="form-control" id="email" name="email" required>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="password" class="form-label">
-                                    <i class="fas fa-lock me-2"></i>Password
-                                </label>
-                                <input type="password" class="form-control" id="password" name="password" required>
-                            </div>
-                            
-                            <div class="mb-3 form-check">
-                                <input type="checkbox" class="form-check-input" id="remember">
-                                <label class="form-check-label" for="remember">Remember me</label>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary w-100 mb-3">
-                                <i class="fas fa-sign-in-alt me-2"></i>Login
-                            </button>
-                            
-                            <div class="text-center">
-                                <a href="{{ url_for('auth.forgot_password') }}" class="text-decoration-none">
-                                    Forgot Password?
-                                </a>
-                            </div>
-                            
-                            <hr class="my-4">
-                            
-                            <div class="text-center">
-                                <p class="mb-0">Don't have an account? 
-                                    <a href="{{ url_for('auth.register') }}" class="text-decoration-none">Register</a>
-                                </p>
-                            </div>
-                            
-                            <div class="text-center mt-3">
-                                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
-                                    <i class="fas fa-home me-2"></i>Back to Home
-                                </a>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+        <div class="account-box shadow-sm">
+            <div class="account-logo">
+                <i class="fas fa-rocket"></i>
+                <span>SmartHR</span>
             </div>
+            
+            <div class="account-title">Login</div>
+            <p class="account-subtitle">Access to our dashboard</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <form method="POST" action="{{ url_for('auth.login') }}">
+                <div class="mb-4">
+                    <label for="email" class="form-label">Employee ID / Email</label>
+                    <input type="text" class="form-control" id="email" name="email" required placeholder="Enter your ID or Email">
+                </div>
+                
+                <div class="mb-4">
+                    <div class="row">
+                        <div class="col">
+                            <label for="password" class="form-label">Password</label>
+                        </div>
+                        <div class="col-auto">
+                            <a class="forgot-password" href="{{ url_for('auth.forgot_password') }}">Forgot password?</a>
+                        </div>
+                    </div>
+                    <input type="password" class="form-control" id="password" name="password" required placeholder="Enter your password">
+                </div>
+                
+                <div class="mb-4">
+                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                </div>
+                
+                <div class="account-footer">
+                    <p>Don't have an account yet? <a href="{{ url_for('auth.register') }}">Register</a></p>
+                    <a href="{{ url_for('index') }}" class="text-muted small"><i class="fas fa-home me-1"></i> Back to Home</a>
+                </div>
+            </form>
         </div>
     </div>
     

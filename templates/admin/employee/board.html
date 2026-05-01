@@ -1,0 +1,351 @@
+{% extends "base.html" %}
+
+{% block title %}Employee Board - HRMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .board-container {
+        padding: 1.5rem 2rem;
+    }
+
+    .board-header {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.25rem 1.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        margin-bottom: 1.5rem;
+    }
+
+    /* Card Styling inspired by SmartHR */
+    .employee-card {
+        background: #fff;
+        border-radius: 15px;
+        border: 1px solid #f0f0f0;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .employee-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        border-color: #e0e0e0;
+    }
+
+    .card-top-accent {
+        height: 4px;
+        width: 100%;
+        background: linear-gradient(90deg, #ff9b44 0%, #fc6075 100%);
+    }
+
+    .card-body-content {
+        padding: 1.5rem;
+    }
+
+    .emp-avatar-lg {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #fff;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        margin-bottom: 1rem;
+    }
+
+    .emp-avatar-placeholder {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: #f8f9fa;
+        color: #ff9b44;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        border: 3px solid #fff;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        margin-bottom: 1rem;
+    }
+
+    .emp-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 0.25rem;
+    }
+
+    .emp-designation {
+        font-size: 0.85rem;
+        color: #777;
+        margin-bottom: 0.5rem;
+    }
+
+    .emp-dept-badge {
+        font-size: 0.75rem;
+        padding: 4px 10px;
+        border-radius: 20px;
+        background: #f1f5f9;
+        color: #475569;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 1rem;
+    }
+
+    .card-stats {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        border-top: 1px solid #f5f5f5;
+        padding-top: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-value {
+        font-weight: 700;
+        color: #333;
+        font-size: 0.9rem;
+    }
+
+    .stat-label {
+        font-size: 0.7rem;
+        color: #999;
+        text-transform: uppercase;
+    }
+
+    .action-icons {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .icon-btn {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #999;
+        border: 1px solid #eee;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .icon-btn:hover {
+        background: #ff9b44;
+        color: #fff;
+        border-color: #ff9b44;
+    }
+
+    /* Filter Sidebar */
+    .filter-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        position: sticky;
+        top: 20px;
+    }
+
+    .view-toggle {
+        display: flex;
+        background: #f1f5f9;
+        padding: 4px;
+        border-radius: 8px;
+        width: fit-content;
+    }
+
+    .view-toggle-btn {
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        color: #64748b;
+        transition: all 0.2s;
+    }
+
+    .view-toggle-btn.active {
+        background: #fff;
+        color: #ff9b44;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .view-toggle-btn:hover:not(.active) {
+        color: #334155;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="board-container">
+    <!-- Header -->
+    <div class="board-header">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h4 class="fw-bold text-dark mb-1">Employee Board</h4>
+                <p class="text-muted small mb-0">Visual directory of our high-performing team</p>
+            </div>
+            <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                <div class="d-flex justify-content-md-end gap-3 align-items-center">
+                    <div class="view-toggle">
+                        <a href="{{ url_for('employee.index') }}" class="view-toggle-btn">
+                            <i class="fas fa-list me-1"></i>List
+                        </a>
+                        <a href="{{ url_for('employee.board') }}" class="view-toggle-btn active">
+                            <i class="fas fa-th me-1"></i>Board
+                        </a>
+                    </div>
+                    <a href="{{ url_for('employee.create') }}" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
+                        <i class="fas fa-plus me-2"></i>Add Staff
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Search & Filter Column -->
+        <div class="col-lg-3 mb-4">
+            <div class="filter-card">
+                <h6 class="fw-bold mb-3">Refine Search</h6>
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold text-muted">Employee Name</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                        <input type="text" class="form-control border-start-0 ps-0" placeholder="Type name..." id="nameSearch">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold text-muted">Department</label>
+                    <select class="form-select form-select-sm" id="deptFilter">
+                        <option value="all">All Departments</option>
+                        {% for dept in departments %}
+                        <option value="{{ dept.name }}">{{ dept.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold text-muted">Designation</label>
+                    <select class="form-select form-select-sm" id="desigFilter">
+                        <option value="all">All Designations</option>
+                        {% for desig in designations %}
+                        <option value="{{ desig.name }}">{{ desig.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button class="btn btn-outline-secondary btn-sm w-100 rounded-pill mt-2" id="resetFilters">
+                    <i class="fas fa-undo me-2"></i>Reset
+                </button>
+            </div>
+        </div>
+
+        <!-- Board Grid Column -->
+        <div class="col-lg-9">
+            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4" id="employeeGrid">
+                {% for emp in employees %}
+                <div class="col employee-item" data-name="{{ emp.firstname|lower }} {{ emp.lastname|lower }}" data-dept="{{ emp.department.name if emp.department else '' }}" data-desig="{{ emp.designation.name if emp.designation else '' }}">
+                    <div class="employee-card text-center h-100">
+                        <div class="card-top-accent"></div>
+                        
+                        <div class="action-icons">
+                            <a href="{{ url_for('employee.show', id=emp.id) }}" class="icon-btn" title="View Profile"><i class="fas fa-user-circle"></i></a>
+                            <a href="{{ url_for('employee.edit', id=emp.id) }}" class="icon-btn" title="Edit Record"><i class="fas fa-edit"></i></a>
+                            <a href="mailto:{{ emp.email }}" class="icon-btn" title="Email Staff"><i class="fas fa-envelope"></i></a>
+                        </div>
+
+                        <div class="card-body-content">
+                            {% if emp.image %}
+                            <img src="{{ url_for('static', filename='uploads/employees/' ~ emp.image) }}" class="emp-avatar-lg" alt="{{ emp.firstname }}">
+                            {% else %}
+                            <div class="mx-auto emp-avatar-placeholder">
+                                {{ emp.firstname[0]|upper }}{{ emp.lastname[0]|upper if emp.lastname else '' }}
+                            </div>
+                            {% endif %}
+                            
+                            <div class="emp-name">{{ emp.firstname }} {{ emp.lastname }}</div>
+                            <div class="emp-designation">{{ emp.designation.name if emp.designation else 'Staff Member' }}</div>
+                            <div class="emp-dept-badge">{{ emp.department.name if emp.department else 'General' }}</div>
+                            
+                            <div class="card-stats">
+                                <div class="stat-item">
+                                    <div class="stat-value">{{ emp.unique_id if emp.unique_id else '—' }}</div>
+                                    <div class="stat-label">ID</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">
+                                        <span class="badge {% if emp.status == 'active' %}bg-success{% else %}bg-secondary{% endif %} rounded-pill" style="font-size: 0.6rem; vertical-align: middle;">
+                                            {{ emp.status|upper }}
+                                        </span>
+                                    </div>
+                                    <div class="stat-label">Status</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            {% if not employees %}
+            <div class="text-center py-5">
+                <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" style="width: 100px; opacity: 0.3;" alt="No data">
+                <h5 class="text-muted mt-3">No employees found in the board.</h5>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const nameSearch = document.getElementById('nameSearch');
+    const deptFilter = document.getElementById('deptFilter');
+    const desigFilter = document.getElementById('desigFilter');
+    const resetBtn = document.getElementById('resetFilters');
+    const employeeItems = document.querySelectorAll('.employee-item');
+
+    function filterGrid() {
+        const nameQuery = nameSearch.value.toLowerCase();
+        const deptQuery = deptFilter.value;
+        const desigQuery = desigFilter.value;
+
+        employeeItems.forEach(item => {
+            const name = item.getAttribute('data-name');
+            const dept = item.getAttribute('data-dept');
+            const desig = item.getAttribute('data-desig');
+
+            const nameMatch = name.includes(nameQuery);
+            const deptMatch = deptQuery === 'all' || dept === deptQuery;
+            const desigMatch = desigQuery === 'all' || desig === desigQuery;
+
+            if (nameMatch && deptMatch && desigMatch) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+
+    nameSearch.addEventListener('input', filterGrid);
+    deptFilter.addEventListener('change', filterGrid);
+    desigFilter.addEventListener('change', filterGrid);
+
+    resetBtn.addEventListener('click', function() {
+        nameSearch.value = '';
+        deptFilter.value = 'all';
+        desigFilter.value = 'all';
+        filterGrid();
+    });
+});
+</script>
+{% endblock %}

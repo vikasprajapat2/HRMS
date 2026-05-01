@@ -99,7 +99,15 @@
                 <p class="text-muted small mb-0">Total of <span class="fw-bold text-primary">{{ employees|length }}</span> active staff members</p>
             </div>
             <div class="col-md-6 text-md-end mt-3 mt-md-0">
-                <div class="d-flex justify-content-md-end gap-2">
+                <div class="d-flex justify-content-md-end gap-3 align-items-center">
+                    <div class="view-toggle" style="display: flex; background: #f1f5f9; padding: 4px; border-radius: 8px; width: fit-content;">
+                        <a href="{{ url_for('employee.index') }}" class="view-toggle-btn active" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; text-decoration: none; color: #ff9b44; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                            <i class="fas fa-list me-1"></i>List
+                        </a>
+                        <a href="{{ url_for('employee.board') }}" class="view-toggle-btn" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; text-decoration: none; color: #64748b;">
+                            <i class="fas fa-th me-1"></i>Board
+                        </a>
+                    </div>
                     <div class="input-group input-group-sm w-auto">
                         <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
                         <input type="text" class="form-control border-start-0 ps-0" placeholder="Search staff...">

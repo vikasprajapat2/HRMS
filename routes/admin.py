@@ -23,7 +23,8 @@ def get_analytics_data():
         'data': []
     }
     for stat in attendance_stats:
-        attendance_data['labels'].append(stat[0].title())
+        status_label = (stat[0].title() if stat[0] else "Unknown")
+        attendance_data['labels'].append(status_label)
         attendance_data['data'].append(stat[1])
         
     # If no data, provide empty structure
@@ -93,10 +94,34 @@ def superadmin_dashboard():
         flash('Access denied', 'danger')
         return redirect(url_for('auth.login'))
     
+    from models import AuditLog, Project, Task, Applicant, Department
+    
+    # Summary Widgets
     total_employees = Employee.query.count()
     total_departments = Department.query.count()
     total_users = User.query.count()
     today_attendance = Attendance.query.filter_by(date=datetime.now().date()).count()
+    
+    # New High-Fidelity Data
+    recent_activities = AuditLog.query.order_by(AuditLog.created_at.desc()).limit(5).all()
+    upcoming_birthdays = Employee.query.filter(
+        func.strftime('%m-%d', Employee.dob) >= datetime.now().strftime('%m-%d')
+    ).order_by(func.strftime('%m-%d', Employee.dob)).limit(4).all()
+    
+    recent_attendance_list = Attendance.query.order_by(Attendance.date.desc(), Attendance.created_at.desc()).limit(5).all()
+    pending_leaves_list = Leave.query.filter_by(status='pending').limit(5).all()
+    
+    # Projects & Tasks
+    ongoing_projects = Project.query.filter_by(status='ongoing').limit(5).all()
+    recent_applicants = Applicant.query.order_by(Applicant.applied_at.desc()).limit(5).all()
+    recent_tasks = Task.query.order_by(Task.created_at.desc()).limit(5).all()
+    
+    # Department Distribution for Bar Chart
+    dept_stats = db.session.query(Department.name, func.count(Employee.id)).join(Employee).group_by(Department.name).all()
+    dept_distribution = {
+        'labels': [s[0] for s in dept_stats],
+        'data': [s[1] for s in dept_stats]
+    }
     
     analytics = get_analytics_data()
     
@@ -105,6 +130,14 @@ def superadmin_dashboard():
                          total_departments=total_departments,
                          total_users=total_users,
                          today_attendance=today_attendance,
+                         recent_activities=recent_activities,
+                         upcoming_birthdays=upcoming_birthdays,
+                         recent_attendance_list=recent_attendance_list,
+                         pending_leaves_list=pending_leaves_list,
+                         ongoing_projects=ongoing_projects,
+                         recent_applicants=recent_applicants,
+                         recent_tasks=recent_tasks,
+                         dept_distribution=json.dumps(dept_distribution),
                          role='superadmin',
                          analytics=analytics)
 
@@ -130,12 +163,37 @@ def hr_dashboard():
     total_departments = Department.query.count()
     pending_leaves = Leave.query.filter_by(status='pending').count()
     
+    # Detailed HR Metrics
+    active_employees = Employee.query.filter_by(status='active').count()
+    new_hires_this_month = Employee.query.filter(
+        Employee.created_at >= datetime.now().replace(day=1)
+    ).count()
+    
+    # Recent Activities
+    from models import AuditLog
+    recent_activities = AuditLog.query.order_by(AuditLog.created_at.desc()).limit(5).all()
+    
+    # Birthdays in next 30 days
+    today = datetime.now().date()
+    upcoming_birthdays = Employee.query.filter(
+        func.strftime('%m-%d', Employee.dob) >= today.strftime('%m-%d')
+    ).order_by(func.strftime('%m-%d', Employee.dob)).limit(4).all()
+    
+    recent_attendance_list = Attendance.query.order_by(Attendance.date.desc()).limit(5).all()
+    pending_leaves_list = Leave.query.filter_by(status='pending').limit(5).all()
+    
     analytics = get_analytics_data()
     
-    return render_template('admin/dashboard.html', 
+    return render_template('admin/hr_dashboard.html', 
                          total_employees=total_employees,
+                         active_employees=active_employees,
+                         new_hires_this_month=new_hires_this_month,
                          total_departments=total_departments,
                          pending_leaves=pending_leaves,
+                         recent_activities=recent_activities,
+                         upcoming_birthdays=upcoming_birthdays,
+                         recent_attendance_list=recent_attendance_list,
+                         pending_leaves_list=pending_leaves_list,
                          role='hr',
                          analytics=analytics)
 

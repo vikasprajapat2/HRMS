@@ -1,293 +1,401 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - HRMS{% endblock %}
+{% block title %}Admin Dashboard - SmartHR{% endblock %}
 
 {% block extra_css %}
 <style>
-    .dashboard-container {
+    .dashboard-wrapper {
         padding: 1.5rem 2rem;
+        background: #f4f7f6;
     }
 
-    /* Stat cards — clean white cards with left accent border */
-    .stat-card {
+    /* Summary Widgets Row */
+    .summary-card {
         background: #fff;
+        border-radius: 12px;
+        padding: 1.25rem;
+        border: none;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s;
+    }
+
+    .summary-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.05);
+    }
+
+    .summary-icon {
+        width: 45px;
+        height: 45px;
         border-radius: 10px;
-        padding: 1.25rem 1.5rem;
-        border-left: 4px solid #cbd5e1;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-        transition: box-shadow 0.2s ease;
-    }
-    .stat-card:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-    .stat-card .stat-icon {
-        width: 42px;
-        height: 42px;
-        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.1rem;
+        font-size: 1.2rem;
+        color: #fff;
     }
-    .stat-card .stat-value {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: #1e293b;
-        line-height: 1;
+
+    .summary-details h3 {
+        font-size: 1.4rem;
+        font-weight: 800;
+        margin-bottom: 0;
+        color: #333;
     }
-    .stat-card .stat-label {
+
+    .summary-details p {
         font-size: 0.75rem;
+        color: #888;
+        margin-bottom: 0;
         font-weight: 600;
-        color: #64748b;
         text-transform: uppercase;
-        letter-spacing: 0.04em;
     }
 
-    /* Accent colors — muted, professional tones */
-    .accent-indigo  { border-left-color: #6366f1; }
-    .accent-indigo .stat-icon  { background: #eef2ff; color: #4f46e5; }
-    .accent-teal    { border-left-color: #14b8a6; }
-    .accent-teal .stat-icon    { background: #f0fdfa; color: #0d9488; }
-    .accent-amber   { border-left-color: #f59e0b; }
-    .accent-amber .stat-icon   { background: #fffbeb; color: #d97706; }
-    .accent-rose    { border-left-color: #f43f5e; }
-    .accent-rose .stat-icon    { background: #fff1f2; color: #e11d48; }
-    .accent-sky     { border-left-color: #0ea5e9; }
-    .accent-sky .stat-icon     { background: #f0f9ff; color: #0284c7; }
-    .accent-violet  { border-left-color: #8b5cf6; }
-    .accent-violet .stat-icon  { background: #f5f3ff; color: #7c3aed; }
+    /* Grid Layout */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 1.5rem;
+    }
 
-    /* Chart wrapper */
-    .chart-card {
+    .grid-col-8 { grid-column: span 8; }
+    .grid-col-4 { grid-column: span 4; }
+
+    /* Custom Widget Cards */
+    .widget-box {
         background: #fff;
-        border-radius: 10px;
+        border-radius: 15px;
         padding: 1.5rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-    }
-    .chart-card h6 {
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: #334155;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        height: 100%;
+        border: 1px solid #f0f0f0;
     }
 
-    /* Action sidebar */
-    .action-card {
-        background: #fff;
-        border-radius: 10px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-    }
-    .action-link {
+    .widget-header {
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        padding: 0.875rem 1rem;
-        border-radius: 8px;
-        color: #334155;
-        text-decoration: none;
-        transition: background 0.15s;
-        margin-bottom: 0.25rem;
+        margin-bottom: 1.25rem;
     }
-    .action-link:hover {
-        background: #f8fafc;
-        color: #1e293b;
+
+    .widget-title {
+        font-weight: 700;
+        color: #333;
+        font-size: 1rem;
     }
-    .action-link .action-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: 8px;
+
+    /* Radial Gauge Styles */
+    .gauge-container {
+        position: relative;
+        height: 180px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.875rem;
-        margin-right: 0.75rem;
-        flex-shrink: 0;
     }
-    .action-link .action-title {
-        font-size: 0.8125rem;
+
+    .gauge-center {
+        position: absolute;
+        text-align: center;
+    }
+
+    .gauge-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #333;
+    }
+
+    .gauge-label {
+        font-size: 0.7rem;
+        color: #999;
+    }
+
+    /* Lists styling */
+    .item-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .list-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+    .list-item:last-child { border-bottom: none; }
+
+    .item-img {
+        width: 35px;
+        height: 35px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+
+    .item-info h6 {
+        font-size: 0.85rem;
+        font-weight: 700;
+        margin-bottom: 0;
+        color: #333;
+    }
+
+    .item-info p {
+        font-size: 0.7rem;
+        color: #999;
+        margin-bottom: 0;
+    }
+
+    .status-badge {
+        font-size: 0.65rem;
+        padding: 4px 10px;
+        border-radius: 20px;
         font-weight: 600;
     }
-    .action-link .action-desc {
-        font-size: 0.6875rem;
-        color: #94a3b8;
+
+    /* Progress bars for projects */
+    .project-item {
+        margin-bottom: 1.25rem;
+    }
+
+    .project-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+    }
+
+    .project-name { font-size: 0.8rem; font-weight: 700; color: #444; }
+    .project-percent { font-size: 0.75rem; font-weight: 700; color: #ff9b44; }
+
+    .custom-progress {
+        height: 6px;
+        background: #f0f0f0;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #ff9b44 0%, #fc6075 100%);
+        border-radius: 10px;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="fw-bold text-dark mb-1">Dashboard</h4>
-            <p class="text-muted small mb-0">Welcome back, <span class="fw-semibold">{{ current_user.name }}</span> · {{ datetime.now().strftime('%A, %d %B %Y') }}</p>
-        </div>
-    </div>
-
-    <!-- Stats Row -->
+<div class="dashboard-wrapper">
+    <!-- Header Summary Row -->
     <div class="row g-3 mb-4">
-        {% if total_employees is defined %}
-        <div class="col-sm-6 col-xl-4 col-xxl-2">
-            <div class="stat-card accent-indigo">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <div class="stat-label mb-1">Employees</div>
-                        <div class="stat-value">{{ total_employees }}</div>
-                    </div>
-                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+        <div class="col-md-3">
+            <div class="summary-card">
+                <div class="summary-icon" style="background: #ff9b44;"><i class="fas fa-users"></i></div>
+                <div class="summary-details">
+                    <h3>{{ total_employees }}</h3>
+                    <p>Total Employees</p>
                 </div>
             </div>
         </div>
-        {% endif %}
-
-        {% if total_departments is defined %}
-        <div class="col-sm-6 col-xl-4 col-xxl-2">
-            <div class="stat-card accent-teal">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <div class="stat-label mb-1">Departments</div>
-                        <div class="stat-value">{{ total_departments }}</div>
-                    </div>
-                    <div class="stat-icon"><i class="fas fa-sitemap"></i></div>
+        <div class="col-md-3">
+            <div class="summary-card">
+                <div class="summary-icon" style="background: #2193b0;"><i class="fas fa-building"></i></div>
+                <div class="summary-details">
+                    <h3>{{ total_departments }}</h3>
+                    <p>Departments</p>
                 </div>
             </div>
         </div>
-        {% endif %}
-
-        {% if today_attendance is defined %}
-        <div class="col-sm-6 col-xl-4 col-xxl-2">
-            <div class="stat-card accent-amber">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <div class="stat-label mb-1">Today Present</div>
-                        <div class="stat-value">{{ today_attendance }}</div>
-                    </div>
-                    <div class="stat-icon"><i class="fas fa-user-check"></i></div>
+        <div class="col-md-3">
+            <div class="summary-card">
+                <div class="summary-icon" style="background: #11998e;"><i class="fas fa-user-clock"></i></div>
+                <div class="summary-details">
+                    <h3>{{ today_attendance }}</h3>
+                    <p>Clocked In Today</p>
                 </div>
             </div>
         </div>
-        {% endif %}
-
-        {% if pending_leaves is defined %}
-        <div class="col-sm-6 col-xl-4 col-xxl-2">
-            <div class="stat-card accent-rose">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <div class="stat-label mb-1">Pending Leaves</div>
-                        <div class="stat-value">{{ pending_leaves }}</div>
-                    </div>
-                    <div class="stat-icon"><i class="fas fa-envelope-open-text"></i></div>
+        <div class="col-md-3">
+            <div class="summary-card">
+                <div class="summary-icon" style="background: #6a11cb;"><i class="fas fa-calendar-times"></i></div>
+                <div class="summary-details">
+                    <h3>{{ pending_leaves_list|length }}</h3>
+                    <p>Pending Leaves</p>
                 </div>
             </div>
         </div>
-        {% endif %}
-
-        {% if total_users is defined %}
-        <div class="col-sm-6 col-xl-4 col-xxl-2">
-            <div class="stat-card accent-sky">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <div class="stat-label mb-1">System Users</div>
-                        <div class="stat-value">{{ total_users }}</div>
-                    </div>
-                    <div class="stat-icon"><i class="fas fa-shield-alt"></i></div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-
-        {% if current_month_payrolls is defined %}
-        <div class="col-sm-6 col-xl-4 col-xxl-2">
-            <div class="stat-card accent-violet">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <div class="stat-label mb-1">Payroll Runs</div>
-                        <div class="stat-value">{{ current_month_payrolls }}</div>
-                    </div>
-                    <div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
     </div>
 
-    <div class="row g-3">
-        <!-- Charts Column -->
-        <div class="col-lg-8">
-            {% if analytics is defined %}
-            <div class="chart-card mb-3">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h6 class="mb-0">Salary Expenditure</h6>
-                    <span class="badge bg-light text-muted border small">Last 6 Months</span>
+    <!-- Main Grid -->
+    <div class="dashboard-grid">
+        <!-- Left Column (Span 8) -->
+        <div class="grid-col-8">
+            <div class="row g-4">
+                <!-- Employees by Department Chart -->
+                <div class="col-md-12">
+                    <div class="widget-box">
+                        <div class="widget-header">
+                            <span class="widget-title">Employees By Department</span>
+                            <div class="dropdown">
+                                <i class="fas fa-ellipsis-v text-muted" style="cursor:pointer;"></i>
+                            </div>
+                        </div>
+                        <div style="height: 250px;">
+                            <canvas id="deptChart"></canvas>
+                        </div>
+                    </div>
                 </div>
-                <div style="height: 300px;">
-                    <canvas id="salaryChart"></canvas>
-                </div>
-            </div>
 
-            <div class="row g-3">
+                <!-- Ongoing Projects -->
                 <div class="col-md-6">
-                    <div class="chart-card">
-                        <h6 class="mb-3">Attendance Overview</h6>
-                        <div style="height: 220px;">
-                            <canvas id="attendanceChart"></canvas>
+                    <div class="widget-box">
+                        <div class="widget-header">
+                            <span class="widget-title">Ongoing Projects</span>
+                            <a href="#" class="text-primary small">View All</a>
+                        </div>
+                        <div class="project-list">
+                            {% for project in ongoing_projects %}
+                            <div class="project-item">
+                                <div class="project-header">
+                                    <span class="project-name">{{ project.name }}</span>
+                                    <span class="project-percent">{{ project.progress }}%</span>
+                                </div>
+                                <div class="custom-progress">
+                                    <div class="progress-fill" style="width: {{ project.progress }}%;"></div>
+                                </div>
+                                <div class="text-muted extra-small mt-1">Deadline: {{ project.deadline.strftime('%b %d') if project.deadline else 'N/A' }}</div>
+                            </div>
+                            {% endfor %}
+                            {% if not ongoing_projects %}
+                            <p class="text-center text-muted py-4 small">No active projects</p>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
+
+                <!-- Jobs Applicants -->
                 <div class="col-md-6">
-                    <div class="chart-card">
-                        <h6 class="mb-3">Leave Trends</h6>
-                        <div style="height: 220px;">
-                            <canvas id="leaveChart"></canvas>
+                    <div class="widget-box">
+                        <div class="widget-header">
+                            <span class="widget-title">Recent Applicants</span>
+                            <a href="#" class="text-primary small">Recruit</a>
+                        </div>
+                        <ul class="item-list">
+                            {% for applicant in recent_applicants %}
+                            <li class="list-item">
+                                <div class="item-img" style="background: #f0f0f0; display:flex; align-items:center; justify-content:center;">
+                                    <i class="fas fa-user text-muted"></i>
+                                </div>
+                                <div class="item-info flex-grow-1">
+                                    <h6>{{ applicant.name }}</h6>
+                                    <p>{{ applicant.position }}</p>
+                                </div>
+                                <div>
+                                    <span class="badge {% if applicant.status == 'new' %}bg-primary{% elif applicant.status == 'interviewing' %}bg-warning{% else %}bg-secondary{% endif %} status-badge">
+                                        {{ applicant.status|title }}
+                                    </span>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Statistics Gauges Row -->
+                <div class="col-md-6">
+                    <div class="widget-box text-center">
+                        <span class="widget-title d-block mb-3">Attendance Overview</span>
+                        <div class="gauge-container">
+                            <canvas id="attendanceGauge"></canvas>
+                            <div class="gauge-center">
+                                <div class="gauge-value" id="attValue">85%</div>
+                                <div class="gauge-label">Monthly Avg</div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-center gap-3 mt-2">
+                            <div class="small"><i class="fas fa-circle text-success me-1"></i>Present</div>
+                            <div class="small"><i class="fas fa-circle text-danger me-1"></i>Late</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="widget-box text-center">
+                        <span class="widget-title d-block mb-3">Task Completion</span>
+                        <div class="gauge-container">
+                            <canvas id="taskGauge"></canvas>
+                            <div class="gauge-center">
+                                <div class="gauge-value" id="taskValue">64%</div>
+                                <div class="gauge-label">Quarterly</div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-center gap-3 mt-2">
+                            <div class="small"><i class="fas fa-circle text-primary me-1"></i>Done</div>
+                            <div class="small"><i class="fas fa-circle text-light me-1"></i>Pending</div>
                         </div>
                     </div>
                 </div>
             </div>
-            {% endif %}
         </div>
 
-        <!-- Quick Actions -->
-        <div class="col-lg-4">
-            <div class="action-card p-3">
-                <h6 class="fw-bold text-dark px-2 pt-1 mb-3">Quick Actions</h6>
-
-                {% if role in ['superadmin', 'admin', 'hr'] %}
-                <a href="{{ url_for('employee.create') }}" class="action-link">
-                    <div class="action-icon" style="background:#eef2ff;color:#4f46e5;"><i class="fas fa-user-plus"></i></div>
-                    <div><div class="action-title">Add Employee</div><div class="action-desc">Onboard new staff</div></div>
-                </a>
-                {% endif %}
-
-                {% if role in ['superadmin', 'admin', 'hr'] %}
-                <a href="{{ url_for('attendance.index') }}" class="action-link">
-                    <div class="action-icon" style="background:#f0fdfa;color:#0d9488;"><i class="fas fa-calendar-check"></i></div>
-                    <div><div class="action-title">Mark Attendance</div><div class="action-desc">Daily records</div></div>
-                </a>
-                {% endif %}
-
-                {% if role in ['superadmin', 'admin', 'hr'] %}
-                <a href="{{ url_for('leave.index') }}" class="action-link">
-                    <div class="action-icon" style="background:#fffbeb;color:#d97706;"><i class="fas fa-envelope-open"></i></div>
-                    <div><div class="action-title">Leave Requests</div><div class="action-desc">Review & approve</div></div>
-                </a>
-                {% endif %}
-
-                {% if role in ['superadmin', 'admin', 'hr', 'payroll'] %}
-                <a href="{{ url_for('payroll.create') }}" class="action-link">
-                    <div class="action-icon" style="background:#f0f9ff;color:#0284c7;"><i class="fas fa-receipt"></i></div>
-                    <div><div class="action-title">Process Payroll</div><div class="action-desc">Monthly salaries</div></div>
-                </a>
-                {% endif %}
-
-                {% if role == 'superadmin' %}
-                <a href="{{ url_for('user.index') }}" class="action-link">
-                    <div class="action-icon" style="background:#fff1f2;color:#e11d48;"><i class="fas fa-users-cog"></i></div>
-                    <div><div class="action-title">Manage Users</div><div class="action-desc">System access control</div></div>
-                </a>
-                <div class="px-2 mt-3">
-                    <a href="{{ url_for('admin.audit_logs') }}" class="btn btn-outline-secondary btn-sm w-100 rounded-pill">
-                        <i class="fas fa-history me-1"></i> Audit Trail
-                    </a>
+        <!-- Right Column (Span 4) -->
+        <div class="grid-col-4">
+            <div class="row g-4">
+                <!-- Recent Activities -->
+                <div class="col-md-12">
+                    <div class="widget-box">
+                        <span class="widget-title">Recent Activities</span>
+                        <ul class="item-list mt-3">
+                            {% for activity in recent_activities %}
+                            <li class="list-item">
+                                <div class="item-icon text-primary"><i class="fas fa-dot-circle"></i></div>
+                                <div class="item-info">
+                                    <h6>{{ activity.action|title }} {{ activity.model }}</h6>
+                                    <p>{{ activity.created_at.strftime('%H:%M %p') if activity.created_at else 'N/A' }}</p>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </div>
-                {% endif %}
+
+                <!-- Upcoming Birthdays -->
+                <div class="col-md-12">
+                    <div class="widget-box">
+                        <span class="widget-title">Birthdays</span>
+                        <ul class="item-list mt-3">
+                            {% for emp in upcoming_birthdays %}
+                            <li class="list-item">
+                                <img src="https://i.pravatar.cc/100?u={{ emp.id }}" class="item-img">
+                                <div class="item-info flex-grow-1">
+                                    <h6>{{ emp.firstname }} {{ emp.lastname }}</h6>
+                                    <p>{{ emp.designation.name if emp.designation else 'Staff' }}</p>
+                                </div>
+                                <div class="text-primary small fw-bold">{{ emp.dob.strftime('%b %d') if emp.dob else 'N/A' }}</div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Pending Leaves Widget -->
+                <div class="col-md-12">
+                    <div class="widget-box">
+                        <span class="widget-title">Leave Requests</span>
+                        <ul class="item-list mt-3">
+                            {% for leave in pending_leaves_list %}
+                            <li class="list-item">
+                                <div class="item-info flex-grow-1">
+                                    <h6>{{ leave.employee.firstname }} {{ leave.employee.lastname }}</h6>
+                                    <p>{{ leave.leave_type|title }} ({{ (leave.end_date - leave.start_date).days + 1 }} days)</p>
+                                </div>
+                                <a href="{{ url_for('leave.index') }}" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.6rem;">Action</a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -295,96 +403,79 @@
 {% endblock %}
 
 {% block extra_js %}
-{% if analytics is defined %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const gridColor = '#f1f5f9';
-    const fontFamily = 'Inter';
-    const commonOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { position: 'bottom', labels: { usePointStyle: true, padding: 16, font: { family: fontFamily, size: 11 } } }
-        }
-    };
-
-    // Attendance Doughnut
-    const attData = {{ analytics.attendance | safe }};
-    new Chart(document.getElementById('attendanceChart').getContext('2d'), {
-        type: 'doughnut',
-        data: {
-            labels: attData.labels,
-            datasets: [{
-                data: attData.data,
-                backgroundColor: ['#6366f1', '#f43f5e', '#f59e0b', '#0ea5e9', '#94a3b8'],
-                borderWidth: 0,
-                hoverOffset: 6
-            }]
-        },
-        options: {
-            ...commonOptions,
-            cutout: '72%'
-        }
-    });
-
-    // Leave Line
-    const leaveData = {{ analytics.leaves | safe }};
-    new Chart(document.getElementById('leaveChart').getContext('2d'), {
-        type: 'line',
-        data: {
-            labels: leaveData.labels,
-            datasets: [{
-                label: 'Approved Leaves',
-                data: leaveData.data,
-                borderColor: '#6366f1',
-                backgroundColor: 'rgba(99,102,241,0.06)',
-                borderWidth: 2,
-                fill: true,
-                tension: 0.35,
-                pointRadius: 4,
-                pointBackgroundColor: '#fff',
-                pointBorderColor: '#6366f1',
-                pointBorderWidth: 2
-            }]
-        },
-        options: {
-            ...commonOptions,
-            scales: {
-                y: { beginAtZero: true, grid: { color: gridColor }, ticks: { precision: 0, font: { size: 11 } } },
-                x: { grid: { display: false }, ticks: { font: { size: 11 } } }
-            }
-        }
-    });
-
-    // Salary Bar
-    const salaryData = {{ analytics.salary | safe }};
-    new Chart(document.getElementById('salaryChart').getContext('2d'), {
+    // 1. Department Distribution Chart
+    const deptCtx = document.getElementById('deptChart').getContext('2d');
+    const deptData = {{ dept_distribution | safe }};
+    
+    new Chart(deptCtx, {
         type: 'bar',
         data: {
-            labels: salaryData.labels,
+            labels: deptData.labels,
             datasets: [{
-                label: 'Expenditure (₹)',
-                data: salaryData.data,
-                backgroundColor: '#6366f1',
-                hoverBackgroundColor: '#4f46e5',
-                borderRadius: 6,
-                barThickness: 32
+                label: 'Employees',
+                data: deptData.data,
+                backgroundColor: '#ff9b44',
+                borderRadius: 8,
+                barThickness: 30
             }]
         },
         options: {
-            ...commonOptions,
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: gridColor },
-                    ticks: { callback: v => '₹' + v.toLocaleString(), font: { size: 11 } }
-                },
-                x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+                y: { beginAtZero: true, grid: { display: false } },
+                x: { grid: { display: false } }
             }
+        }
+    });
+
+    // 2. Attendance Gauge (Radial)
+    const attCtx = document.getElementById('attendanceGauge').getContext('2d');
+    new Chart(attCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Present', 'Late'],
+            datasets: [{
+                data: [85, 15],
+                backgroundColor: ['#38ef7d', '#ff4b2b'],
+                borderWidth: 0,
+                cutout: '80%',
+                circumference: 180,
+                rotation: 270
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    // 3. Task Completion Gauge
+    const taskCtx = document.getElementById('taskGauge').getContext('2d');
+    new Chart(taskCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Done', 'Pending'],
+            datasets: [{
+                data: [64, 36],
+                backgroundColor: ['#2575fc', '#f0f0f0'],
+                borderWidth: 0,
+                cutout: '80%',
+                circumference: 180,
+                rotation: 270
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } }
         }
     });
 });
 </script>
-{% endif %}
 {% endblock %}

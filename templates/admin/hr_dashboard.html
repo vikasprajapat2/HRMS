@@ -1,0 +1,452 @@
+{% extends "base.html" %}
+
+{% block title %}HR Dashboard - SmartHR{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #ff9b44 0%, #fc6075 100%);
+        --blue-gradient: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
+        --green-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --purple-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    }
+
+    .dashboard-container {
+        padding: 1.5rem 2rem;
+        background: #f4f7f6;
+    }
+
+    /* Welcome Banner */
+    .welcome-banner {
+        background: var(--primary-gradient);
+        border-radius: 15px;
+        padding: 2rem;
+        color: #fff;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 10px 30px rgba(255, 155, 68, 0.3);
+    }
+
+    .welcome-text h2 {
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Summary Stats */
+    .stat-card {
+        background: #fff;
+        border-radius: 15px;
+        padding: 1.5rem;
+        border: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: #fff;
+    }
+
+    .stat-info h3 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #333;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-info p {
+        color: #777;
+        font-size: 0.85rem;
+        margin-bottom: 0;
+        font-weight: 600;
+    }
+
+    /* Charts Section */
+    .chart-card {
+        background: #fff;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+        border: none;
+    }
+
+    .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .chart-title {
+        font-weight: 700;
+        color: #333;
+        font-size: 1.1rem;
+    }
+
+    /* Activity & List widgets */
+    .widget-card {
+        background: #fff;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        height: 100%;
+    }
+
+    .widget-title {
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .activity-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .activity-item {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 1.25rem;
+        position: relative;
+    }
+
+    .activity-item::before {
+        content: '';
+        position: absolute;
+        left: 17px;
+        top: 35px;
+        bottom: -15px;
+        width: 2px;
+        background: #f0f0f0;
+    }
+
+    .activity-item:last-child::before {
+        display: none;
+    }
+
+    .activity-dot {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        z-index: 1;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .activity-content {
+        padding-top: 2px;
+    }
+
+    .activity-content h6 {
+        font-size: 0.9rem;
+        font-weight: 700;
+        margin-bottom: 2px;
+        color: #333;
+    }
+
+    .activity-content p {
+        font-size: 0.75rem;
+        color: #999;
+        margin-bottom: 0;
+    }
+
+    /* Table styling */
+    .modern-table {
+        width: 100%;
+    }
+
+    .modern-table th {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: #999;
+        font-weight: 700;
+        padding-bottom: 1rem;
+    }
+
+    .modern-table td {
+        padding: 0.75rem 0;
+        font-size: 0.85rem;
+        border-top: 1px solid #f8f9fa;
+    }
+
+    .user-pill {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .user-pill img {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .badge-soft {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.7rem;
+    }
+
+    .badge-soft-warning { background: #fff8e1; color: #ffa000; }
+    .badge-soft-success { background: #e8f5e9; color: #2e7d32; }
+    .badge-soft-danger { background: #ffebee; color: #c62828; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Welcome Banner -->
+    <div class="welcome-banner">
+        <div class="welcome-text">
+            <h2>Welcome back, {{ current_user.name }}!</h2>
+            <p class="mb-0 op-8">Here's what's happening in your HR department today.</p>
+        </div>
+        <div class="welcome-img d-none d-md-block">
+            <img src="https://smart-hr-demo.netlify.app/assets/img/img-01.png" alt="welcome" style="width: 150px;">
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: var(--blue-gradient);">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ total_employees }}</h3>
+                    <p>Total Employees</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: var(--green-gradient);">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ active_employees }}</h3>
+                    <p>Active Staff</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: var(--purple-gradient);">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ pending_leaves }}</h3>
+                    <p>Pending Leaves</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: var(--primary-gradient);">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ new_hires_this_month }}</h3>
+                    <p>New Hires (Month)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Charts -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h5 class="chart-title">Attendance Trends</h5>
+                    <select class="form-select form-select-sm w-auto border-0 bg-light">
+                        <option>Last 6 Months</option>
+                        <option>Last Year</option>
+                    </select>
+                </div>
+                <div style="height: 300px;">
+                    <canvas id="attendanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h5 class="chart-title">Leave Overview</h5>
+                </div>
+                <div style="height: 300px; display: flex; align-items: center; justify-content: center;">
+                    <canvas id="leaveChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lists & Activities -->
+    <div class="row g-4">
+        <!-- Recent Activities -->
+        <div class="col-lg-4">
+            <div class="widget-card">
+                <div class="widget-title">
+                    <span>Recent Activities</span>
+                    <a href="#" class="text-primary small">View All</a>
+                </div>
+                <ul class="activity-list">
+                    {% for activity in recent_activities %}
+                    <li class="activity-item">
+                        <div class="activity-dot">
+                            <i class="fas fa-info-circle text-primary" style="font-size: 0.8rem;"></i>
+                        </div>
+                        <div class="activity-content">
+                            <h6>{{ activity.action|title }} {{ activity.model }}</h6>
+                            <p>{{ activity.created_at.strftime('%H:%M %p') if activity.created_at else 'N/A' }} · By {{ activity.actor.name if activity.actor else 'System' }}</p>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Pending Leaves -->
+        <div class="col-lg-8">
+            <div class="widget-card">
+                <div class="widget-title">
+                    <span>Pending Leave Requests</span>
+                    <a href="{{ url_for('leave.index') }}" class="btn btn-sm btn-primary rounded-pill px-3">Manage</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Leave Type</th>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for leave in pending_leaves_list %}
+                            <tr>
+                                <td>
+                                    <div class="user-pill">
+                                        <img src="https://i.pravatar.cc/100?u={{ leave.employee.id }}" alt="user">
+                                        <span class="fw-bold">{{ leave.employee.firstname }} {{ leave.employee.lastname }}</span>
+                                    </div>
+                                </td>
+                                <td>{{ leave.leave_type|title }}</td>
+                                <td>{{ leave.start_date.strftime('%b %d, %Y') if leave.start_date else 'N/A' }}</td>
+                                <td>{{ leave.end_date.strftime('%b %d, %Y') if leave.end_date else 'N/A' }}</td>
+                                <td>
+                                    <span class="badge-soft badge-soft-warning">Pending</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% if not pending_leaves_list %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">No pending leave requests</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Attendance Chart
+    const attCtx = document.getElementById('attendanceChart').getContext('2d');
+    const attendanceData = {{ analytics.attendance | safe }};
+    
+    new Chart(attCtx, {
+        type: 'line',
+        data: {
+            labels: attendanceData.labels,
+            datasets: [{
+                label: 'Present %',
+                data: attendanceData.data,
+                borderColor: '#ff9b44',
+                backgroundColor: 'rgba(255, 155, 68, 0.1)',
+                fill: true,
+                tension: 0.4,
+                borderWidth: 3,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#ff9b44',
+                pointBorderWidth: 2,
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true, grid: { display: false } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // Leave Chart
+    const leaveCtx = document.getElementById('leaveChart').getContext('2d');
+    const leaveData = {{ analytics.leaves | safe }};
+    
+    new Chart(leaveCtx, {
+        type: 'doughnut',
+        data: {
+            labels: leaveData.labels,
+            datasets: [{
+                data: leaveData.data,
+                backgroundColor: ['#ff9b44', '#fc6075', '#2193b0', '#6dd5ed', '#38ef7d'],
+                borderWidth: 0,
+                cutout: '70%'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 10 } } }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -17,6 +17,17 @@ def index():
     employees = Employee.query.all()
     return render_template('admin/employee/index.html', employees=employees)
 
+@bp.route('/board')
+@login_required
+def board():
+    employees = Employee.query.all()
+    departments = Department.query.all()
+    designations = Designation.query.all()
+    return render_template('admin/employee/board.html', 
+                         employees=employees, 
+                         departments=departments,
+                         designations=designations)
+
 def _get_logged_in_employee():
     # Try match by user's email
     if current_user.is_authenticated:

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Employee Management System{% endblock %}</title>
+    <title>{% block title %}SmartHR - HRMS{% endblock %}</title>
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -28,133 +28,145 @@
         'employee': 'user.dashboard'
     } %}
     {% set dashboard_endpoint = dashboard_map.get(role_name, 'user.dashboard') %}
-    <!-- Sidebar -->
-    <div class="d-flex" id="wrapper">
+    
+    <div id="wrapper">
+        <!-- Sidebar -->
         <div id="sidebar-wrapper">
-            <div class="sidebar-heading text-center">
-                <i class="fas fa-users-cog me-2"></i>HRMS
+            <div class="sidebar-heading">
+                <i class="fas fa-rocket me-2"></i>SmartHR
             </div>
-            <div class="list-group list-group-flush mt-3">
-                <a href="{{ url_for(dashboard_endpoint) }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == dashboard_endpoint else '' }}">
-                    <i class="fas fa-th-large me-2"></i>Dashboard
-                </a>
-                {% if role_name in ['superadmin', 'hr'] %}
-                <a href="{{ url_for('employee.index') }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == 'employee.index' else '' }}">
-                    <i class="fas fa-user-tie me-2"></i>Employees
-                </a>
-                <a href="{{ url_for('department.index') }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == 'department.index' else '' }}">
-                    <i class="fas fa-building me-2"></i>Departments
-                </a>
-                <a href="{{ url_for('designation.index') }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == 'designation.index' else '' }}">
-                    <i class="fas fa-briefcase me-2"></i>Designations
-                </a>
+            
+            <div class="sidebar-inner" style="height: calc(100vh - 60px); overflow-y: auto;">
+                <div class="sidebar-menu-header">Main Menu</div>
+                <div class="list-group list-group-flush">
+                    <a href="{{ url_for(dashboard_endpoint) }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == dashboard_endpoint else '' }}">
+                        <i class="fas fa-tachometer-alt"></i>Dashboard
+                    </a>
+                    
+                    {% if role_name in ['superadmin', 'hr'] %}
+                    <a href="{{ url_for('employee.index') }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == 'employee.index' else '' }}">
+                        <i class="fas fa-users"></i>Employees
+                    </a>
+                    <a href="{{ url_for('department.index') }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == 'department.index' else '' }}">
+                        <i class="fas fa-building"></i>Departments
+                    </a>
+                    <a href="{{ url_for('designation.index') }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == 'designation.index' else '' }}">
+                        <i class="fas fa-briefcase"></i>Designations
+                    </a>
+                    {% endif %}
+
+                    {% if role_name == 'employee' %}
+                    <a href="{{ url_for('user.profile') }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == 'user.profile' else '' }}">
+                        <i class="fas fa-user"></i>My Profile
+                    </a>
+                    <a href="{{ url_for('user.attendance_list') }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == 'user.attendance_list' else '' }}">
+                        <i class="fas fa-calendar-check"></i>My Attendance
+                    </a>
+                    <a href="{{ url_for('user.leaves_list') }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == 'user.leaves_list' else '' }}">
+                        <i class="fas fa-calendar-alt"></i>My Leaves
+                    </a>
+                    <a href="{{ url_for('user.payrolls_list') }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == 'user.payrolls_list' else '' }}">
+                        <i class="fas fa-money-check-alt"></i>My Payroll
+                    </a>
+                    {% endif %}
+                </div>
+
+                {% if role_name in ['superadmin', 'hr', 'payroll'] %}
+                <div class="sidebar-menu-header">HR & Payroll</div>
+                <div class="list-group list-group-flush">
+                    {% if role_name in ['superadmin', 'hr'] %}
+                    <a href="{{ url_for('attendance.index') }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == 'attendance.index' else '' }}">
+                        <i class="fas fa-calendar-check"></i>Attendance
+                    </a>
+                    <a href="{{ url_for('leave.index') }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == 'leave.index' else '' }}">
+                        <i class="fas fa-calendar-times"></i>Leaves
+                    </a>
+                    {% endif %}
+                    
+                    {% if role_name in ['superadmin', 'hr', 'payroll'] %}
+                    <a href="{{ url_for('payroll.index') }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == 'payroll.index' else '' }}">
+                        <i class="fas fa-money-bill-wave"></i>Payroll
+                    </a>
+                    {% endif %}
+                </div>
                 {% endif %}
 
-                {% if role_name == 'employee' %}
-                <a href="{{ url_for('user.profile') }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == 'user.profile' else '' }}">
-                    <i class="fas fa-id-card me-2"></i>My Profile
-                </a>
-                <a href="{{ url_for('user.attendance_list') }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == 'user.attendance_list' else '' }}">
-                    <i class="fas fa-calendar-check me-2"></i>My Attendance
-                </a>
-                <a href="{{ url_for('user.leaves_list') }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == 'user.leaves_list' else '' }}">
-                    <i class="fas fa-calendar-alt me-2"></i>My Leaves
-                </a>
-                <a href="{{ url_for('user.payrolls_list') }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == 'user.payrolls_list' else '' }}">
-                    <i class="fas fa-file-invoice-dollar me-2"></i>My Payroll
-                </a>
-                {% endif %}
-                
-                {% if role_name in ['superadmin', 'hr'] %}
-                <a href="{{ url_for('attendance.index') }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == 'attendance.index' else '' }}">
-                    <i class="fas fa-calendar-check me-2"></i>Attendance
-                </a>
-                <a href="{{ url_for('schedule.index') }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == 'schedule.index' else '' }}">
-                    <i class="fas fa-clock me-2"></i>Schedule
-                </a>
-                {% endif %}
-                
-                {% if role_name in ['superadmin', 'hr'] %}
-                <a href="{{ url_for('leave.index') }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == 'leave.index' else '' }}">
-                    <i class="fas fa-calendar-times me-2"></i>Leaves
-                </a>
-                {% endif %}
-                
-                {% if role_name in ['superadmin', 'hr'] %}
-                <a href="{{ url_for('payroll.index') }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == 'payroll.index' else '' }}">
-                    <i class="fas fa-money-bill-wave me-2"></i>Payroll
-                </a>
-                {% endif %}
-                
                 {% if role_name == 'superadmin' %}
-                <a href="{{ url_for('user.index') }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == 'user.index' else '' }}">
-                    <i class="fas fa-users me-2"></i>Users
-                </a>
-                <a href="{{ url_for('admin.audit_logs') }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == 'admin.audit_logs' else '' }}">
-                    <i class="fas fa-shield-alt me-2"></i>Audit Logs
-                </a>
+                <div class="sidebar-menu-header">Administration</div>
+                <div class="list-group list-group-flush">
+                    <a href="{{ url_for('user.index') }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == 'user.index' else '' }}">
+                        <i class="fas fa-user-shield"></i>Users
+                    </a>
+                    <a href="{{ url_for('admin.audit_logs') }}" class="list-group-item list-group-item-action {{ 'active' if request.endpoint == 'admin.audit_logs' else '' }}">
+                        <i class="fas fa-history"></i>Audit Logs
+                    </a>
+                </div>
                 {% endif %}
             </div>
         </div>
 
         <!-- Page Content -->
-        <div id="page-content-wrapper" class="w-100">
-            <!-- Top Navigation -->
-            <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
-                <div class="container-fluid">
-                    <button class="btn btn-primary" id="menu-toggle">
+        <div id="page-content-wrapper">
+            <!-- Main Header -->
+            <header class="main-header">
+                <div class="header-left">
+                    <div id="menu-toggle">
                         <i class="fas fa-bars"></i>
-                    </button>
-                    
-                    <div class="ms-auto d-flex align-items-center">
-                        <!-- Notifications Dropdown -->
-                        <div class="dropdown me-3">
-                            <a class="nav-link dropdown-toggle position-relative text-dark" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-bell fs-5"></i>
-                                {% if unread_notifications_count > 0 %}
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65em;">
-                                    {{ unread_notifications_count }}
-                                </span>
-                                {% endif %}
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="notificationsDropdown" style="width: 320px; max-height: 400px; overflow-y: auto;">
-                                <li class="dropdown-header fw-bold text-dark border-bottom">Notifications</li>
-                                {% if recent_notifications %}
-                                    {% for notif in recent_notifications %}
-                                    <li>
-                                        <a class="dropdown-item d-flex align-items-center py-2 border-bottom {{ 'bg-light' if not notif.is_read else '' }}" href="{{ url_for('user.read_notification', id=notif.id) }}">
-                                            <div class="me-3">
-                                                {% if notif.type == 'leave' %}
-                                                    <i class="fas fa-calendar-check text-success fs-4"></i>
-                                                {% elif notif.type == 'salary' %}
-                                                    <i class="fas fa-money-check-alt text-primary fs-4"></i>
-                                                {% else %}
-                                                    <i class="fas fa-info-circle text-info fs-4"></i>
-                                                {% endif %}
-                                            </div>
-                                            <div>
-                                                <div class="small fw-bold {{ 'text-dark' if not notif.is_read else 'text-muted' }} text-wrap" style="line-height: 1.2;">{{ notif.message }}</div>
-                                                <div class="text-muted" style="font-size: 0.7em;">{{ notif.created_at.strftime('%b %d, %H:%M') }}</div>
-                                            </div>
-                                        </a>
-                                    </li>
-                                    {% endfor %}
-                                {% else %}
-                                    <li><span class="dropdown-item text-muted text-center py-3">No notifications</span></li>
-                                {% endif %}
-                            </ul>
-                        </div>
-
-                        <span class="me-3">
-                            <i class="fas fa-user-circle me-1"></i>{{ current_user.name }}
-                        </span>
-                        <span class="badge bg-info me-3">{{ role_name|title }}</span>
-                        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger btn-sm">
-                            <i class="fas fa-sign-out-alt me-1"></i>Logout
-                        </a>
+                    </div>
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search in HRMS">
                     </div>
                 </div>
-            </nav>
+
+                <div class="header-right">
+                    <div class="dropdown me-2">
+                        <div class="header-nav-item dropdown-toggle" data-bs-toggle="dropdown" style="cursor:pointer;">
+                            <i class="far fa-bell"></i>
+                            {% if unread_notifications_count > 0 %}
+                            <span class="badge rounded-pill bg-danger">{{ unread_notifications_count }}</span>
+                            {% endif %}
+                        </div>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="width: 300px; max-height: 400px; overflow-y: auto;">
+                            <li class="dropdown-header border-bottom">Notifications</li>
+                            {% if recent_notifications %}
+                                {% for notif in recent_notifications %}
+                                <li>
+                                    <a class="dropdown-item py-2 border-bottom {{ 'bg-light' if not notif.is_read else '' }}" href="{{ url_for('user.read_notification', id=notif.id) }}">
+                                        <div class="small fw-bold {{ 'text-dark' if not notif.is_read else 'text-muted' }}">{{ notif.message }}</div>
+                                        <div class="text-muted" style="font-size: 0.7em;">{{ notif.created_at.strftime('%b %d, %H:%M') }}</div>
+                                    </a>
+                                </li>
+                                {% endfor %}
+                            {% else %}
+                                <li><span class="dropdown-item text-muted text-center py-3">No notifications</span></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    <div class="header-nav-item">
+                        <i class="far fa-comment"></i>
+                        <span class="badge rounded-pill bg-info">4</span>
+                    </div>
+                    
+                    <div class="dropdown">
+                        <div class="user-profile dropdown-toggle" data-bs-toggle="dropdown">
+                            <img src="https://i.pravatar.cc/150?u={{ current_user.id }}" alt="User">
+                            <span class="user-name d-none d-sm-inline">{{ current_user.name }}</span>
+                        </div>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                            <li class="dropdown-header">
+                                <div class="fw-bold">{{ current_user.name }}</div>
+                                <div class="text-muted small">{{ role_name|title }}</div>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>My Profile</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </header>
 
             <!-- Flash Messages -->
             <div class="container-fluid mt-3">
@@ -170,14 +182,14 @@
                 {% endwith %}
             </div>
 
-            <!-- Main Content -->
-            <div class="container-fluid p-4">
+            <!-- Main Content Area -->
+            <div class="p-4">
                 {% block content %}{% endblock %}
             </div>
         </div>
     </div>
     {% else %}
-    <!-- Content for non-authenticated users -->
+    <!-- Public Content -->
     <div class="container-fluid mt-3">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -193,21 +205,17 @@
     {% block public_content %}{% endblock %}
     {% endif %}
 
-    <!-- Bootstrap 5 JS Bundle -->
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
-    <!-- Custom JS -->
     <script>
-        // Toggle sidebar
-        $("#menu-toggle").click(function(e) {
-            e.preventDefault();
-            $("#wrapper").toggleClass("toggled");
+        $(document).ready(function() {
+            $("#menu-toggle").click(function(e) {
+                e.preventDefault();
+                $("#wrapper").toggleClass("toggled");
+            });
         });
     </script>
-    
     {% block extra_js %}{% endblock %}
 </body>
 </html>
